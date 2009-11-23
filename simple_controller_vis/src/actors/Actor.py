@@ -18,6 +18,8 @@ logging.info("Logger enabled")
 
 import signal   # If we inport signal we can kill the program with Ctrl C
 
+import time, random # These are used to test the async
+
 gui_lock = threading.Condition()
 
 """
@@ -58,7 +60,7 @@ class Actor(threading.Thread):
         '''
         logging.debug("Started running an actor thread")
         while not self.stop:
-            logging.debug("Processing now")
+            #logging.debug("Some actor is processing now")
             self.process()
     
     def process(self):
@@ -69,11 +71,9 @@ import matplotlib
 #matplotlib.use('TkAgg') # do this before importing pylab
 
 import matplotlib.pyplot as plt
-
-
 class Plotter(Actor):
     '''
-    This actor shows a signal...
+    This actor shows a signal dynamically as it comes off the buffer with matplotlib.
     '''
     
     def __init__(self, input):
@@ -81,6 +81,7 @@ class Plotter(Actor):
         self.x = []
         self.y = []
         plt.ion()
+        #plt.ioff()
         #self.fig = plt.figure()
         #self.ax = self.fig.add_subplot(111)
         #self.ax.xaxis.set_animated(True)
@@ -95,28 +96,38 @@ class Plotter(Actor):
         '''
         plot any values in the buffer
         '''
+        self.updatePlot = False
         
-        obj = self.input_queue.get()     # this is blocking...
-        if obj is None:
-            self.stop = True
-            return
-        self.x.append(obj['tag'])
-        self.y.append(obj['value'])
-        logging.debug("Plotter received values ( %e,%e ) Now have %i values" % (self.y[-1], self.x[-1], len(self.x)))
-        obj = None
+        try:
+            while(True):    # Really this is until exception gets raised by an empty queue
+                obj = self.input_queue.get(False)     # this is blocking if True... if program is finished... this sucks
+                if obj is None:
+                    logging.info("We have finished processing the queue of data to be displayed")
+                    self.update_plot()
+                    self.stop = True
+                    return
+                self.updatePlot = True
+                self.x.append(obj['tag'])
+                self.y.append(obj['value'])
+                logging.debug("Plotter received values ( %e,%e ) Now have %i values." % (self.y[-1], self.x[-1], len(self.x)))
+                obj = None
+        except queue.Empty:
+            pass
         
-        # Probably don't want to plot every change!
-        self.update_plot()
+        # Don't want to plot every change!
+        if self.updatePlot: self.update_plot()
 
 
     def update_plot(self):
-        logging.debug("Updating plot refresh:%i" % self.refreshs)
+        logging.debug("Updating plot (refresh: %i)" % self.refreshs)
         if self.refreshs >= 1000:
+            logging.info("We have updated the plot 1000 times - forcing a stop of the simulation now")
             self.stop = True
             return
         self.refreshs += 1
         
-        self.line.set_data(self.x, self.y)
+        with gui_lock:
+            self.line.set_data(self.x, self.y)
         ax = self.line.get_axes()
         self.line.recache()
         ax.relim()
@@ -139,7 +150,7 @@ class Ramp(Actor):
     
     def __init__(self, out, amplitude=2.0, freq=1.0/30, res=10):
         """
-        default params creates a ramp up to 2 that takes 30 seconds with 10 values per "second"
+        default parameters creates a ramp up to 2 that takes 30 seconds with 10 values per "second"
         
         """
         Actor.__init__(self, output_queue=out)
@@ -152,9 +163,7 @@ class Ramp(Actor):
         logging.debug("Running ramp process")
         tags = numpy.linspace(0, 120, 120*self.resolution)  # for now just compute 2 minutes of values
         
-        for tag in tags:
-            
-                
+        for tag in tags: 
             value = tag * self.frequency * self.amplitude
             
             while value >= self.amplitude:
@@ -165,7 +174,11 @@ class Ramp(Actor):
                     "value": value
                     }
             self.output_queue.put(data)
+            logging.debug("Ramp process added data: (tag: %2.e, value: %.2e)" % (tag, value))
+            time.sleep(random.random() * 0.001)
+        logging.debug("Ramp process finished adding all data to queue")    
         self.stop = True
+        self.output_queue.put(None)
         
         
    
@@ -182,9 +195,12 @@ if __name__ == "__main__":
     logging.debug("Finished starting actors")
     
     
+    
+    
+    
+    plt.show()   # The program will stay "running" while this plot is open
+    
     src.join()
-    
-    
-    plt.show()
     dst.join()
+    
     logging.debug("Finished running actor")
