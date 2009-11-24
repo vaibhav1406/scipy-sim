@@ -75,11 +75,11 @@ Tagged signal models.
 
 \begin_layout Itemize
 Discrete time models.
- tags are integer numbers
+ Tags are integer numbers
 \end_layout
 
 \begin_layout Itemize
-continuous time models.
+Continuous time models.
  tags are real numbers
 \end_layout
 
