@@ -39,7 +39,7 @@ class Actor(threading.Thread):
         threading.Thread.__init__(self)
         logging.debug("Constructing a new Actor thread")
         
-        # Every actor will have an input thread - even if its just a control
+        # Every actor will have at least an input thread - even if its just a control
         if input_queue is None:
             input_queue = queue.Queue(0)
         self.input_queue = input_queue
@@ -66,6 +66,7 @@ class Actor(threading.Thread):
 class Source(Actor):
     '''
     This is just an abstract interface for a signal source.
+    Requires an output queue.
     '''
 
     def __init__(self):

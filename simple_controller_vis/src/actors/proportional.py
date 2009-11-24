@@ -15,7 +15,7 @@ except ImportError:
     
 import time, random # These are used to test the async
 
-class Proportional(Source):
+class Proportional(Actor):
     '''
     This actor takes a source and multiplies it by some gain P.
     '''

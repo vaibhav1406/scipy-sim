@@ -13,7 +13,7 @@ import os
 pathtoscript = os.path.dirname(os.path.realpath(__file__))
 
 def load_example(name):
-    """Load a actor file."""
+    """Load an actor file."""
     examplesDir = os.path.join(os.path.split(pathtoscript)[0],'src','actors')
     text = "".join(open(os.path.join(examplesDir,name),'r').readlines())
     return text
