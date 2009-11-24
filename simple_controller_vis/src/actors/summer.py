@@ -20,12 +20,12 @@ class Summer(Actor):
     This has to be used with discrete signals, or at least aligned continuous signals.
     '''
     
-    def __init__(self, input1, input2, output_queue):
+    def __init__(self, inputs, output_queue):
         """
         Constructor for a summation block
         """
         Actor.__init__(self, output_queue=output_queue)
-        self.inputs = [input1, input2]
+        self.inputs = list(inputs)
         self.futures = numpy.zeros_like(self.inputs)
         
         

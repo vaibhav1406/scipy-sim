@@ -12,6 +12,7 @@ from actors.plotter import Plotter
 
 from actors.ramp import Ramp
 from actors.summer import Summer
+from actors.random_signal import RandomSource
 import matplotlib.pyplot as plt
 
 import logging
@@ -25,7 +26,7 @@ if __name__ == '__main__':
     connection3 = queue.Queue(0)
     
     src1 = Ramp(connection1)
-    src2 = Ramp(connection2)
+    src2 = RandomSource(connection2)
     summer = Summer([connection1, connection2], connection3)
     dst = Plotter(connection3)
     
