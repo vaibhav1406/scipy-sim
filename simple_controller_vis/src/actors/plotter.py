@@ -1,7 +1,5 @@
 '''
-Created on 23/11/2009
-
-@author: brian
+This dynamic plotter shows a live signal stream.
 '''
 
 from Actor import Actor
@@ -15,55 +13,49 @@ except ImportError:
 import threading
 gui_lock = threading.Condition()
 
+import time
+
 class Plotter(Actor):
     '''
     This actor shows a signal dynamically as it comes off the buffer with matplotlib.
+    The max refresh rate is an optional input - default is 10Hz
     '''
     
-    def __init__(self, input):
+    def __init__(self, input, refresh_rate=10):
         Actor.__init__(self, input_queue=input)
         self.x = []
         self.y = []
+        assert refresh_rate != 0
+        self.refresh_rate = refresh_rate
         plt.ion()
-        #plt.ioff()
-        #self.fig = plt.figure()
-        #self.ax = self.fig.add_subplot(111)
-        #self.ax.xaxis.set_animated(True)
-        #self.ax.yaxis.set_animated(True)
-        self.line, = plt.plot(self.x, self.y)#, animated=True, lw=2)
+        self.line, = plt.plot(self.x, self.y)   #, animated=True, lw=2)
         self.refreshs = 0
-        #self.fig.canvas.manager.window.after(1, self.update_plot)
-        #self.ax.set_xlim(0,120)
-        #self.ax.set_ylim(-1,1)
+        self.updatePlot = True
+        self.last_update = 0
         
     def process(self):
         '''
         plot any values in the buffer
         '''
-        self.updatePlot = False
+        obj = self.input_queue.get(True)     # this is blocking
+        if obj is None:
+            logging.info("We have finished processing the queue of data to be displayed")
+            self.update_plot()
+            self.stop = True
+            return
+
+        self.x.append(obj['tag'])
+        self.y.append(obj['value'])
+        logging.debug("Plotter received values ( %e,%e ) Now have %i values." % (self.y[-1], self.x[-1], len(self.x)))
+        obj = None
         
-        try:
-            while(True):    # Really this is until exception gets raised by an empty queue
-                obj = self.input_queue.get(False)     # this is blocking if True... if program is finished... this sucks
-                if obj is None:
-                    logging.info("We have finished processing the queue of data to be displayed")
-                    self.update_plot()
-                    self.stop = True
-                    return
-                self.updatePlot = True
-                self.x.append(obj['tag'])
-                self.y.append(obj['value'])
-                logging.debug("Plotter received values ( %e,%e ) Now have %i values." % (self.y[-1], self.x[-1], len(self.x)))
-                obj = None
-        except queue.Empty:
-            pass
-        
-        # Don't want to plot every change!
-        if self.updatePlot: self.update_plot()
+        if time.time() - self.last_update > 1.0/self.refresh_rate:
+            self.update_plot()
 
 
     def update_plot(self):
         logging.debug("Updating plot (refresh: %i)" % self.refreshs)
+        self.last_update = time.time()
         if self.refreshs >= 1000:
             logging.info("We have updated the plot 1000 times - forcing a stop of the simulation now")
             self.stop = True
@@ -72,12 +64,12 @@ class Plotter(Actor):
         
         with gui_lock:
             self.line.set_data(self.x, self.y)
-        ax = self.line.get_axes()
-        self.line.recache()
-        ax.relim()
-        ax.autoscale_view()
-        with gui_lock:
-            plt.draw()   # redraw the canvas
+            ax = self.line.get_axes()
+            self.line.recache()
+            ax.relim()
+            ax.autoscale_view()
+            plt.draw() # redraw the canvas
+        
         # It might prove to be beneficial just to redraw small bits 
         # just redraw the axes rectangle
         #self.fig.canvas.blit(self.ax.bbox)

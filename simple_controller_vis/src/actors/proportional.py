@@ -29,27 +29,23 @@ class Proportional(Source):
         self.gain = gain
     
     def process(self):
-        """Multiply the numbers..."""
+        """Multiply the input values by a gain..."""
         logging.debug("Running proportional process")
         
+        obj = self.input_queue.get(True)     # this is blocking
+        if obj is None:
+            logging.info("We have finished multiplying the data")
+            self.stop = True
+            self.output_queue.put(None)
+            return
+        tag =  obj['tag']
+        value = obj['value']
+        new_value = value * self.gain
+        logging.debug("Proportional actor received data (tag: %2.e, value: %2.e ), multiplied and sent out: (tag: %2.e, value: %2.e)" % (tag, value, tag, new_value ))
+        data = {
+            "tag": tag,
+            "value": new_value
+            }
+        self.output_queue.put(data)
+        obj = None
         
-        try:
-            while(True):    # Really this is until exception gets raised by an empty queue
-                obj = self.input_queue.get(False)     # this is not blocking - will raise queue.Empty
-                if obj is None:
-                    logging.info("We have finished multiplying the data")
-                    self.stop = True
-                    self.output_queue.put(None)
-                    return
-                tag =  obj['tag']
-                value = obj['value']
-                new_value = value * self.gain
-                logging.debug("Proportional actor received data (tag: %2.e, value: %2.e ), multiplied and sent out: (tag: %2.e, value: %2.e)" % (tag, value, tag, new_value ))
-                data = {
-                    "tag": tag,
-                    "value": new_value
-                    }
-                self.output_queue.put(data)
-                obj = None
-        except queue.Empty:
-            pass

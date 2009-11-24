@@ -18,7 +18,6 @@ logging.basicConfig(level=logging.DEBUG)
 logging.info("Logger enabled")
 
 
-
 if __name__ == '__main__':
     connection = queue.Queue(0)
     src = Ramp(connection)

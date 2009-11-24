@@ -41,7 +41,7 @@ class Ramp(Source):
                     }
             self.output_queue.put(data)
             logging.debug("Ramp process added data: (tag: %2.e, value: %.2e)" % (tag, value))
-            time.sleep(random.random() * 0.0001)     # Adding a delay so we can see the async
+            time.sleep(random.random() * 0.001)     # Adding a delay so we can see the async
         logging.debug("Ramp process finished adding all data to queue")    
         self.stop = True
         self.output_queue.put(None)
