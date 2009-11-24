@@ -21,6 +21,20 @@ logging.info("Logger enabled")
 
 
 if __name__ == '__main__':
+    """
+     ______
+    |      |
+    | ramp |----\
+    |  /   |     \      ______     ________
+    |______|      \____|      |    |      |
+                       | Sum  |____| Plot |
+                   ____|      |    |______|
+     ______       /    |______|
+    |      |     /
+    | Rand |----/
+    |______|
+    
+    """
     connection1 = queue.Queue(0)
     connection2 = queue.Queue(0)
     connection3 = queue.Queue(0)
