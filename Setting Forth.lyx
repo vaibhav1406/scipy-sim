@@ -179,6 +179,20 @@ MoML - modelling language based on xml
 Models of Computation
 \end_layout
 
+\begin_layout Standard
+Process:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\xymatrix{ &  & Ramp\, Source\ar[dr]\\
+Start &  & Random\, Source\ar[r] & SumBlock\ar[r] & Plotter &  & Complete\\
+ &  & Ramp\, Source\ar[ur]}
+$
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section*
 Kahn process networks 
 \end_layout
