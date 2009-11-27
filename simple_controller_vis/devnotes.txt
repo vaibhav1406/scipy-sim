@@ -1,0 +1,10 @@
+Notes for future work
+
+GUI
+
+
+
+Backend System
+
+- A model system that automatically adds all connected components into a Model which can be "Run"
+ 

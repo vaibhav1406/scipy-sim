@@ -1,0 +1,149 @@
+#LyX 1.6.4 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\language british
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Simulation in SciPy Project - TODO - Week 2
+\end_layout
+
+\begin_layout Itemize
+change computation model to use ordered blocking queues instead of nonblocking
+ reads.
+\end_layout
+
+\begin_layout Itemize
+Write a random source block, and an addition block (for discrete time)
+\end_layout
+
+\begin_layout Itemize
+write an example that adds a ramp and a random noise and plots output
+\end_layout
+
+\begin_layout Itemize
+learn a bit of Haskel from Actors without directors paper
+\end_layout
+
+\begin_layout Itemize
+implement the SUM block in a concurrent way
+\end_layout
+
+\begin_layout Itemize
+look at PRET and PRET-C (from AU)
+\end_layout
+
+\begin_layout Itemize
+look at esterel and micro threading - options for Python include twisted
+ and stackless python.
+\end_layout
+
+\begin_layout Itemize
+See if my stuff works under jython and iron python
+\end_layout
+
+\begin_layout Itemize
+model checking for time analysis - UPPAAC, TFSM, TCCFG
+\end_layout
+
+\begin_layout Itemize
+Read these papers
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Benveniste '03
+\end_layout
+
+\begin_layout Itemize
+Computing Needs Time '09 (Ed Lee)
+\end_layout
+
+\begin_layout Itemize
+Actors without Directors (Ed Lee)
+\end_layout
+
+\begin_layout Itemize
+Classes and Inheritance in Actor-Oriented Design(Ed Lee)
+\end_layout
+
+\begin_layout Itemize
+Overview of Ptolemy project (Ed Lee)
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+operational semantics
+\emph default
+ of hybrid systems
+\end_layout
+
+\begin_layout Itemize
+taming heterogeneity - ptolemy approach (Ed Lee)
+\end_layout
+
+\begin_layout Itemize
+modeling timed concurrent systems (Ed Lee)
+\end_layout
+
+\begin_layout Itemize
+MACs '91
+\end_layout
+
+\begin_layout Itemize
+Krike Structure RTSS '03
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+read and write intro to ptolemy project
+\end_layout
+
+\begin_layout Itemize
+Implement a sampler to go from Continous Time to Discrete Time
+\end_layout
+
+\begin_layout Itemize
+Implement an interpolater to go from Discrete Time to Continous Time
+\end_layout
+
+\end_body
+\end_document
