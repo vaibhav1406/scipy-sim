@@ -6,10 +6,11 @@ Created on 24/11/2009
 import logging
 import numpy as np
 from Actor import Actor
-
+from multiqueue import MultiQueue
 import Queue as queue
 
-#import time, random # These are or can be used to test the async
+MAX_INPUTS = 10
+
 
 class Summer(Actor):
     '''
@@ -20,10 +21,13 @@ class Summer(Actor):
     def __init__(self, inputs, output_queue):
         """
         Constructor for a summation block
+        @param inputs: A Python list of input queues
         """
         Actor.__init__(self, output_queue=output_queue)
-        self.inputs = list(inputs)
-        self.futures = np.zeros_like(self.inputs)
+
+        self.inputs = MultiQueue(MAX_INPUTS)
+
+        #self.futures = np.zeros_like(self.inputs)
 
 
     def process(self):
