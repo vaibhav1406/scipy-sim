@@ -11,9 +11,13 @@ import Queue as queue
 
 #import time, random # These are or can be used to test the async
 
+
+
+
 class Summer(Actor):
     '''
-    This actor takes a list of two or more sources and adds them together at the corresponding tagged time. 
+    This actor takes a list of two or more sources and adds them
+    together at the corresponding tagged time.
     This has to be used with discrete signals, or at least aligned continuous signals.
     '''
 
@@ -62,7 +66,59 @@ class Summer(Actor):
 
             # With the 0th option there is a major problem when one signal isn't creating the same rate of signals
             # because the current actor (without director) model only processes after receiving an input from
-            # EVERY input queue. So this would be sub optimal also... 
+            # EVERY input queue. So this would be sub optimal also...
 
         # if the tags won't be the same -  we store a buffer of future tag/value pairs
         #future = max(tags)
+
+
+import unittest
+
+class SummerTests(unittest.TestCase):
+    def test_basic_summer(self):
+        '''Test adding two queues of complete pairs together'''
+        q_in_1 = queue.Queue()
+        q_in_2 = queue.Queue()
+        q_out = queue.Queue()
+
+        input1 = [{'value':1,'tag':i} for i in xrange(100)]
+        input2 = [{'value':2,'tag':i} for i in xrange(100)]
+
+        summer = Summer([q_in_1, q_in_2], q_out)
+        summer.start()
+        for val in input1:
+            q_in_1.put(val)
+        for val in input2:
+            q_in_2.put(val)
+        q_in_1.put(None)
+        q_in_2.put(None)
+        summer.join()
+        for i in xrange(100):
+            self.assertEquals(q_out.get()['value'],3)
+        self.assertEquals(q_out.get(), None)
+
+    def test_multi_summer(self):
+        '''
+        Test adding multiple (50) input signals
+        where all signals contain every tag.
+        '''
+        num_input_queues, num_data_points = 50, 100
+
+        input_queues = [queue.Queue() for i in xrange(num_input_queues)]
+        output_queue = queue.Queue()
+
+        # Fill each queue with num_data_points of its own index
+        # So queue 5 will be full of the value 4, then a None
+        for i, input_queue in enumerate(input_queues):
+            _ = [input_queue.put({'value':i,'tag':j}) for j in xrange(num_data_points)]
+        _ = [input_queue.put(None) for input_queue in input_queues]
+
+        summer = Summer(input_queues, output_queue)
+        summer.start()
+        summer.join()
+        s = sum(xrange(num_input_queues))
+        for i in xrange(num_data_points):
+            self.assertEquals(output_queue.get()['value'], s)
+        self.assertEquals(output_queue.get(), None)
+if __name__ == "__main__":
+    unittest.main()
