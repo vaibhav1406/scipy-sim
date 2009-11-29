@@ -21,13 +21,15 @@ class Summer(Actor):
     This has to be used with discrete signals, or at least aligned continuous signals.
     '''
 
-    def __init__(self, inputs, output_queue):
+    def __init__(self, inputs, output_queue, discard_incomplete_sets=True):
         """
         Constructor for a summation block
         """
         Actor.__init__(self, output_queue=output_queue)
         self.inputs = list(inputs)
-        self.futures = np.zeros_like(self.inputs)
+        self.discard_incomplete = discard_incomplete_sets
+        self.data_is_stored = False
+        #self.futures = np.zeros_like(self.inputs)
 
 
     def process(self):
@@ -67,6 +69,33 @@ class Summer(Actor):
             # With the 0th option there is a major problem when one signal isn't creating the same rate of signals
             # because the current actor (without director) model only processes after receiving an input from
             # EVERY input queue. So this would be sub optimal also...
+            oldest_tag = min(tags)
+
+            if self.data_is_stored:
+                logging.debug("We have got previously stored data - checking for any at oldest tag")
+                current_data = [obj for obj in self.future_data + objects if obj['tag'] == oldest_tag]
+
+
+                logging.debug("We have data stored from the future for 'now'...")
+                # At this point we either sum ALL we have at 'now' or discard 'now'
+                # depending on how many data points there are relative to inputs
+
+                num_points = len(current_data)
+
+
+                if num_points == len(self.inputs) or not self.discard_incomplete:
+                    the_sum = values = sum([obj['value'] for obj in current_data])
+                    self.output_queue.put(
+                        {
+                            'tag':oldest_tag,
+                            'value': the_sum
+                        }
+                    )
+                else:
+                    logging.debug("We are throwing away the oldest tag, and storing the rest")
+
+            self.future_data = [obj for obj in objects if obj['tag'] is not oldest_tag]
+            if self.future_data is not None: self.data_is_stored = True
 
         # if the tags won't be the same -  we store a buffer of future tag/value pairs
         #future = max(tags)
@@ -95,6 +124,28 @@ class SummerTests(unittest.TestCase):
         summer.join()
         for i in xrange(100):
             self.assertEquals(q_out.get()['value'],3)
+        self.assertEquals(q_out.get(), None)
+
+    def test_delayed_summer(self):
+        '''Test adding two queues where one is delayed by some amount'''
+        q_in_1 = queue.Queue()
+        q_in_2 = queue.Queue()
+        q_out = queue.Queue()
+
+        input1 = [{'value':1,'tag':i} for i in xrange(100)]
+        input2 = [{'value':2,'tag':i + 1} for i in xrange(100)]
+
+        summer = Summer([q_in_1, q_in_2], q_out)
+        summer.start()
+        for val in input1:
+            q_in_1.put(val)
+        for val in input2:
+            q_in_2.put(val)
+        q_in_1.put(None)
+        q_in_2.put(None)
+        summer.join()
+        for i in xrange(99):
+            self.assertEquals(q_out.get()['value'], 3)
         self.assertEquals(q_out.get(), None)
 
     def test_multi_summer(self):
