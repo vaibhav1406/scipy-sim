@@ -29,7 +29,7 @@ class Summer(Actor):
         self.inputs = list(inputs)
         self.discard_incomplete = discard_incomplete_sets
         self.data_is_stored = False
-        #self.futures = np.zeros_like(self.inputs)
+        self.future_data = []
 
 
     def process(self):
@@ -69,32 +69,35 @@ class Summer(Actor):
             # With the 0th option there is a major problem when one signal isn't creating the same rate of signals
             # because the current actor (without director) model only processes after receiving an input from
             # EVERY input queue. So this would be sub optimal also...
-            oldest_tag = min(tags)
+
+            # need oldest tag out of stored and new
+            oldest_tag = min(tags + [a['tag'] for a in self.future_data])
 
             if self.data_is_stored:
                 logging.debug("We have got previously stored data - checking for any at oldest tag")
                 current_data = [obj for obj in self.future_data + objects if obj['tag'] == oldest_tag]
+            else:
+                current_data = [obj for obj in objects if obj['tag'] == oldest_tag]
 
 
-                logging.debug("We have data stored from the future for 'now'...")
-                # At this point we either sum ALL we have at 'now' or discard 'now'
-                # depending on how many data points there are relative to inputs
+            # At this point we either sum ALL we have at 'now' or discard 'now'
+            # depending on how many data points there are relative to inputs
 
-                num_points = len(current_data)
+            num_points = len(current_data)
 
 
-                if num_points == len(self.inputs) or not self.discard_incomplete:
-                    the_sum = values = sum([obj['value'] for obj in current_data])
-                    self.output_queue.put(
-                        {
-                            'tag':oldest_tag,
-                            'value': the_sum
-                        }
-                    )
-                else:
-                    logging.debug("We are throwing away the oldest tag, and storing the rest")
+            if num_points == len(self.inputs) or not self.discard_incomplete:
+                the_sum = values = sum([obj['value'] for obj in current_data])
+                self.output_queue.put(
+                    {
+                        'tag':oldest_tag,
+                        'value': the_sum
+                    }
+                )
+            else:
+                logging.debug("We are throwing away the oldest tag, and storing the rest")
 
-            self.future_data = [obj for obj in objects if obj['tag'] is not oldest_tag]
+            self.future_data = [obj for obj in self.future_data + objects if obj['tag'] is not oldest_tag]
             if self.future_data is not None: self.data_is_stored = True
 
         # if the tags won't be the same -  we store a buffer of future tag/value pairs
@@ -127,7 +130,10 @@ class SummerTests(unittest.TestCase):
         self.assertEquals(q_out.get(), None)
 
     def test_delayed_summer(self):
-        '''Test adding two queues where one is delayed by some amount'''
+        '''
+        Test adding two queues where one is delayed by ONE time step difference
+        Summer is set up to discard incomplete sets
+        '''
         q_in_1 = queue.Queue()
         q_in_2 = queue.Queue()
         q_out = queue.Queue()
@@ -135,7 +141,7 @@ class SummerTests(unittest.TestCase):
         input1 = [{'value':1,'tag':i} for i in xrange(100)]
         input2 = [{'value':2,'tag':i + 1} for i in xrange(100)]
 
-        summer = Summer([q_in_1, q_in_2], q_out)
+        summer = Summer([q_in_1, q_in_2], q_out, True)
         summer.start()
         for val in input1:
             q_in_1.put(val)
@@ -146,6 +152,69 @@ class SummerTests(unittest.TestCase):
         summer.join()
         for i in xrange(99):
             self.assertEquals(q_out.get()['value'], 3)
+        self.assertEquals(q_out.get(), None)
+
+    def test_delayed_summer2(self):
+        '''
+        Test adding two queues where one is delayed by an arbitrary
+        time step difference. Summer is set up to discard incomplete sets
+        '''
+        DELAY = 2
+        q_in_1 = queue.Queue()
+        q_in_2 = queue.Queue()
+        q_out = queue.Queue()
+
+        input1 = [{'value':1,'tag':i} for i in xrange(100)]
+        input2 = [{'value':2,'tag':i + DELAY} for i in xrange(100)]
+
+        summer = Summer([q_in_1, q_in_2], q_out, True)
+        summer.start()
+        for val in input1:
+            q_in_1.put(val)
+        for val in input2:
+            q_in_2.put(val)
+        q_in_1.put(None)
+        q_in_2.put(None)
+        summer.join()
+        #for i in xrange(DELAY, 99):
+
+        self.assertEquals(q_out.get()['value'], 3)
+        #self.assertEquals(q_out.get(), None)
+
+
+    def test_delayed_summer3(self):
+        '''
+        Test adding two queues where one is delayed by ONE time step difference
+        Summer is set up to SUM incomplete sets
+        '''
+        q_in_1 = queue.Queue()
+        q_in_2 = queue.Queue()
+        q_out = queue.Queue()
+
+        input1 = [{'value':1,'tag':i} for i in xrange(100)]
+        input2 = [{'value':2,'tag':i + 1} for i in xrange(100)]
+
+        summer = Summer([q_in_1, q_in_2], q_out, False)
+        summer.start()
+        for val in input1:
+            q_in_1.put(val)
+        for val in input2:
+            q_in_2.put(val)
+        q_in_1.put(None)
+        q_in_2.put(None)
+        summer.join()
+
+        # First value should be 1, rest should be 3
+        data = q_out.get()
+        self.assertEquals(data['value'], 1)
+        self.assertEquals(data['tag'], 0)
+
+        for i in xrange(1, 100):
+            data = q_out.get()
+            self.assertEquals(data['value'], 3)
+            self.assertEquals(data['tag'], i)
+
+        # lastly the queue should contain a 'None'
         self.assertEquals(q_out.get(), None)
 
     def test_multi_summer(self):
@@ -171,5 +240,36 @@ class SummerTests(unittest.TestCase):
         for i in xrange(num_data_points):
             self.assertEquals(output_queue.get()['value'], s)
         self.assertEquals(output_queue.get(), None)
+
+    def test_multi_delayed_summer(self):
+        '''
+        Test adding multiple (50) input signals where a signal is delayed.
+
+        '''
+        DELAY = 1
+        num_input_queues, num_data_points = 50, 100
+
+        input_queues = [queue.Queue() for i in xrange(num_input_queues)]
+        output_queue = queue.Queue()
+
+        # Fill each queue with num_data_points of its own index
+        # So queue 5 will be full of the value 4, then a None
+        for i, input_queue in enumerate(input_queues):
+            _ = [input_queue.put({'value':i,'tag':j}) for j in xrange(num_data_points) if i is not 0]
+        _ = [input_queues[0].put({'value':i,'tag':j + DELAY}) for j in xrange(num_data_points)]
+        _ = [input_queue.put(None) for input_queue in input_queues]
+
+        summer = Summer(input_queues, output_queue)
+        summer.start()
+        summer.join()
+        s = sum(xrange(num_input_queues))
+        for i in xrange(num_data_points):
+            self.assertEquals(output_queue.get()['value'], s)
+        self.assertEquals(output_queue.get(), None)
+
+
 if __name__ == "__main__":
-    unittest.main()
+    #unittest.main()
+    suite = unittest.TestLoader().loadTestsFromTestCase(SummerTests)
+    unittest.TextTestRunner(verbosity=4).run(suite)
+
