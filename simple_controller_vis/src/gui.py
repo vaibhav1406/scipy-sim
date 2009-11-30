@@ -14,8 +14,8 @@ pathtoscript = os.path.dirname(os.path.realpath(__file__))
 
 def load_example(name):
     """Load an actor file."""
-    examplesDir = os.path.join(os.path.split(pathtoscript)[0],'src','actors')
-    text = "".join(open(os.path.join(examplesDir,name),'r').readlines())
+    examplesDir = os.path.join(os.path.split(pathtoscript)[0], 'src', 'actors')
+    text = "".join(open(os.path.join(examplesDir, name), 'r').readlines())
     return text
 
 class ExamplesGroup:
@@ -26,41 +26,41 @@ class ExamplesGroup:
         self.code = code
         self.set_text = set_text_callback
         self.draw_list()
-        
-        
+
+
     def get_list(self):
         keys = self.code.keys()
         return keys
 
-    def get_example(self,key):
+    def get_example(self, key):
         return self.code[key]
-    
+
     def get_selection(self, x):
         index = self.listbox.curselection()[0]
         seltext = self.listbox.get(index)
         self.set_text(self.code[seltext])
-    
+
     def draw_list(self):
         label = Label(self.frame, text=self.name)
         label.pack()
-        self.listbox = Listbox(self.frame,selectmode=SINGLE)
+        self.listbox = Listbox(self.frame, selectmode=SINGLE)
         self.listbox.pack(fill=BOTH, expand=1)
         for i in self.get_list():
             self.listbox.insert(END, i)
-           
+
         # left mouse click on a list item to display selection
         self.listbox.bind('<ButtonRelease-1>', self.get_selection)
 
-        
+
 class App:
     def __init__(self, frame):
-      
+
         # The frame for all the file management on the left.
         file_frame = Frame(frame)
-        file_frame.pack(side=LEFT,fill=BOTH, expand=1)
+        file_frame.pack(side=LEFT, fill=BOTH, expand=1)
 
         math_code = {
-            "addition": 
+            "addition":
 """a = 10
 b = 5
 c = (a + b)
@@ -78,8 +78,8 @@ if(x == 1){return (x )}
 a = 5
 ('!' + a + ' = ' + self.fact(a)).print()
 """,
-        }        
-        
+        }
+
         program_code = {
 "if":
 """# If statements do something after evaluating an expression
@@ -199,49 +199,49 @@ file_b.read().print()
 file_b.close()
 """
         }
-        
+
         # These three next examples are loaded from the examples directory.
         example_code = {
-            'All': load_example('Actor.py'), 
+            'All': load_example('Actor.py'),
             #'stack': load_example('stack.vorpal'),
             #'increment': load_example('increment-decrement.vorpal'),
             }
-        
-        
-        math_group = ExamplesGroup("Math",file_frame, math_code, self.write_to_win)
+
+
+        math_group = ExamplesGroup("Math", file_frame, math_code, self.write_to_win)
         program_group = ExamplesGroup("Programing", file_frame, program_code, self.write_to_win)
         misc = ExamplesGroup("Misc Examples", file_frame, example_code, self.write_to_win)
         # The frame for the main window
         main_frame = Frame(frame)
         main_frame.pack(side=LEFT)
-        
+
         # Text Editor
         self.textEdit = Text(main_frame, width=80)
-        self.textEdit.pack(side=TOP,fill=X)
-        self.textEdit.insert(END,"self.hello = 'Hello World (Change me!)'\nself.hello.print()\n")
-        
+        self.textEdit.pack(side=TOP, fill=X)
+        self.textEdit.insert(END, "self.hello = 'Hello World (Change me!)'\nself.hello.print()\n")
+
         # Frame to hold all the main buttons
         controls_frame = Frame(main_frame)
         controls_frame.pack(fill=X)
-        
+
         self.console = Text(main_frame, width=80)
         self.console.pack(fill=X)
         self.console.insert(END, "Vorpal Output Console\n \n")
-        
 
-               
+
+
         run_button = Button(controls_frame, text="Run", fg="green", command=self.run)
         run_button.pack(side=LEFT)
-        
+
         stop_button = Button(controls_frame, text="Stop", fg="red", command=self.stop)
         stop_button.pack(side=LEFT)
-        
+
         save_button = Button(controls_frame, text="Save", command=self.save)
         save_button.pack(side=LEFT)
-        
+
         help_button = Button(controls_frame, text="Help", command=self.help)
         help_button.pack(side=LEFT)
-        
+
         quit_button = Button(controls_frame, text="QUIT", fg="white", command=frame.quit)
         quit_button.pack(side=LEFT)
 
@@ -249,76 +249,76 @@ file_b.close()
         from tkFileDialog import asksaveasfilename
         f = asksaveasfilename(parent=root, defaultextension=".txt")
         if not f:
-            raise Cancel
+            raise "Cancel"
         try:
             text = self.textEdit.get(1.0, END)
-            writeFile(f,text)
+            writeFile(f, text)
         except IOError:
             from tkMessageBox import showwarning
             showwarning("Save As", "Cannot save the file.")
-            raise Cancel
+            raise "Cancel"
 
-        
+
     def stop(self):
         pass
-      
+
     def run(self):
         """Get the text from the window, save a temp file, run the tempfile with vorpal"""
         text = self.textEdit.get(1.0, END)
-        temp = os.path.join(os.path.split(pathtoscript)[0],'local','temp.vorpal') 
-        writeFile(temp,text)
+        temp = os.path.join(os.path.split(pathtoscript)[0], 'local', 'temp.vorpal')
+        writeFile(temp, text)
         vr = VorpalRunner()
         output = vr.runFile(temp)
         self.write_to_console(output)
-    
-    def write_to_console(self,text):
-        self.console.insert(END, "\n" + text  + "\n")
+
+    def write_to_console(self, text):
+        self.console.insert(END, "\n" + text + "\n")
         self.console.see(END)    # Scroll the console
-    
-    def write_to_win(self,text):
+
+    def write_to_win(self, text):
         self.textEdit.delete(1.0, END)
         self.textEdit.insert('end', text)
-        
+
     def help(self):
         self.write_to_console("""Help for Vorpal IDE""")
 
 
 class VorpalRunner:
-    
+
     def __init__(self):
         """
         In the future could set up the vorpal VM here.
         """
 
-        self.vorpalPath = os.path.join(os.path.split(pathtoscript)[0],"bin","vorpal")
+        self.vorpalPath = os.path.join(os.path.split(pathtoscript)[0], "bin", "vorpal")
         self.vorpalOptions = "--record-info "
         if not os.path.exists(self.vorpalPath):
             raise Exception("Could not find vorpal at: " + self.vorpalPath)
-        
-    
-    def runFile(self,file):
+
+
+    def runFile(self, file):
         cmd = self.vorpalPath + " " + self.vorpalOptions + '"' + file + '"'
-        ( status, outtext) = commands.getstatusoutput(cmd)    
+        (status, outtext) = commands.getstatusoutput(cmd)
         # TODO redirect the stdin to the bottom pane...
         # TODO do in seperate thread, so we can stop a long running file...
         if status:
             print status, "Error in running vorpal file."
         return outtext
- 
-def writeFile(filepath,content):
+
+def writeFile(filepath, content):
     try:
         if os.path.exists(os.path.split(filepath)[0]):
-            f = open(filepath,'w')
+            f = open(filepath, 'w')
             f.seek(0)
             f.write(content)
             f.close()
     except Exception, e:
-        print("File write error occured...", e)   
-      
+        print("File write error occured...", e)
+
 if __name__ == "__main__":
     root = Tk()
     root.title("Vorpal Gui")
-    
+
     app = App(root)
-    
+
     root.mainloop()

@@ -3,6 +3,9 @@
 \begin_document
 \begin_header
 \textclass article
+\begin_preamble
+
+\end_preamble
 \use_default_options true
 \language british
 \inputencoding auto
@@ -17,6 +20,7 @@
 
 \graphics default
 \paperfontsize default
+\spacing single
 \use_hyperref false
 \papersize default
 \use_geometry false
@@ -42,7 +46,11 @@
 \begin_body
 
 \begin_layout Title
-Simulation in SciPy Project - TODO - Week 2
+Simulation in SciPy Project
+\end_layout
+
+\begin_layout Author
+Brian Thorne
 \end_layout
 
 \begin_layout Itemize
@@ -63,7 +71,12 @@ learn a bit of Haskel from Actors without directors paper
 \end_layout
 
 \begin_layout Itemize
-implement the SUM block in a concurrent way
+implement the SUM Actor in a concurrent and blocking way for multiple inputs
+ possibly delayed
+\end_layout
+
+\begin_layout Itemize
+make UNIT tests for all Actors thus far
 \end_layout
 
 \begin_layout Itemize
@@ -71,12 +84,12 @@ look at PRET and PRET-C (from AU)
 \end_layout
 
 \begin_layout Itemize
-look at esterel and micro threading - options for Python include twisted
- and stackless python.
+look at esterel and micro threading and coroutines - options for Python
+ include twisted, multitask and stackless python.
 \end_layout
 
 \begin_layout Itemize
-See if my stuff works under jython and iron python
+See if my stuff works under jython and iron python - No (2.2), and No Numpy
 \end_layout
 
 \begin_layout Itemize
@@ -101,7 +114,11 @@ Actors without Directors (Ed Lee)
 \end_layout
 
 \begin_layout Itemize
-Classes and Inheritance in Actor-Oriented Design(Ed Lee)
+A framework for comparing models of computation (Ed Lee)
+\end_layout
+
+\begin_layout Itemize
+Classes and Inheritance in Actor-Oriented Design (Ed Lee)
 \end_layout
 
 \begin_layout Itemize
@@ -132,6 +149,19 @@ MACs '91
 Krike Structure RTSS '03
 \end_layout
 
+\begin_layout Itemize
+A survey of stream processing - Stephens
+\end_layout
+
+\begin_layout Itemize
+Actor model and process calculi - Wiki
+\end_layout
+
+\begin_layout Itemize
+N-Synchronous Kahn Networks - A Relaxed Model of Synchrony for Real-Time
+ Systems
+\end_layout
+
 \end_deeper
 \begin_layout Itemize
 read and write intro to ptolemy project
@@ -143,6 +173,83 @@ Implement a sampler to go from Continous Time to Discrete Time
 
 \begin_layout Itemize
 Implement an interpolater to go from Discrete Time to Continous Time
+\end_layout
+
+\begin_layout Itemize
+write a derivative block
+\end_layout
+
+\begin_layout Itemize
+write an integration block
+\end_layout
+
+\begin_layout Itemize
+write a higher level abstraction for a 
+\begin_inset Quotes eld
+\end_inset
+
+model
+\begin_inset Quotes erd
+\end_inset
+
+ - including running time etc
+\end_layout
+
+\begin_layout Itemize
+investigate and implement a way to KILL a running simulation (Should be
+ easy as injecting 
+\begin_inset Quotes eld
+\end_inset
+
+None
+\begin_inset Quotes erd
+\end_inset
+
+ into every queue)
+\end_layout
+
+\begin_layout Itemize
+Implement a frequency probe
+\end_layout
+
+\begin_layout Itemize
+Start planning the GUI
+\end_layout
+
+\begin_layout Itemize
+Different domains
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Boolean - flip flops, XOR etc
+\end_layout
+
+\begin_layout Itemize
+Discrete - stem graph plotter
+\end_layout
+
+\begin_layout Itemize
+Continuous 
+\end_layout
+
+\end_deeper
+\begin_layout Section*
+Example Model:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\xymatrix{ &  & Ramp\, Source\ar[dr]\\
+Start &  & Random\, Source\ar[r] & SumBlock\ar[r] & Plotter &  & Complete\\
+ &  & Ramp\, Source\ar[ur]}
+$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
 \end_layout
 
 \end_body

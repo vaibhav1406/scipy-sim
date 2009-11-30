@@ -57,10 +57,13 @@ class Source(Actor):
     Requires an output queue.
     '''
 
-    def __init__(self):
-        raise NotImplementedError()
+    #def __init__(self):
+    #    raise NotImplementedError()
 
     def process(self):
+        '''
+        This abstract method gets called in a loop untill the actor sets its stop variable to true
+        '''
         raise NotImplementedError()
 
 if __name__ == "__main__":

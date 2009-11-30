@@ -1,0 +1,1071 @@
+% This file was created with JabRef 2.3.1.
+% Encoding: UTF-8
+
+@ARTICLE{armbrust2009above,
+  author = {Armbrust, M. and Fox, A. and Griffith, R. and Joseph, A.D. and Katz,
+	R.H. and Konwinski, A. and Lee, G. and Patterson, D.A. and Rabkin,
+	A. and Stoica, I. and others},
+  title = {Above the clouds: A berkeley view of cloud computing},
+  journal = {EECS Department, University of California, Berkeley, Tech. Rep. UCB/EECS-2009-28},
+  year = {2009},
+  file = {Above the clouds\: A berkeley view of cloud computing:/home/brian/Desktop/Models
+	of Computing Papers/abovetheclouds.pdf:PDF}
+}
+
+@ARTICLE{barnes2009xml,
+  author = {Barnes, C. and Vaidya, P. and Lee, J.J.},
+  title = {An XML-Based ADL Framework for Automatic Generation of Multithreaded
+	Computer Architecture Simulators},
+  journal = {IEEE Computer Architecture Letters},
+  year = {2009},
+  volume = {8},
+  pages = {13--16},
+  number = {1},
+  file = {:/home/brian/Desktop/Models of Computing Papers/An XML-Based ADL Framework
+	for Automatic Generation of Multithreaded Computer Architecture Simulators
+	.pdf:PDF},
+  publisher = {IEEE Computer Society}
+}
+
+@ARTICLE{benveniste9actors,
+  author = {Benveniste, A. and Caspi, P. and Lublinerman, R. and Tripakis, S.},
+  title = {Actors without Directors: A Kahnian View of Heterogeneous Systems},
+  journal = {Proc. Hybrid Systems: Computation and Control (HSCC 09), LNCS},
+  volume = {5469},
+  pages = {46--60},
+  abstract = {This paper intends to clarify recent efforts proposed by the Berkeley
+	school in order
+	
+	to give a formal semantics to the Ptolemy toolbox. We show that the
+	proposed
+	
+	semantics is indeed a generalisation of a Kahn semantics based on
+	tag systems. We
+	
+	make this proposal a precise one by showing for several Ptolemy domains
+	what is
+	
+	the corresponding tag system and how operators can be defined. We
+	first remark that
+	
+	this semantics doesn’t need ”absent” values. We also discuss some
+	domains which
+	
+	do not obey this semantics. We then discuss some advantages of this
+	semantics,
+	
+	namely that it provides heterogeneity and distribution for free. In
+	particular, we
+	
+	show that while the semantics is naturally expressed in terms of actors,
+	directors are
+	
+	not essential for semantical purposes and are only justified by simulation
+	efficiency
+	
+	purposes. We conclude that in most cases, directors do not play an
+	important part in
+	
+	the definition of a Model of Computation and Communication.},
+  file = {:/home/brian/Desktop/Models of Computing Papers/benveniste-actors_without_directors-a_kahnian_view_of_heterogeneous_systems.pdf:PDF}
+}
+
+@ARTICLE{brooks2008heterogeneous,
+  author = {Brooks, C. and Lee, E.A. and Liu, X. and Neuendorffer, S. and Zhao,
+	Y. and Zheng, H.},
+  title = {Heterogeneous concurrent modeling and design in Java (Volume 1: Introduction
+	to Ptolemy II)},
+  journal = {EECS Department, University of California, Berkeley, Tech. Rep. UCB/EECS-2008-28,
+	Apr},
+  year = {2008},
+  pages = {2008--28},
+  abstract = {This volume describes how to construct Ptolemy II models for web-based
+	modeling or building appli-
+	
+	cations. The first chapter includes an overview of Ptolemy II software,
+	and a brief description of each
+	
+	of the models of computation that have been implemented. It describes
+	the package structure of the
+	
+	software, and includes as an appendix a brief tutorial on UML notation,
+	which is used throughout the
+	
+	documentation to explain the structure of the software. The second
+	chapter is a tutorial on building
+	
+	models using Vergil, a graphical user interface where models are built
+	pictorially. The third chapter
+	
+	discusses the Ptolemy II expression language, which is used to set
+	parameter values. The next chapter
+	
+	gives an overview of actor libraries. These three chapters, plus one
+	of the domain chapters, will be suf-
+	
+	ficient for users to start building interesting models in the selected
+	domain. The fifth chapter gives a
+	
+	tutorial on designing actors in Java. The sixth chapter describes
+	the Ptolemy coding style, The seventh
+	
+	chapter explains MoML, the XML schema used by Vergil to store models.
+	And the eighth chapter, the
+	
+	final one in this part, explains how to construct custom applets.},
+  file = {:home/brian/Desktop/Models of Computing Papers/Ptolemy II - intro.pdf:PDF},
+  publisher = {Citeseer}
+}
+
+@ARTICLE{cohen2006n,
+  author = {Cohen, A. and Duranton, M. and Eisenbeis, C. and Pagetti, C. and
+	Plateau, F. and Pouzet, M.},
+  title = {N-synchronous Kahn networks},
+  journal = {POPL 2006},
+  year = {2006},
+  abstract = {The design of high-performance stream-processing systems is a
+	
+	fast growing domain, driven by markets such like high-end TV,
+	
+	gaming, 3D animation and medical imaging. It is also a surprisingly
+	
+	demanding task, with respect to the algorithmic and conceptual
+	
+	simplicity of streaming applications. It needs the close cooperation
+	
+	between numerical analysts, parallel programming experts, real-
+	
+	time control experts and computer architects, and incurs a very high
+	
+	level of quality insurance and optimization.
+	
+	    In search for improved productivity, we propose a programming
+	
+	model and language dedicated to high-performance stream process-
+	
+	ing. This language builds on the synchronous programming model
+	
+	and on domain knowledge — the periodic evolution of streams
+	
+	— to allow correct-by-construction properties to be proven by the
+	
+	compiler. These properties include resource requirements and de-
+	
+	lays between input and output streams. Automating this task avoids
+	
+	tedious and error-prone engineering, due to the combinatorics of
+	
+	the composition of filters with multiple data rates and formats. Cor-
+	
+	rectness of the implementation is also difficult to assess with tradi-
+	
+	tional (asynchronous, simulation-based) approaches. This language
+	
+	is thus provided with a relaxed notion of synchronous composition,
+	
+	called n-synchrony: two processes are n-synchronous if they can
+	
+	communicate in the ordinary (0-)synchronous model with a FIFO
+	
+	buffer of size n.
+	
+	    Technically, we extend a core synchronous data-flow language
+	
+	with a notion of periodic clocks, and design a relaxed clock cal-
+	
+	culus (a type system for clocks) to allow non strictly synchronous
+	
+	processes to be composed or correlated. This relaxation is associ-
+	
+	ated with two sub-typing rules in the clock calculus. Delay, buffer
+	
+	insertion and control code for these buffers are automatically in-
+	
+	ferred from the clock types through a systematic transformation
+	
+	into a standard synchronous program. We formally define the se-
+	
+	mantics of the language and prove the soundness and completeness
+	
+	of its clock calculus and synchronization transformation. Finally,
+	
+	the language is compared with existing formalisms.},
+  file = {:/home/brian/Desktop/Models of Computing Papers/N-Synchronous Kahn
+	Networks.pdf:PDF},
+  publisher = {Citeseer}
+}
+
+@ARTICLE{denzel2009framework,
+  author = {Denzel, W.E. and Lee, J. and Walker, P. and Jin, Y.},
+  title = {A framework for end-to-end simulation of high-performance computing
+	systems},
+  journal = {SIMULATION},
+  year = {2009},
+  file = {:/home/brian/Desktop/Models of Computing Papers/A Framework for End-to-End
+	Simulation of High-performance Computing Systems.pdf:PDF},
+  publisher = {SCS}
+}
+
+@ARTICLE{edwards2007case,
+  author = {Edwards, S.A. and Lee, E.A.},
+  title = {The case for the precision timed (PRET) machine},
+  year = {2007},
+  pages = {265},
+  booktitle = {Proceedings of the 44th annual Design Automation Conference},
+  file = {:/home/brian/Desktop/Models of Computing Papers/The Case for the Precision
+	Timed (PRET) Machine.pdf:PDF},
+  organization = {ACM}
+}
+
+@ARTICLE{eker2003taming,
+  author = {Eker, J. and Janneck, J.W. and Lee, E.A. and Liu, J. and Liu, X.
+	and Ludvig, J. and Neuendorffer, S. and Sachs, S. and Xiong, Y.},
+  title = {Taming heterogeneity - the Ptolemy approach},
+  journal = {Proceedings of the IEEE},
+  year = {2003},
+  volume = {91},
+  pages = {127--144},
+  number = {1},
+  file = {:home/brian/Desktop/Models of Computing Papers/TamingHeterogeneity.pdf:PDF},
+  publisher = {Citeseer}
+}
+
+@ARTICLE{goderis2009heterogeneous,
+  author = {Goderis, A. and Brooks, C. and Altintas, I. and Lee, E.A. and Goble,
+	C.},
+  title = {Heterogeneous composition of models of computation},
+  journal = {Future Generation Computer Systems},
+  year = {2009},
+  volume = {25},
+  pages = {552--560},
+  number = {5},
+  abstract = {A model of computation (MoC) is a formal abstraction of execution
+	in a computer. There is a need for
+	
+	composing diverse MoCs in e-science. Kepler, which is based on Ptolemy
+	II, is a scientific workflow
+	
+	environment that allows for MoC composition. This paper explains how
+	MoCs are combined in Kepler and
+	
+	Ptolemy II and analyzes which combinations of MoCs are currently possible
+	and useful. It demonstrates
+	
+	the approach by combining MoCs involving dataflow and finite state
+	machines. The resulting classification
+	
+	should be relevant to other workflow environments wishing to combine
+	multiple MoCs (available at
+	
+	http://ptolemy.org/heterogeneousMoCs).},
+  file = {:/home/brian/Desktop/Models of Computing Papers/Heterogeneous composition
+	of models of computation.pdf:PDF},
+  publisher = {Elsevier}
+}
+
+@ARTICLE{goderis2007composing,
+  author = {Goderis, A. and Brooks, C. and Altintas, I. and Lee, E.A. and Goble,
+	C.},
+  title = {Composing different models of computation in Kepler and Ptolemy II},
+  journal = {Lecture Notes in Computer Science},
+  year = {2007},
+  volume = {4489},
+  pages = {182},
+  abstract = {A model of computation (MoC) is a formal abstraction of execution
+	
+	in a computer. There is a need for composing MoCs in e-science. Kepler,
+	which
+	
+	is based on Ptolemy II, is a scientific workflow environment that
+	allows for
+	
+	MoC composition. This paper explains how MoCs are combined in Kepler
+	and
+	
+	Ptolemy II and analyzes which combinations of MoCs are currently possible
+	
+	and useful. It demonstrates the approach by combining MoCs involving
+	
+	dataflow and finite state machines. The resulting classification should
+	be
+	
+	relevant to other workflow environments wishing to combine multiple
+	MoCs.},
+  file = {:/home/brian/Desktop/Models of Computing Papers/Composing Different
+	Models of Computation in Kepler and Ptolemy II\\.pdf:PDF},
+  publisher = {Springer}
+}
+
+@ARTICLE{goodman2009brian,
+  author = {Goodman, DF and Brette, R.},
+  title = {The Brian simulator},
+  journal = {Front. Neurosci},
+  year = {2009},
+  file = {:home/brian/Desktop/Models of Computing Papers/The Brian simulator.pdf:PDF}
+}
+
+@ARTICLE{goodman2008brian,
+  author = {Goodman, D. and Brette, R.},
+  title = {Brian: a simulator for spiking neural networks in Python},
+  journal = {Frontiers in Neuroinformatics},
+  year = {2008},
+  volume = {2},
+  abstract = {“Brian” is a new simulator for spiking neural networks, written in
+	Python (http://brian. di.ens.fr). It is an intuitive and highly flexible
+	tool for rapidly developing new models, especially networks of single-compartment
+	neurons. In addition to using standard types of neuron models, users
+	can define models by writing arbitrary differential equations in
+	ordinary mathematical notation. Python scientific libraries can also
+	be used for defining models and analysing data. Vectorisation techniques
+	allow efficient simulations despite the overheads of an interpreted
+	language. Brian will be especially valuable for working on non-standard
+	neuron models not easily covered by existing software, and as an
+	alternative to using Matlab or C for simulations. With its easy and
+	intuitive syntax, Brian is also very well suited for teaching computational
+	neuroscience.},
+  file = {:home/brian/Desktop/Models of Computing Papers/Brian\: a simulator
+	for spiking neural networks in Python.pdf:PDF},
+  publisher = {Frontiers Research Foundation}
+}
+
+@ARTICLE{hansen2002origins,
+  author = {Hansen, P.B. and Dijkstra, E.W. and Hoare, CAR},
+  title = {The Origins of Concurrent Programming: From Semaphores to Remote
+	Procedure Calls},
+  year = {2002},
+  abstract = {The author selects classic papers written by the computer scientists
+	who made
+	
+	the major breakthroughs in concurrent programming. These papers cover
+	the
+	
+	pioneering era of the field from the semaphores of the mid 1960s to
+	the remote
+	
+	procedure calls of the late 1970s. The author summarizes the classic
+	papers
+	
+	and puts them in historical perspective.},
+  file = {:/home/brian/Desktop/Models of Computing Papers/brinch-hansen-the_invention_of_concurrent_programming.pdf:PDF},
+  publisher = {Springer-Verlag New York, Inc. Secaucus, NJ, USA}
+}
+
+@ARTICLE{hunter2007matplotlib,
+  author = {Hunter, J.D.},
+  title = {Matplotlib: a 2D graphics environment},
+  journal = {Computing in Science \& Engineering},
+  year = {2007},
+  pages = {90--95},
+  file = {Matplotlib User Guide - Release 0.98.3 2008:/home/brian/Desktop/Models
+	of Computing Papers/Matplotlib.pdf:PDF;The Matplotlib User’s Guide:/home/brian/Desktop/Models
+	of Computing Papers/matplotlib.pdf:PDF},
+  publisher = {IEEE Computer Society}
+}
+
+@ARTICLE{jones2001scipy,
+  author = {Jones, E. and Oliphant, T. and Peterson, P. and others},
+  title = {SciPy: Open source scientific tools for Python},
+  journal = {URL http://www. scipy. org},
+  year = {2001},
+  file = {:home/brian/Desktop/Models of Computing Papers/scipy-ref.pdf:PDF}
+}
+
+@ARTICLE{lee2009computing,
+  author = {Lee, E.A.},
+  title = {Computing needs time},
+  year = {2009},
+  abstract = {This paper considers the orchestration of computing with physical
+	
+	processes. It argues that to realize its full potential, the core
+	abstrac-
+	
+	tions of computing need to be rethought to incorporate essential prop-
+	
+	erties of the physical systems, most particularly the passage of time.
+	
+	It makes a case that the solution cannot be simply overlaid on exist-
+	
+	ing abstractions, and outlines a number of promising approaches being
+	
+	pursued. The emphasis needs to be on repeatable behavior rather than
+	
+	on performance optimization.},
+  file = {:/home/brian/Desktop/Models of Computing Papers/Computing Needs Time.pdf:PDF},
+  publisher = {ACM New York, NY, USA}
+}
+
+@ARTICLE{lee2006concurrent,
+  author = {Lee, E.A.},
+  title = {Concurrent models of computation for embedded software},
+  journal = {System-on-chip: next generation electronics},
+  year = {2006},
+  pages = {223},
+  file = {:/home/brian/Desktop/Models of Computing Papers/lee-concurrent_models_of_computation_for_embedded_software-notes.pdf:PDF},
+  publisher = {Iet}
+}
+
+@ARTICLE{lee2006problem,
+  author = {Lee, E.A.},
+  title = {The problem with threads},
+  journal = {Computer},
+  year = {2006},
+  volume = {39},
+  pages = {33--42},
+  number = {5},
+  abstract = {Concurrent programming is difficult,1 yet many
+	
+	technologists predict the end of Moore’s law
+	
+	will be answered with increasingly parallel
+	
+	computer architectures—multicore or chip
+	
+	multiprocessors (CMPs).2 If we hope to achieve
+	
+	continued performance gains, programs must be able to
+	
+	exploit this parallelism.
+	
+	   Automatic exploitation of parallelism in sequential
+	
+	programs, through either computer architecture tech-
+	
+	niques such as dynamic dispatch or automatic paral-
+	
+	lelization of sequential programs,3 offers one possible
+	
+	technical solution. However, many researchers agree that
+	
+	these automatic techniques have been pushed to their
+	
+	limits and can exploit only modest parallelism. Thus,
+	
+	programs themselves must become more concurrent.
+	
+	   Understanding why concurrent programming is so dif-
+	
+	ficult can help us solve the problem. The physical world
+	
+	is highly concurrent, and our very survival depends on
+	
+	our ability to reason about concurrent physical dynam-
+	
+	ics. This reasoning doesn’t extend to concurrent pro-
+	
+	grams because we have chosen abstractions that do not
+	
+	even vaguely resemble the physical world’s concurrency.
+	
+	We have become so used to these computational abstrac-
+	
+	tions that we have forgotten they are not immutable.
+	
+	The difficulty of concurrent programming is a conse-
+	
+	quence of these abstractions, and if we can let go of
+	
+	them, the problem will be fixable.},
+  file = {:home/brian/Desktop/Models of Computing Papers/The Problem With Threads.pdf:PDF},
+  publisher = {Citeseer}
+}
+
+@CONFERENCE{LeeMay21-232001,
+  author = {Edward A. Lee},
+  title = {Computing for Embedded Systems},
+  booktitle = {State of the Art Lecture,
+	
+	IEEE Instrumentation and Measurement,
+	
+	Technology Conference},
+  year = {May 21-23, 2001},
+  file = {:/home/brian/Desktop/Models of Computing Papers/computing for Embedded
+	Systems.pdf:PDF},
+  owner = {brian},
+  review = {- Why Object Orriented Design is flawed... 
+	
+	- Brief overview of Actors+Ports Software Architectures},
+  timestamp = {2009.12.01}
+}
+
+@ARTICLE{lee2009classes,
+  author = {Lee, E.A. and Liu, X. and Neuendorffer, S.},
+  title = {Classes and inheritance in actor-oriented design},
+  journal = {ACM Transactions on Embedded Computing Systems (TECS)},
+  year = {2009},
+  volume = {8},
+  pages = {29},
+  number = {4},
+  abstract = {Actor-oriented components emphasize concurrency and temporal semantics
+	and are used for mod-
+	
+	eling and designing embedded software and hardware. Actors interact
+	with one another through
+	
+	ports via a messaging schema that can follow any of several concurrent
+	semantics. Domain-specific
+	
+	actor-oriented languages and frameworks are common (Simulink, LabVIEW,
+	SystemC, etc.). How-
+	
+	ever, they lack many modularity and abstraction mechanisms that programmers
+	have become
+	
+	accustomed to in object-oriented components, such as classes, inheritance,
+	interfaces, and polymor-
+	
+	phism, except as inherited from the host language. This article shows
+	a form that such mechanisms
+	
+	can take in actor-oriented components, gives a formal structure, and
+	describes a prototype imple-
+	
+	mentation. The mechanisms support actor-oriented class definitions,
+	subclassing, inheritance, and
+	
+	overriding. The formal structure imposes structural constraints on
+	a model (mainly the “derivation
+	
+	invariant”) that lead to a policy to govern inheritance. In particular,
+	the structural constraints
+	
+	permit a disciplined form of multiple inheritance with unambiguous
+	inheritance and overriding
+	
+	behavior. The policy is based formally on a generalized ultrametric
+	space with some remarkable
+	
+	properties. In this space, inheritance is favored when actors are
+	“closer” (in the generalized ultra-
+	
+	metric), and we show that when inheritance can occur from multiple
+	sources, one source is always
+	
+	unambiguously closer than the other.},
+  file = {:/home/brian/Desktop/Models of Computing Papers/Classes and Inheritance
+	in Actor-Oriented Design -lee.pdf:PDF},
+  publisher = {ACM}
+}
+
+@ARTICLE{lee2001overview,
+  author = {Lee, E.A. and Messerschmitt, D.G. and others},
+  title = {Overview of the ptolemy project},
+  journal = {University of California, Berkeley},
+  year = {2001},
+  abstract = {The Ptolemy Project is an informal group of researchers that is part
+	of Chess (the center for hybrid
+	
+	and embedded software systems) at U.C. Berkeley; see “Acknowledgements”
+	on page 28 for a list par-
+	
+	ticipants. This projects conducts foundational and applied research
+	in software based design tech-
+	
+	niques for embedded systems. Ptolemy II is the current software infrastructure
+	of the Ptolemy Project.
+	
+	For the participants in the Ptolemy Project, Ptolemy II is first and
+	foremost a laboratory for experi-
+	
+	menting with design techniques. It is published freely in open-source
+	form. Distribution of open-
+	
+	source software complements more traditional publication media, and
+	serves as a clear, unambiguous,
+	
+	and complete description our research results. Also, the open architecture
+	and open source encourages
+	
+	researchers to build their own methods, leveraging and extending the
+	core infrastructure provided by
+	
+	the software. This creates a community where much of the dialog is
+	through the software. In addition,
+	
+	the freely available software encourages designers to try out the
+	new design techniques that are intro-
+	
+	duced and give feedback to the Ptolemy Project. This helps guide further
+	research. Finally, the open
+	
+	source software encourages commercial providers of software tools
+	to commercialize the research
+	
+	results, which then helps to maximize the impact of the work.
+	
+	     Ptolemy II is the third generation of design software to emerge
+	from this group, with each genera-
+	
+	tion bringing a new set of problems being addressed, new emphasis,
+	and (largely) a new group of con-
+	
+	tributors.},
+  file = {:/home/brian/Desktop/Models of Computing Papers/OVERVIEW OF THE PTOLEMY
+	PROJECT.pdf:PDF}
+}
+
+@ARTICLE{lee2007tutorial,
+  author = {Lee, E.A. and Neuendorffer, S.},
+  title = {Tutorial: Building ptolemy ii models graphically},
+  journal = {EECS Department, University of California, Berkeley, Tech. Rep. UCB/EECS-2007-129,
+	Oct},
+  year = {2007},
+  pages = {2007--129},
+  file = {:home/brian/Desktop/Models of Computing Papers/Tutorial\: Building
+	Ptolemy II Models Graphically.pdf:PDF}
+}
+
+@ARTICLE{lee2000moml,
+  author = {Lee, E.A. and Neuendorffer, S.},
+  title = {Moml - a modeling markup language in xml - version 0.4},
+  journal = {Memorandum M00/12, University of California, at Berkeley},
+  year = {2000},
+  file = {:/home/brian/Desktop/Models of Computing Papers/MoML — A Modeling
+	Markup Language in XML.pdf:PDF},
+  publisher = {Citeseer}
+}
+
+@ARTICLE{lee1998framework,
+  author = {Lee, E.A. and Sangiovanni-Vincentelli, A.},
+  title = {A framework for comparing models of computation},
+  journal = {IEEE Transactions on computer-aided design of integrated circuits
+	and systems},
+  year = {1998},
+  volume = {17},
+  pages = {1217--1229},
+  number = {12},
+  abstract = {We give a denotational framework (a “meta model”) within which certain
+	properties of models of
+	
+	computation can be compared. It describes concurrent processes in
+	general terms as sets of possible
+	
+	behaviors. A process is determinate if given the constraints imposed
+	by the inputs there are exactly one
+	
+	or exactly zero behaviors. Compositions of processes are processes
+	with behaviors in the intersection
+	
+	of the behaviors of the component processes. The interaction between
+	processes is through signals,
+	
+	which are collections of events. Each event is a value-tag pair, where
+	the tags can come from a par-
+	
+	tially ordered or totally ordered set. Timed models are where the
+	set of tags is totally ordered. Synchro-
+	
+	nous events share the same tag, and synchronous signals contain events
+	with the same set of tags.
+	
+	Synchronous processes have only synchronous signals as behaviors.
+	Strict causality (in timed tag sys-
+	
+	tems) and continuity (in untimed tag systems) ensure determinacy under
+	certain technical conditions.
+	
+	The framework is used to compare certain essential features of various
+	models of computation, includ-
+	
+	ing Kahn process networks, dataflow, sequential processes, concurrent
+	sequential processes with ren-
+	
+	dezvous, Petri nets, and discrete-event systems.},
+  file = {:/home/brian/Desktop/Models of Computing Papers/lee-framework_for_comparing_models_of_computation.pdf:PDF},
+  publisher = {Citeseer}
+}
+
+@ARTICLE{lee1996tagged,
+  author = {Lee, E.A. and Sangiovanni-Vincentelli, A.},
+  title = {The tagged signal model-a preliminary version of a denotational framework
+	for comparing models of computation},
+  journal = {Memorandum UCB/ERL M},
+  year = {1996},
+  volume = {96},
+  file = {:home/brian/Desktop/Models of Computing Papers/The Tagged Signal Model
+	- denotationalERL.ps:PostScript},
+  publisher = {Citeseer}
+}
+
+@ARTICLE{lee2005operational,
+  author = {Lee, E.A. and Zheng, H.},
+  title = {Operational semantics of hybrid systems},
+  journal = {Hybrid Systems: Computation and Control},
+  year = {2005},
+  pages = {25--53},
+  abstract = {This paper discusses an interpretation of hybrid systems as
+	
+	executable models. A specification of a hybrid system for this purpose
+	
+	can be viewed as a program in a domain-specific programming language.
+	
+	We describe the semantics of HyVisual, which is such a domain-specific
+	
+	programming language. The semantic properties of such a language affect
+	
+	our ability to understand, execute, and analyze a model. We discuss
+	sev-
+	
+	eral semantic issues that come in defining such a programming language,
+	
+	such as the interpretation of discontinuities in continuous-time signals,
+	
+	and the interpretation of discrete-event signals in hybrid systems,
+	and
+	
+	the consequences of numerical ODE solver techniques. We describe the
+	
+	solution in HyVisual by giving its operational semantics.},
+  file = {:/home/brian/Desktop/Models of Computing Papers/lee-operational_semantics_of_hybrid_systems.pdf:PDF},
+  publisher = {Springer}
+}
+
+@ARTICLE{liu98continuous,
+  author = {Liu, J.},
+  title = {Continuous time and mixed-signal simulation in Ptolemy II},
+  journal = {UCB/ERL Memorandum M},
+  volume = {98},
+  abstract = {This report studies the continuous time and mixed-signal simulation
+	techniques in the Ptolemy II
+	
+	environment. Unlike the nodal analysis representation usually seen
+	in circuit simulators, the continu-
+	
+	ous time systems are modeled as signal-flow block diagrams in Ptolemy
+	II. This representation is suit-
+	
+	able for system-level specification, and the interaction semantics
+	with other models of computation
+	
+	can be easily studied and implemented. The numerical solving methods
+	for ordinary differential equa-
+	
+	tions are discussed from the tagged-signal point of view and implemented
+	in the continuous time
+	
+	domain. The breakpoint handling techniques are essential for performing
+	correct simulation and sup-
+	
+	porting the interaction with other domains. Mixed-signal simulation
+	of continuous time and discrete
+	
+	event models is discussed. Event detection can be performed using
+	the breakpoint handling mecha-
+	
+	nism. The coordination of the execution of the two models are discussed.
+	The result shows that when a
+	
+	continuous subsystem is embedded in a discrete event system, the inner
+	system must run ahead of the
+	
+	global time and be able to roll back. Based on the result, a correct
+	and efficient simulation strategy is
+	
+	presented. As a case study, the mixed-signal simulation techniques
+	are applied to a micro accelerome-
+	
+	ter with sigma-delta kind of digital feedback.},
+  file = {CONTINUOUS TIME AND MIXED-SIGNAL SIMULATION IN PTOLEMY II:/home/brian/Desktop/Models
+	of Computing Papers/MSThesis - CONTINUOUS TIME AND MIXED-SIGNAL SIMULATION
+	IN PTOLEMY II.pdf:PDF},
+  publisher = {Citeseer}
+}
+
+@PHDTHESIS{liu2005semantic,
+  author = {Liu, X. and Lee, E.A.},
+  title = {Semantic foundation of the tagged signal model},
+  year = {2005},
+  abstract = {The tagged signal model provides a denotational framework to study
+	properties of vari-
+	
+	ous models of computation. It is a generalization of the Signals and
+	Systems approach
+	
+	to system modeling and specification. Having different models of computation
+	or aspects
+	
+	of them specified in the tagged signal model framework provides the
+	following opportuni-
+	
+	ties. First, one can compare certain properties of the models of computation,
+	such as their
+	
+	notion of synchrony. Such comparisons highlight both the differences
+	and the commonal-
+	
+	ities among the models of computation. Second, one can define formal
+	relations among
+	
+	signals and process behaviors from different models of computation.
+	These relations have
+	
+	important applications in the specification and design of heterogeneous
+	embedded systems.
+	
+	Third, it facilitates the cross-fertilization of results and proof
+	techniques among models of
+	
+	computation. This opportunity is exploited extensively in this dissertation.
+	
+	     The main goal of this dissertation is to establish a semantic
+	foundation for the tagged
+	
+	signal model. Both order-theoretic and metric-theoretic concepts and
+	approaches are used.
+	
+	The fundamental concepts of the tagged signal model—signals, processes,
+	and networks of
+	
+	processes—are formally defined. From few assumptions on the tag sets
+	of signals, it is shown
+	
+	that the set of all signals with the same partially ordered tag set
+	and the same value set is
+	
+	a complete partial order. This leads to a direct generalization of
+	Kahn process networks to
+	
+	tagged process networks.
+	
+	    Building on this result, the order-theoretic approach is further
+	applied to study timed
+	
+	process networks, in which all signals share the same totally ordered
+	tag set. The order
+	
+	structure of timed signals provides new characterizations of the common
+	notion of causal-
+	
+	ity and the discreteness of timed signals. Combining the causality
+	and the discreteness
+	
+	conditions is proved to guarantee the non-Zenoness of timed process
+	networks.
+	
+	    The metric structure of tagged signals is studied from the very
+	specific—the Cantor
+	
+	metric and its properties. A generalized ultrametric on tagged signals
+	is proposed, which
+	
+	provides a framework for defining more specialized metrics, such as
+	the extension of the
+	
+	Cantor metric to super-dense time.
+	
+	    The tagged signal model provides not only a framework for studying
+	the denotational
+	
+	semantics of models of computation, but also useful constructs for
+	studying implementations
+	
+	or simulations of tagged processes. This is demonstrated by deriving
+	certain properties
+	
+	of two discrete event simulation strategies from the behavioral specifications
+	of discrete
+	
+	event processes. A formulation of tagged processes as labeled transition
+	systems provides
+	
+	yet another framework for comparing different implementation or simulation
+	strategies for
+	
+	tagged processes. This formulation lays the foundation to future research
+	in polymorphic
+	
+	implementations of tagged processes.},
+  file = {:home/brian/Desktop/Models of Computing Papers/Semantic Foundation
+	of the Tagged Signal Model.pdf:PDF},
+  journal = {EECS Department, University of California,” PhD Thesis}
+}
+
+@ARTICLE{liu2006modeling,
+  author = {Liu, X. and Matsikoudis, E. and Lee, E.A.},
+  title = {Modeling timed concurrent systems},
+  journal = {Lecture Notes in Computer Science},
+  year = {2006},
+  volume = {4137},
+  pages = {1},
+  abstract = {Timed concurrent systems are widely used in concurrent and
+	
+	distributed real-time software, modeling of hybrid systems, design
+	of
+	
+	hardware systems (using hardware description languages), discrete-event
+	
+	simulation, and modeling of communication networks. They consist of
+	
+	concurrent components that communicate using timed signals, that is,
+	
+	sets of (semantically) time-stamped events. The denotational semantics
+	
+	of such systems is traditionally formulated in a metric space, wherein
+	
+	causal components are modeled as contracting functions. We show that
+	
+	this formulation excessively restricts the models of time that can
+	be
+	
+	used. In particular, it cannot handle super-dense time, commonly used
+	
+	in hardware description languages and hybrid systems modeling, finite
+	
+	time lines, and time with no origin. Moreover, if we admit continuous-
+	
+	time and mixed signals (essential for hybrid systems modeling) or
+	certain
+	
+	Zeno signals, then causality is no longer equivalent to its formalization
+	
+	in terms of contracting functions. In this paper, we offer an alternative
+	
+	semantic framework using a generalized ultrametric that overcomes
+	these
+	
+	limitations.},
+  file = {Modeling Timed Concurrent Systems:/home/brian/Desktop/Models of Computing
+	Papers/Modeling Timed Concurrent Systems.pdf:PDF},
+  publisher = {Springer}
+}
+
+@ARTICLE{oliphant2006guide,
+  author = {Oliphant, T.E.},
+  title = {Guide to NumPy},
+  journal = {Spanish Fork, UT, Trelgol Publishing},
+  year = {2006},
+  file = {NumPy User Guide:/home/brian/Desktop/Models of Computing Papers/numpy-user.pdf:PDF}
+}
+
+@ARTICLE{pecevski2009pcsim,
+  author = {Pecevski, D. and Natschl{\\"a}ger, T. and Schuch, K.},
+  title = {PCSIM: a parallel simulation environment for neural circuits fully
+	integrated with python},
+  year = {2009},
+  abstract = {The Parallel Circuit SIMulator (PCSIM) is a software package for simulation
+	of neural circuits. It is primarily designed for distributed simulation
+	of large scale networks of spiking point neurons. Although its computational
+	core is written in C++, PCSIM's primary interface is implemented
+	in the Python programming language, which is a powerful programming
+	environment and allows the user to easily integrate the neural circuit
+	simulator with data analysis and visualization tools to manage the
+	full neural modeling life cycle. The main focus of this paper is
+	to describe PCSIM's full integration into Python and the benefits
+	thereof. In particular we will investigate how the automatically
+	generated bidirectional interface and PCSIM's object-oriented modular
+	framework enable the user to adopt a hybrid modeling approach: using
+	and extending PCSIM's functionality either employing pure Python
+	or C++ and thus combining the advantages of both worlds. Furthermore,
+	we describe several supplementary PCSIM packages written in pure
+	Python and tailored towards setting up and analyzing neural simulations.},
+  file = {:home/brian/Desktop/Models of Computing Papers/PCSIM\: A Parallel
+	Simulation Environment for Neural Circuits Fully Integrated with
+	Python.pdf:PDF},
+  owner = {brian},
+  publisher = {Frontiers Research Foundation},
+  timestamp = {2009.12.01}
+}
+
+@CONFERENCE{sanner2002viper,
+  author = {Sanner, M.F. and Stoffler, D. and Olson, A.J.},
+  title = {ViPEr, a visual programming environment for Python},
+  booktitle = {Proceedings of the 10th International Python conference},
+  year = {2002},
+  pages = {103--115},
+  abstract = {In this paper we describe a Python- and Tkinter-based visual-programming
+	environment called
+	
+	ViPEr. This tool enables non-programmers to build computational and
+	visualization networks
+	
+	interactively. Computational nodes can be placed onto a canvas and
+	their input and output ports can
+	
+	be connected using the mouse. The connections between the nodes define
+	a directed graph that will be
+	
+	used to propagate data and trigger the execution of nodes that have
+	new input data. ViPEr is, in
+	
+	appearance, similar to programs such as AVS [Upson et al. 89] from
+	Advanced Visual Simulations
+	
+	Inc, or OpenDX [DX 93] from IBM, but presents some fundamental differences
+	which will be pointed
+	
+	out throughout this paper. Several examples of applications will be
+	used to illustrate ViPEr’s design
+	
+	and current range of capabilities.},
+  file = {:home/brian/Desktop/Models of Computing Papers/ViPEr, a Visual Programming
+	Environment for Python.pdf:PDF}
+}
+
+@ARTICLE{stephens1997survey,
+  author = {Stephens, R.},
+  title = {A survey of stream processing},
+  journal = {Acta Informatica},
+  year = {1997},
+  volume = {34},
+  pages = {491--541},
+  number = {7},
+  abstract = {Stream processing is a term that is used widely in the literature
+	to
+	
+	describe a variety of systems. We present an overview of the historical
+	development
+	
+	of stream processing and a detailed discussion of the different languages
+	and
+	
+	techniques for programming with streams that can be found in the literature.
+	This
+	
+	includes an analysis of dataflow, specialized functional and logic
+	programming with
+	
+	streams, reactive systems, signal processing systems, and the use
+	of streams in the
+	
+	design and verification of hardware.
+	
+	   The aim of this survey is an analysis of the development of each
+	of these
+	
+	specialized topics to determine if a general theory of stream processing
+	has
+	
+	emerged. As such, we discuss and classify the different classes of
+	stream processing
+	
+	systems found in the literature from the perspective of programming
+	primitives,
+	
+	implementation techniques, and computability issues, including a comparison
+	of
+	
+	the semantic models that are used to formalize stream based computation.},
+  file = {:home/brian/Desktop/Models of Computing Papers/stephens-a_survey_of_stream_processing.pdf:PDF},
+  publisher = {Springer}
+}
+
+@ARTICLE{sutter2005software,
+  author = {Sutter, H. and Larus, J.},
+  title = {Software and the concurrency revolution},
+  journal = {Queue},
+  year = {2005},
+  volume = {3},
+  pages = {62},
+  number = {7},
+  file = {:home/brian/Desktop/Models of Computing Papers/Software and the Concurrency
+	Revolution HerbSutter.pdf:PDF},
+  publisher = {ACM}
+}
+
+@comment{jabref-meta: selector_publisher:}
+
+@comment{jabref-meta: selector_author:}
+
+@comment{jabref-meta: selector_journal:}
+
+@comment{jabref-meta: selector_keywords:}
+
