@@ -14,10 +14,10 @@ import time
 class Plotter(Actor):
     '''
     This actor shows a signal dynamically as it comes off the buffer with matplotlib.
-    The max refresh rate is an optional input - default is 10Hz
+    The max refresh rate is an optional input - default is 2Hz
     '''
 
-    def __init__(self, input_queue, refresh_rate=10):
+    def __init__(self, input_queue, refresh_rate=2):
         super(Plotter, self).__init__(input_queue=input_queue)
         self.x_axis_data = []
         self.y_axis_data = []
@@ -72,7 +72,7 @@ class Plotter(Actor):
             axes.autoscale_view()
             plt.draw() # redraw the canvas
 
-        # It might prove to be beneficial just to redraw small bits 
+        # It might prove to be beneficial just to redraw small bits
         # just redraw the axes rectangle
         #self.fig.canvas.blit(self.ax.bbox)
         #self.fig.canvas.draw()

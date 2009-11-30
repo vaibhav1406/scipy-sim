@@ -24,6 +24,14 @@ class Summer(Actor):
     def __init__(self, inputs, output_queue, discard_incomplete_sets=True):
         """
         Constructor for a summation block
+
+        @param inputs: A Python list of input queues for summing.
+
+        @param output_queue: A single queue where the output will be put.
+
+        @param discard_incomplete_sets: Boolean for either outputting incomplete
+        data sets, or discarding.
+
         """
         Actor.__init__(self, output_queue=output_queue)
         self.inputs = list(inputs)
