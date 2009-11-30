@@ -3,10 +3,7 @@ Created on 23/11/2009
 
 @author: brian
 '''
-try:
-    import queue
-except ImportError:
-    import Queue as queue
+import Queue as queue
 
 from actors.plotter import Plotter
 
