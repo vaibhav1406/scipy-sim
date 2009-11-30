@@ -1,4 +1,8 @@
 '''
+This Sum actor takes any number of input queues and adds up the data points
+where the tags coincide, if there are missing tags it can discard the data point
+or alternativly sum the remaining inputs.
+
 Created on 24/11/2009
 
 @author: brian
@@ -8,10 +12,6 @@ import numpy as np
 from Actor import Actor
 
 import Queue as queue
-
-#import time, random # These are or can be used to test the async
-
-
 
 
 class Summer(Actor):
@@ -87,6 +87,7 @@ class Summer(Actor):
 
 
             if num_points == len(self.inputs) or not self.discard_incomplete:
+                logging.debug("We are summing up what we have and outputting")
                 the_sum = values = sum([obj['value'] for obj in current_data])
                 self.output_queue.put(
                     {
@@ -97,6 +98,8 @@ class Summer(Actor):
             else:
                 logging.debug("We are throwing away the oldest tag, and storing the rest")
 
+            # Provided its not the very oldest data point (either saved already or arrived
+            # in this process, we keep it for the future.
             self.future_data = [obj for obj in self.future_data + objects if obj['tag'] is not oldest_tag]
             if self.future_data is not None: self.data_is_stored = True
 
@@ -243,10 +246,10 @@ class SummerTests(unittest.TestCase):
 
     def test_multi_delayed_summer(self):
         '''
-        Test adding multiple (50) input signals where a signal is delayed.
+        Test adding multiple (50) input signals where one signal is delayed.
 
         '''
-        DELAY = 1
+        DELAY = 20
         num_input_queues, num_data_points = 50, 100
 
         input_queues = [queue.Queue() for i in xrange(num_input_queues)]
@@ -256,14 +259,14 @@ class SummerTests(unittest.TestCase):
         # So queue 5 will be full of the value 4, then a None
         for i, input_queue in enumerate(input_queues):
             _ = [input_queue.put({'value':i,'tag':j}) for j in xrange(num_data_points) if i is not 0]
-        _ = [input_queues[0].put({'value':i,'tag':j + DELAY}) for j in xrange(num_data_points)]
+        _ = [input_queues[0].put({'value':0,'tag':j + DELAY}) for j in xrange(num_data_points)]
         _ = [input_queue.put(None) for input_queue in input_queues]
 
         summer = Summer(input_queues, output_queue)
         summer.start()
         summer.join()
         s = sum(xrange(num_input_queues))
-        for i in xrange(num_data_points):
+        for i in xrange(num_data_points - DELAY):
             self.assertEquals(output_queue.get()['value'], s)
         self.assertEquals(output_queue.get(), None)
 
