@@ -14,28 +14,34 @@ MAX_INPUTS = 10
 
 class Summer(Actor):
     '''
-    This actor takes a list of two or more sources and adds them together at the corresponding tagged time. 
-    This has to be used with discrete signals, or at least aligned continuous signals.
+    This actor sums the input at each tagged time and outputs the result.
+    
+    This has to be used with discrete signals, 
+    or at least aligned continuous signals (floating tags will break it)
     '''
 
-    def __init__(self, inputs, output_queue):
+    def __init__(self, input_queue, output_queue):
         """
         Constructor for a summation block
-        @param inputs: A Python list of input queues
+        
+        @param input_queue
+        a single queue that is connected to one or more sources and adds
+        them together at the times where the tags correspond.
+        
+        @param output_queue
+        The queue to put the resulting sum on.
         """
-        Actor.__init__(self, output_queue=output_queue)
+        Actor.__init__(self, input_queue=input, output_queue=output_queue)
+        self.future_values = []
 
-        self.inputs = MultiQueue(MAX_INPUTS)
-
-        #self.futures = np.zeros_like(self.inputs)
 
 
     def process(self):
         """Wait for data from both (all) input queues"""
         logging.debug("Running summer process")
 
-        # this is blocking on each queue in sequence
-        objects = [in_queue.get(True) for in_queue in self.inputs]
+        # this is blocking on the queue
+        object = self.input_queue.get(True)
 
         # We are finished iff all the input objects are None
         if objects.count(None) == len(objects):
