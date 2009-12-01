@@ -46,19 +46,76 @@
 SciPy-Simulation Project - Glossary of Terms
 \end_layout
 
+\begin_layout Standard
+The scipy-simulator project aims to create a visual stream processing system
+ for different models of computation using tagged signals communicating
+ over uni-directional channels to asynchronous and deterministic blocks.
+ In the shorthand notation introduced by Stephens
+\begin_inset CommandInset citation
+LatexCommand citet
+key "stephens1997survey"
+
+\end_inset
+
+ the dataflow network type is ADU-SPS.
+ Note there may be individual blocks that are not deterministic - eg a random
+ source.
+\end_layout
+
+\begin_layout Description
+Blocks A component in a system, also refered to as Actors.
+\end_layout
+
+\begin_layout Description
+Channels A unidirectional pipe implemented with a FIFO queue connecting
+ blocks
+\end_layout
+
+\begin_layout Description
+Stream
+\begin_inset space ~
+\end_inset
+
+Processing
+\begin_inset space ~
+\end_inset
+
+System
+\begin_inset space ~
+\end_inset
+
+(SPS) A system comprised of a collection of modules that compute in parallel,
+ that communicate data via channels.
+\end_layout
+
 \begin_layout Section
 Types of Blocks
 \end_layout
 
 \begin_layout Description
-Sources A source block creates at least one output signal, it may have initial
+Source A source block creates at least one output signal, it may have initial
  parameters but no input signals.
  Sources pass data into the system.
 \end_layout
 
 \begin_layout Description
-Filters A block that alters its input to create an output.
+Filter A block that alters its input to create an output.
  A filter performs some atomic computation.
+\end_layout
+
+\begin_layout Description
+Sink A block that passes data out of the system.
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "bibliography"
+options "bibtotoc,plain"
+
+\end_inset
+
+
 \end_layout
 
 \end_body
