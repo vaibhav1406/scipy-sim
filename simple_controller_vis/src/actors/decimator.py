@@ -1,0 +1,73 @@
+'''
+Created on 1/12/2009
+
+@author: brian
+'''
+from Actor import Actor, InvalidSimulationInput
+import Queue as queue
+import logging
+import unittest
+import numpy
+
+class Decimator(Actor):
+    '''
+    This actor takes a source and only passes on every Nth value
+    '''
+    def __init__(self, input_queue, output_queue, reduction_factor=5):
+        '''
+        Constructor for a decimation actor. 
+        This actor is designed for even spaced inputs, 
+        although it could "thin" a discrete events system.
+        
+        @param reduction: Keep every Nth sample, reduces the signal by factor passed in.
+        '''
+        super(Decimator, self).__init__(input_queue=input_queue,
+                                        output_queue=output_queue)
+
+        self.reduction_factor = int(reduction_factor)
+        self.sample = 0
+
+    def process(self):
+        obj = self.input_queue.get(True)
+
+        if obj is None:
+            logging.info("We have finished decimating the data")
+            self.stop = True
+            self.output_queue.put(None)
+            return
+
+        if self.sample % self.reduction_factor == 0:
+            self.output_queue.put(obj)
+        self.sample += 1
+
+class DecimatorTests(unittest.TestCase):
+    '''Test the decimation actor'''
+
+    def setUp(self):
+        '''
+        Unit test setup code
+        '''
+        self.q_in = queue.Queue()
+        self.q_out = queue.Queue()
+
+    def test_basic_integer_tags(self):
+        '''Test halving the frequency we sample a simple integer signal.
+        
+        Create a discrete time signal with a 1hz frequency 
+        down-sample to 0.5hz by a factor 2 reduction
+        '''
+        inp = [{'value':1, 'tag':i} for i in xrange(0, 100, 1)]
+
+        expected_outputs = [{'value':1, 'tag':i} for i in xrange(0, 100, 2)]
+
+        down_sampler = Decimator(self.q_in, self.q_out, 2)
+        down_sampler.start()
+        [self.q_in.put(val) for val in inp]
+        self.q_in.put(None)
+        down_sampler.join()
+
+        for expected_output in expected_outputs:
+            out = self.q_out.get()
+            self.assertEquals(out['value'], expected_output['value'])
+            self.assertEquals(out['tag'], expected_output['tag'])
+        self.assertEquals(self.q_out.get(), None)

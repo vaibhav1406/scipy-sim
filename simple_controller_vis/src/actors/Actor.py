@@ -8,6 +8,8 @@ import Queue as queue
 import threading
 import logging
 
+class InvalidSimulationInput(TypeError):
+    pass
 
 class Actor(threading.Thread):
     '''
@@ -17,7 +19,10 @@ class Actor(threading.Thread):
     def __init__(self, input_queue=None, output_queue=None):
         '''
         Constructor for a generic actor.
-        If an input queue is not passed in, one will be created.
+        
+        @param input_queue: If an input queue is not passed in, one will be created.
+        
+        @param output_queue: Optional queue for output to be put into.
         '''
 
         super(Actor, self).__init__()
