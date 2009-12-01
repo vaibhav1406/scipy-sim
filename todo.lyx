@@ -54,25 +54,13 @@ Brian Thorne
 \end_layout
 
 \begin_layout Itemize
-change computation model to use ordered blocking queues instead of nonblocking
- reads.
+Decide how to deal with different domains of computation - maybe the signals
+ need tagged with DE, DT, CT etc...
 \end_layout
 
 \begin_layout Itemize
-Write a random source block, and an addition block (for discrete time)
-\end_layout
-
-\begin_layout Itemize
-write an example that adds a ramp and a random noise and plots output
-\end_layout
-
-\begin_layout Itemize
-learn a bit of Haskel from Actors without directors paper
-\end_layout
-
-\begin_layout Itemize
-implement the SUM Actor in a concurrent and blocking way for multiple inputs
- possibly delayed
+learn a bit more Haskel so I fully understand code in Actors without directors
+ paper
 \end_layout
 
 \begin_layout Itemize
@@ -89,7 +77,8 @@ look at esterel and micro threading and coroutines - options for Python
 \end_layout
 
 \begin_layout Itemize
-See if my stuff works under jython and iron python - No (2.2), and No Numpy
+look at reactive functional programming/thunk space/deferred computation
+ (pypy)
 \end_layout
 
 \begin_layout Itemize
@@ -245,10 +234,6 @@ Start &  & Random\, Source\ar[r] & SumBlock\ar[r] & Plotter &  & Complete\\
 $
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
 
 \end_layout
 
