@@ -156,6 +156,14 @@ N-Synchronous Kahn Networks - A Relaxed Model of Synchrony for Real-Time
 read and write intro to ptolemy project
 \end_layout
 
+\begin_layout Section*
+Code
+\end_layout
+
+\begin_layout Itemize
+subtraction block
+\end_layout
+
 \begin_layout Itemize
 Implement a sampler to go from Continous Time to Discrete Time
 \end_layout
@@ -165,7 +173,7 @@ Implement an interpolater to go from Discrete Time to Continous Time
 \end_layout
 
 \begin_layout Itemize
-write a derivative block
+a derivative block
 \end_layout
 
 \begin_layout Itemize
@@ -205,24 +213,6 @@ Implement a frequency probe
 Start planning the GUI
 \end_layout
 
-\begin_layout Itemize
-Different domains
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-Boolean - flip flops, XOR etc
-\end_layout
-
-\begin_layout Itemize
-Discrete - stem graph plotter
-\end_layout
-
-\begin_layout Itemize
-Continuous 
-\end_layout
-
-\end_deeper
 \begin_layout Section*
 Example Model:
 \end_layout
