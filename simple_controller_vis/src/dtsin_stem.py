@@ -3,16 +3,13 @@ Created on 04/12/2009
 
 @author: allan
 '''
-try:
-    import queue
-except ImportError:
-    import Queue as queue
+import Queue as queue
 
 from actors.stemmer import Stemmer
-
 from actors.dtsin import DTSin
+
 import matplotlib.pyplot as plt
-import numpy
+
 
 import logging
 logging.basicConfig(level=logging.INFO)
