@@ -1,4 +1,4 @@
-#LyX 1.6.4 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.4.1 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -62,13 +62,89 @@ key "stephens1997survey"
  source.
 \end_layout
 
+\begin_layout Standard
+Much of the semantics comes from Liu and Lee in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "liu2008cpo"
+
+\end_inset
+
+.
+\end_layout
+
 \begin_layout Description
-Blocks A component in a system, also refered to as Actors.
+Actor An individual component in a system
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Actors are refered to in some literature as agents
+\end_layout
+
+\end_inset
+
+.
+ Actors run in parrallel, in charge of their own actions.
+ Data is provided to them from the environment - which may include other
+ actors.
+ They may react to the data and provide data back to the environment.
+ Our Actor is closer to that of the Ptolemy II project than the classical
+ Actor model of Hewitt and Agha, although each component does have its own
+ thread of control.
+ 
+\end_layout
+
+\begin_deeper
+\begin_layout Description
+Primitive
+\begin_inset space ~
+\end_inset
+
+Actor An Actor that is not defined in terms of other actors.
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Ports Actors have ports over which they communicate with the environment,
+ there is a distinction between input and output ports.
 \end_layout
 
 \begin_layout Description
 Channels A unidirectional pipe implemented with a FIFO queue connecting
- blocks
+ Actors.
+\end_layout
+
+\begin_layout Description
+System A collection of Actors communicating via channels.
+ The system state may not be observable, and may not be well defined.
+ The structure must be static, its the 
+\begin_inset Quotes eld
+\end_inset
+
+source code
+\begin_inset Quotes erd
+\end_inset
+
+ for the simulation.
+\end_layout
+
+\begin_layout Description
+Event A 
+\emph on
+tag/value 
+\emph default
+pair - every
+\emph on
+ 
+\emph default
+discrete communication over a channel is an event.
+\end_layout
+
+\begin_layout Description
+Signal The set of every event in a channel makes a signal - often this is
+ infinite.
+ A signal must be associated with 2 ports.
 \end_layout
 
 \begin_layout Description
