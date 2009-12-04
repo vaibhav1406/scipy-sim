@@ -6,17 +6,16 @@ Created on 23/11/2009
 import Queue as queue
 
 from actors.plotter import Plotter
-
 from actors.ramp import Ramp
 from actors.summer import Summer
+
 import matplotlib.pyplot as plt
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
 logging.info("Logger enabled")
 
-
-if __name__ == '__main__':
+def run_ramp_plot():
     connection1 = queue.Queue(0)
     connection2 = queue.Queue(0)
     connection3 = queue.Queue(0)
@@ -29,16 +28,14 @@ if __name__ == '__main__':
     components = [src1, src2, summer, dst]
 
     logging.info("Starting simulation")
-    for component in components:
-        component.start()
+    [component.start() for component in components]
     logging.debug("Finished starting actors")
-
 
     plt.show()   # The program will stay "running" while this plot is open
 
-    src1.join()
-    src2.join()
-    summer.join()
-    dst.join()
+    [component.join() for component in components]
+    logging.debug("Finished running simulation")
 
-    logging.debug("Finished running actor")
+
+if __name__ == '__main__':
+    run_ramp_plot()

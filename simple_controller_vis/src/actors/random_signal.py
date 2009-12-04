@@ -15,7 +15,7 @@ class RandomSource(Source):
     '''
 
 
-    def __init__(self, out, amplitude=1.0, res=10, simulation_time=120):
+    def __init__(self, out, amplitude=1.0, resolution=10, simulation_time=120):
         '''
         Constructor for a RandomSource.
 
@@ -28,12 +28,11 @@ class RandomSource(Source):
         @param res: the number of values to output "per second"
                     res defaults to 10
 
-        @param simulation_time: The preset time that this will run for.
+        @param simulation_time: The preset time to generate random numbers over.
         '''
-        Actor.__init__(self, output_queue=out)
+        super(RandomSource, self).__init__(output_queue=out, simulation_time=simulation_time)
         self.amplitude = amplitude
-        self.resolution = res
-        self.simulation_time = simulation_time
+        self.resolution = resolution
 
     def process(self):
         """Create the numbers..."""
