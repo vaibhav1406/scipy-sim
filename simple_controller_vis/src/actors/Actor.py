@@ -62,8 +62,9 @@ class Source(Actor):
     Requires an output queue.
     '''
 
-    #def __init__(self):
-    #    raise NotImplementedError()
+    def __init__(self, output_queue, simulation_time):
+        super(Source, self).__init__(output_queue=output_queue)
+        self.simulation_time = simulation_time
 
     def process(self):
         '''

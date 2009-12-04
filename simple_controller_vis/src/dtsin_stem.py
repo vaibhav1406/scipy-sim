@@ -35,7 +35,7 @@ def run_dtsin_stem():
     for component in components:
         component.join()
 
-    logging.debug("Finished running actor")
+    logging.debug("Finished running simulation")
 
 if __name__ == '__main__':
     run_dtsin_stem()

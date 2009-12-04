@@ -18,12 +18,11 @@ class CTSin(Source):
         default parameters create a 1 Hz sinusoid with an amplitude of 1 and a phase of 0.
 
         """
-        Actor.__init__(self, output_queue=out)
+        super(CTSin, self).__init__( output_queue=out, simulation_time=simulation_time)
         self.amplitude = amplitude
         self.frequency = freq
         self.phase = phi
         self.dt = timestep
-        self.simulation_time = simulation_time
 
     def process(self):
         """Create the numbers..."""
