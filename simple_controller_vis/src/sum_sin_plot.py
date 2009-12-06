@@ -4,7 +4,7 @@ Created on 03/12/2009
 @author: allan
 '''
 import Queue as queue
-
+from actors.Actor import Channel
 from actors.plotter import Plotter
 
 from actors.ctsin import CTSin
@@ -18,8 +18,8 @@ logging.info("Logger enabled")
 
 
 def run_sum_sin_plot():
-    connection1 = queue.Queue(0)
-    connection2 = queue.Queue(0)
+    connection1 = Channel(domain="CT")
+    connection2 = Channel(domain="CT")
     connection3 = queue.Queue(0)
 
     src1 = CTSin(connection1, 2, 2.0, numpy.pi/2) # 2 Hz, 90 degree phase
@@ -31,17 +31,17 @@ def run_sum_sin_plot():
     components = [src1, src2, summer, dst]
 
     logging.info("Starting simulation")
-    for component in components:
-        component.start()
-    logging.debug("Finished starting actors")
+    [component.start() for component in components]
+        
+    logging.debug("Finished starting %i actors." % len(components))
 
 
     plt.show()   # The program will stay "running" while this plot is open
 
-    for component in components:
-        component.join()
+    [component.join() for component in components]
+        
 
-    logging.debug("Finished running actor")
+    logging.info("Finished running simulation")
 
 if __name__ == '__main__':
     run_sum_sin_plot()

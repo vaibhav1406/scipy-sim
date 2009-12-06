@@ -19,6 +19,7 @@ class CTSin(Source):
 
         """
         super(CTSin, self).__init__( output_queue=out, simulation_time=simulation_time)
+        assert out.domain is "CT"
         self.amplitude = amplitude
         self.frequency = freq
         self.phase = phi
