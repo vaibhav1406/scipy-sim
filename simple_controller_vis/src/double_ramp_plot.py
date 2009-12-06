@@ -3,8 +3,8 @@ Created on 23/11/2009
 
 @author: brian
 '''
-import Queue as queue
 
+from actors.Actor import Channel
 from actors.plotter import Plotter
 from actors.ramp import Ramp
 from actors.summer import Summer
@@ -16,9 +16,10 @@ logging.basicConfig(level=logging.DEBUG)
 logging.info("Logger enabled")
 
 def run_ramp_plot():
-    connection1 = queue.Queue(0)
-    connection2 = queue.Queue(0)
-    connection3 = queue.Queue(0)
+    '''A basic simulation that sums two Ramp sources together and plots.'''
+    connection1 = Channel()
+    connection2 = Channel()
+    connection3 = Channel()
 
     src1 = Ramp(connection1)
     src2 = Ramp(connection2)

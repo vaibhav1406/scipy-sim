@@ -20,8 +20,10 @@ class DTSin(Source):
         default parameters create 50 samples of an F=0.1 sinusoid with an 
         amplitude of 1 and a phase of 0.
 
+        @param out: An output channel with type of DT
         """
         Actor.__init__(self, output_queue=out)
+        assert out.domain is "DT"
         self.amplitude = amplitude
         self.frequency = freq
         self.phase = phi
