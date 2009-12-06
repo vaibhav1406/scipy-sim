@@ -32,8 +32,8 @@ def run_dtsin_stem():
 
     plt.show()   # The program will stay "running" while this plot is open
 
-    for component in components:
-        component.join()
+    [component.join() for component in components]
+        
 
     logging.debug("Finished running simulation")
 
