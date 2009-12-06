@@ -11,6 +11,19 @@ import logging
 class InvalidSimulationInput(TypeError):
     pass
 
+class Channel(queue):
+    '''
+    A Channel is a derived class of the Python Queue, used for communicating between Actors.
+    
+    A Channel must be created for a specific domain:
+        * CT - Continuous Time
+        * DT - Discrete Time
+        * DE - Discrete Event
+    '''
+    def __init__(self, domain="CT", *args, **kwargs):
+        super(Channel, self).__init__(*args, **kwargs)
+        self.domain = domain
+
 class Actor(threading.Thread):
     '''
     This is a base Actor class for use in a simulation.
