@@ -3,7 +3,7 @@ Created on 04/12/2009
 
 @author: allan
 '''
-import Queue as queue
+from actors.Actor import Channel
 
 from actors.stemmer import Stemmer
 from actors.dtsin import DTSin
@@ -17,7 +17,7 @@ logging.info("Logger enabled")
 
 
 def run_dtsin_stem():
-    connection1 = queue.Queue(0)
+    connection1 = Channel("DT")
 
     src = DTSin(connection1) 
     dst = Stemmer(connection1)
