@@ -17,9 +17,10 @@ class Sin(Actor):
 
         @param out: An output channel (with a specified type ???)
         """
-        Actor.__init__(self, output_queue=out)
+        Actor.__init__(self, input_queue=input_tags, output_queue=out)
         #@todo Change the output queue assertion
         #assert out.domain is "DT"
+        
         self.amplitude = amplitude
         self.frequency = freq
         self.phase = phi
