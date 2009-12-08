@@ -28,7 +28,7 @@ class Ramp(Source):
     def process(self):
         """Create the numbers..."""
         logging.debug("Running ramp process")
-        tags = numpy.linspace(0, self.simulation_time, self.simulation_time*self.resolution)  # for now just compute 2 minutes of values
+        tags = numpy.linspace(0, self.simulation_time, self.simulation_time*self.resolution, endpoint=False)  # for now just compute 2 minutes of values
 
         for tag in tags:
             value = tag * self.frequency * self.amplitude

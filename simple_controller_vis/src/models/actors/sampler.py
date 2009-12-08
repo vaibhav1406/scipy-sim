@@ -10,7 +10,7 @@ Incompatible input/output frequencies...?
 '''
 
 from Actor import Actor, InvalidSimulationInput
-import Queue as queue
+from Actor import Channel
 import logging
 import unittest
 import numpy
@@ -62,8 +62,8 @@ class SamplerTests(unittest.TestCase):
         '''
         Unit test setup code
         '''
-        self.q_in = queue.Queue()
-        self.q_out = queue.Queue()
+        self.q_in = Channel("DT")
+        self.q_out = Channel("CT")
 
     def test_basic_integer_tags(self):
         '''Test halving the frequency we sample a simple integer signal.
@@ -143,6 +143,7 @@ class SamplerTests(unittest.TestCase):
         down_sampler.join()
 
         out = self.q_out.get()
+        # @todo: NEED TO WORK OUT HOW WE WANT TO DO THIS...
         self.assertEquals(type(out), InvalidSimulationInput)
         self.assertEquals(self.q_out.get(), None)
 

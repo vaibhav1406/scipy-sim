@@ -3,10 +3,8 @@ Created on 23/11/2009
 
 @author: brian
 '''
-import Queue as queue
+from models.actors import Plotter, Ramp, Channel
 
-from actors.plotter import Plotter
-from actors.ramp import Ramp
 import matplotlib.pyplot as plt
 
 import logging
@@ -18,7 +16,7 @@ def run_ramp_plot():
     '''
     This example simulation connects a ramp source to a plotter
     '''
-    connection = queue.Queue(0)
+    connection = Channel()
     src = Ramp(connection)
     dst = Plotter(connection)
 

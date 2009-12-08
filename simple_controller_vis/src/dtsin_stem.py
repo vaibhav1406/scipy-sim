@@ -1,15 +1,19 @@
 '''
+A discrete sin stem plotter.
+
+@note This simulation uses the DTSin class, an alternative would be to use the
+trig function sin with an appropriate ramp source.
+
+
 Created on 04/12/2009
 
-@author: allan
+@author: allan, brian
 '''
-from actors.Actor import Channel
+import models.actors
+from models.actors import Channel, Stemmer, DTSin
 
-from actors.stemmer import Stemmer
-from actors.dtsin import DTSin
 
 import matplotlib.pyplot as plt
-
 
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -24,18 +28,15 @@ def run_dtsin_stem():
 
     components = [src, dst]
 
-    logging.info("Starting simulation")
-    for component in components:
-        component.start()
+    logging.info("Starting discrete time sin stem plot simulation")
+    [component.start() for component in components]
     logging.debug("Finished starting actors")
-
 
     plt.show()   # The program will stay "running" while this plot is open
 
     [component.join() for component in components]
         
-
-    logging.debug("Finished running simulation")
+    logging.info("Finished running simulation")
 
 if __name__ == '__main__':
     run_dtsin_stem()

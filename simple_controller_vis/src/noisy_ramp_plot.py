@@ -3,13 +3,9 @@ Created on 23/11/2009
 
 @author: brian
 '''
-import Queue as queue
 
-from actors.plotter import Plotter
+from models.actors import Channel, Plotter, Ramp, Summer, RandomSource
 
-from actors.ramp import Ramp
-from actors.summer import Summer
-from actors.random_signal import RandomSource
 import matplotlib.pyplot as plt
 
 import logging
@@ -34,9 +30,9 @@ def run_noisy_ramp_plot():
     |______|
     
     """
-    connection1 = queue.Queue(0)
-    connection2 = queue.Queue(0)
-    connection3 = queue.Queue(0)
+    connection1 = Channel()
+    connection2 = Channel()
+    connection3 = Channel()
 
     src1 = Ramp(connection1)
     src2 = RandomSource(connection2)
@@ -46,19 +42,15 @@ def run_noisy_ramp_plot():
     components = [src1, src2, summer, dst]
 
     logging.info("Starting simulation")
-    for component in components:
-        component.start()
+    [component.start() for component in components]
+    
     logging.debug("Finished starting actors")
 
 
     plt.show()   # The program will stay "running" while this plot is open
 
-    src1.join()
-    src2.join()
-    summer.join()
-    dst.join()
-
-    logging.debug("Finished running actor")
+    [c.join() for c in components]
+    logging.debug("Finished running simulation")
 
 if __name__ == '__main__':
     run_noisy_ramp_plot()

@@ -3,12 +3,8 @@ Created on 03/12/2009
 
 @author: allan
 '''
-import Queue as queue
-from actors.Actor import Channel
-from actors.plotter import Plotter
+from models.actors import Channel, Plotter, CTSin, Summer
 
-from actors.ctsin import CTSin
-from actors.summer import Summer
 import matplotlib.pyplot as plt
 import numpy
 
@@ -20,7 +16,7 @@ logging.info("Logger enabled")
 def run_sum_sin_plot():
     connection1 = Channel(domain="CT")
     connection2 = Channel(domain="CT")
-    connection3 = queue.Queue(0)
+    connection3 = Channel()
 
     src1 = CTSin(connection1, 2, 2.0, numpy.pi/2) # 2 Hz, 90 degree phase
     src2 = CTSin(connection2, 1, 3.5, numpy.pi/4) # 4 Hz, 45 degree phase
