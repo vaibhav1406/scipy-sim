@@ -4,13 +4,14 @@ Created on 23/11/2009
 @author: brian
 '''
 
-import Queue as queue
 
-from actors.plotter import Plotter
-from actors.ramp import Ramp
-from actors.summer import Summer
-from actors.delay import Delay
-from actors.random_signal import RandomSource
+from models.actors.Actor import Channel, MakeChans
+
+from models.actors.plotter import Plotter
+from models.actors.ramp import Ramp
+from models.actors.summer import Summer
+from models.actors.delay import Delay
+from models.actors.random_signal import RandomSource
 
 import matplotlib.pyplot as plt
 
@@ -20,27 +21,23 @@ logging.info("Logger enabled")
 
 
 def run_multi_delay_ramp_sum_plot():
-    connection1 = queue.Queue(0)
-    connection2 = queue.Queue(0)
-    connection3 = queue.Queue(0)
-    connection4 = queue.Queue(0)
-    connection5 = queue.Queue(0)
+    conns = MakeChans(5)
     
     res = 10
-    simulation_length = 120
+    simulation_length = 40
     
-    src1 = Ramp(connection1, resolution=res, simulation_time=simulation_length)
-    src2 = Ramp(connection2, resolution=res, simulation_time=simulation_length)
-    src3 = RandomSource(connection3, resolution=res, simulation_time=simulation_length)
+    src1 = Ramp(conns[0], resolution=res, simulation_time=simulation_length)
+    src2 = Ramp(conns[1], resolution=res, simulation_time=simulation_length)
+    src3 = RandomSource(conns[2], resolution=res, simulation_time=simulation_length)
 
-    # The following "magic number" is one time step, 
+    # The following "magic number" is one time step, (1/res)
     # the delay must be an integer factor of this so the events line up 
     # for the summer block to work...
-    time_step = 0.10008340283569642
-    delay1 = Delay(connection2, connection5, 3 * time_step)
+    time_step = 1.0/res
+    delay1 = Delay(conns[1], conns[4], 3 * time_step)
 
-    summer = Summer([connection1, connection5, connection3], connection4)
-    dst = Plotter(connection4)
+    summer = Summer([conns[0], conns[4], conns[2]], conns[3])
+    dst = Plotter(conns[3])
 
     components = [src1, src2, src3, summer, dst, delay1]
 
@@ -54,7 +51,7 @@ def run_multi_delay_ramp_sum_plot():
     [component.join() for component in components]
         
 
-    logging.debug("Finished running actor")
+    logging.debug("Finished running simulation")
 
 if __name__ == '__main__':
     run_multi_delay_ramp_sum_plot()

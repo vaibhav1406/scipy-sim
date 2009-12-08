@@ -1,7 +1,4 @@
 import logging
-logging.basicConfig(level=logging.DEBUG)
-logging.info("Logger enabled in model.py")
-
 
 from Actor import Actor
 class Model(Actor):
@@ -14,7 +11,7 @@ class Model(Actor):
 
     def __init__(self, *args, **kwargs):
         '''
-        Constructor
+        Abstract Constructor for a Model 
         '''
         super(Model, self).__init__(*args, **kwargs)
         logging.debug("Constructed a generic 'model'")

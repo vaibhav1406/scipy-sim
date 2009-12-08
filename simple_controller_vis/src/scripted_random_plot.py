@@ -3,9 +3,7 @@ Created on 23/11/2009
 
 @author: brian
 '''
-import Queue as queue
-from actors.plotter import Plotter
-from actors.random_signal import RandomSource
+from models.actors import Plotter, RandomSource, Channel
 import matplotlib.pyplot as plt
 
 import logging
@@ -17,22 +15,19 @@ def run_random_plot():
     '''
     Run a simple example connecting a random source with a plotter
     '''
-    connection = queue.Queue(0)
+    connection = Channel()
     src = RandomSource(connection)
     dst = Plotter(connection)
 
     components = [src, dst]
 
     logging.info("Starting simulation")
-    for component in components:
-        component.start()
+    [component.start() for component in components]
+    
     logging.debug("Finished starting actors")
-
-
     plt.show()   # The program will stay "running" while this plot is open
-
-    src.join()
-    dst.join()
+    
+    [component.join() for component in components]
 
     logging.debug("Finished running actor")
 

@@ -3,14 +3,10 @@ Created on 23/11/2009
 
 @author: brian
 '''
-import Queue as queue
 
-from actors.plotter import Plotter
 
-from actors.ramp import Ramp
-from actors.summer import Summer
-from actors.copier import Copier
-from actors.random_signal import RandomSource
+from models.actors import Channel, Plotter, Ramp, Summer, Copier, RandomSource
+
 import matplotlib.pyplot as plt
 
 import logging
@@ -21,18 +17,18 @@ logging.info("Logger enabled")
 def run_multi_sum():
     '''
     This example connects 3 sources ( 2 ramps and a random) to a summer block
-    The output is then dynamically plotted.
+    The final output AND one of the ramps are dynamically plotted.
     
     The components are all generating the same sequence of tags so are always
     synchronised
     '''
 
-    connection1 = queue.Queue(0)
-    connection1_1 = queue.Queue(0)
-    connection1_2 = queue.Queue(0)
-    connection2 = queue.Queue(0)
-    connection3 = queue.Queue(0)
-    connection4 = queue.Queue(0)
+    connection1 = Channel()
+    connection1_1 = Channel()
+    connection1_2 = Channel()
+    connection2 = Channel()
+    connection3 = Channel()
+    connection4 = Channel()
 
     src1 = Ramp(connection1, freq=1.0/120)
     src2 = Ramp(connection2)

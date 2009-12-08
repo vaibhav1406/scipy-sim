@@ -1,8 +1,14 @@
-from models.actors.stemmer import Stemmer
+'''
+This simulation is made up of a composite model containing a sin generator
+and a standard plotting actor.
+'''
+
+from models.actors import Stemmer, Channel
 from models.DTSinGenerator import DTSinGenerator
 import matplotlib.pyplot as plt
 import logging
-from models.actors.Actor import Channel
+logging.basicConfig(level=logging.INFO)
+
 def run_dt_sin_plotter_model():
     logging.info("Starting a combined model and actor simulation")
     
