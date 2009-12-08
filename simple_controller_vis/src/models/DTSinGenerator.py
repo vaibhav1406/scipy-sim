@@ -1,40 +1,11 @@
-'''
-Created on Dec 7, 2009
-
-@author: brianthorne
-'''
+from actors.sin import Sin
+from actors.ramp import Ramp
+from actors.Actor import Channel
+from actors.model import Model
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
-logging.info("Logger enabled")
-
-
-from Actor import Actor
-class Model(Actor):
-    '''
-    A Model is a full citizen actor, it has its own thread of 
-    control, it takes parameters and can have input and output 
-    channels.
-    '''
-
-
-    def __init__(self, *args, **kwargs):
-        '''
-        Constructor
-        '''
-        super(Model, self).__init__(*args, **kwargs)
-        logging.debug("Constructed a generic 'model'")
-    
-    def process(self):
-        '''
-        The process function is called as often as possible by the threading or multitasking library
-        No guarantees are made about timing, or that anything will have changed for the input queues
-        '''
-        raise NotImplementedError()
-    
-from sin import Sin
-from ramp import Ramp
-from Actor import Channel
+logging.info("Logger enabled in DTSinGenerator")
 
 class DTSinGenerator(Model):
     '''A discrete sinusoidal signal generator. 
@@ -74,25 +45,3 @@ class DTSinGenerator(Model):
         [comp.join() for comp in components]
         self.stop = True
         logging.info("Model has finished running.")
-
-from stemmer import Stemmer
-import matplotlib.pyplot as plt
-def run_dt_sin_plotter_model():
-    logging.info("Starting a combined model and actor simulation")
-    
-    chan1 = Channel("DT")
-    src = DTSinGenerator(chan1)
-    pltr = Stemmer(chan1)
-    logging.info("Model and actor have been constructed")
-    
-    components = [src, pltr]
-    [c.start() for c in components]
-    logging.info("Model and Actor have been started - simulation is running")
-    plt.show()
-    [c.join() for c in components]
-    logging.info("Model and actor simulation is over.")
-        
-if __name__ == "__main__":
-    run_dt_sin_plotter_model()
-        
-    
