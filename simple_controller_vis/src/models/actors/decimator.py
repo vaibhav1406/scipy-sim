@@ -5,9 +5,7 @@ Created on 1/12/2009
 '''
 from siso import Siso
 import Queue as queue
-import logging
 import unittest
-import numpy
 
 class Decimator(Siso):
     '''
