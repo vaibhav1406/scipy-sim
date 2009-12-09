@@ -5,15 +5,15 @@ Created on 23/11/2009
 '''
 
 import logging
-from Actor import Actor
+from siso import Siso
 import Queue as queue
 
 import unittest
 import numpy
 
-class Delay(Actor):
+class Delay(Siso):
     '''
-    This actor takes a source and delays it by an arbitrary amount of time.
+    This siso actor takes a source and delays it by an arbitrary amount of time.
     '''
 
     def __init__(self, input_queue, output_queue, wait=1.0/10):
@@ -30,24 +30,17 @@ class Delay(Actor):
         super(Delay, self).__init__(input_queue=input_queue, output_queue=output_queue)
         self.delay = wait
 
-    def process(self):
+    def siso_process(self, obj):
         """Delay the input values by a set amount of time..."""
         logging.debug("Running delay process")
 
-        obj = self.input_queue.get(True)     # this is blocking
-        if obj is None:
-            logging.info("We have finished delaying the data")
-            self.stop = True
-            self.output_queue.put(None)
-            return
         tag = obj['tag'] + self.delay
         value = obj['value']
         data = {
             "tag": tag,
             "value": value
             }
-        self.output_queue.put(data)
-        obj = None
+        return data
 
 
 
