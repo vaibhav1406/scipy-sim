@@ -1,9 +1,10 @@
 
 import logging
 import numpy
-from Actor import Source, Actor
+#from Actor import Source, Actor
+from siso import Siso
 
-class Sin(Actor):
+class Sin(Siso):
     '''
     This actor is a generic sinusoid, it requires an input
     specifying the time steps. This allows arbitrarily dense time,
@@ -14,33 +15,22 @@ class Sin(Actor):
         """
         default parameters create len(input_tags) samples of an F=0.1 sinusoid with an 
         amplitude of 1 and a phase of 0.
-
-        @param out: An output channel (with a specified type ???)
         """
-        Actor.__init__(self, input_queue=input_tags, output_queue=out)
-        #@todo Change the output queue assertion
-        #assert out.domain is "DT"
+        super(Sin, self).__init__(input_queue=input_tags, output_queue=out)
         
         self.amplitude = amplitude
         self.frequency = freq
         self.phase = phi
 
-    def process(self):
-        """Create the numbers..."""
-        logging.debug("Running DT sinusoid process")
-        
-        obj = self.input_queue.get(True)     # this is blocking
-        if obj is None:
-            logging.info('We have finished "sinning" the data')
-            self.stop = True
-            self.output_queue.put(None)
-            return
-        tag = obj['tag']
-        
+    def siso_process(self, obj):
+        """The Sin trig function."""
+        logging.debug("Running sin process")
+
+        tag = obj['tag']        
         value = self.amplitude * numpy.sin(2 * numpy.pi * self.frequency * tag + self.phase)
 
         data = {
                 "tag": tag,
                 "value": value
                 }
-        self.output_queue.put(data)
+        return data

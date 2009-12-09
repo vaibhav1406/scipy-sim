@@ -8,7 +8,7 @@ Notes
 How do we deal with "weird" input signals... what about random time intervals in DE?
 Incompatible input/output frequencies...?
 '''
-
+from siso import Siso
 from Actor import Actor, InvalidSimulationInput
 from Actor import Channel
 import logging
@@ -16,7 +16,7 @@ import unittest
 import numpy
 
 
-class Sampler(Actor):
+class Sampler(Siso):
     '''
     This actor takes a source and samples it at a set frequency.
     The source must be at a equal or higher frequency that the desired output
@@ -28,23 +28,15 @@ class Sampler(Actor):
         
         @param frequency: The desired signal output frequency, must be a factor of the input frequency
         """
-        super(Sampler, self).__init__(input_queue=input_queue, output_queue=output_queue)
+        super(Sampler, self).__init__(input_queue=input_queue, output_queue=output_queue, child_handles_output=True)
         self.output_frequency = frequency
         self.output_period = 1.0 / frequency
         self.has_data = False
         self.last_point = None
 
-    def process(self):
+    def siso_process(self, obj):
         logging.debug("Running sampler process")
-
-        obj = self.input_queue.get(True)     # this is blocking
-        if obj is None:
-            logging.info("We have finished sampling the data")
-            self.stop = True
-            self.output_queue.put(None)
-            return
-        tag = obj['tag']
-        value = obj['value']
+        tag, value = obj['tag'], obj['value']
 
         logging.debug("Sampling received (tag: %2.e, value: %2.e )" % (tag, value))
         if not self.has_data or self.last_point['tag'] + self.output_period == obj['tag']:
