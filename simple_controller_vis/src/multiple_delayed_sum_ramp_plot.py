@@ -33,7 +33,7 @@ def run_multi_delay_ramp_sum_plot():
     # The following "magic number" is one time step, (1/res)
     # the delay must be an integer factor of this so the events line up 
     # for the summer block to work...
-    time_step = 1.0/res
+    time_step = 1.0 / res
     delay1 = Delay(conns[1], conns[4], 3 * time_step)
 
     summer = Summer([conns[0], conns[4], conns[2]], conns[3])

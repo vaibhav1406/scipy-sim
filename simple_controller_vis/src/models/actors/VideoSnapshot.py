@@ -11,8 +11,8 @@ from Actor import Source, Actor
 
 import logging
 verbose = True
-LOG_FILENAME=None
-logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG)
+LOG_FILENAME = None
+logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG)
 WIDTH, HEIGHT = 320, 240
 
 
@@ -28,7 +28,7 @@ class VideoSnapshot(Source):
     single image when requested.
     '''
 
-    def __init__(self, input_queue, output_queue, device=0, max_freq=10, size=(WIDTH, HEIGHT),grey=True):
+    def __init__(self, input_queue, output_queue, device=0, max_freq=10, size=(WIDTH, HEIGHT), grey=True):
         """
         Constructor for a VideoSnapshot source.
 
@@ -70,7 +70,7 @@ class VideoSnapshot(Source):
         if not self.clist:
             raise IOError("Sorry, no cameras detected.")
 
-        logging.info("Opening device %s, with video size (%s,%s)" % (self.clist[0],self.size[0],self.size[1]))
+        logging.info("Opening device %s, with video size (%s,%s)" % (self.clist[0], self.size[0], self.size[1]))
 
         self.camera = camera.Camera(self.clist[0], self.size, "RGB")
 
@@ -89,7 +89,7 @@ class VideoSnapshot(Source):
                 self.stop = True
                 self.output_queue.put(None)
                 return
-            tag =  obj['tag']
+            tag = obj['tag']
 
             surface = self.camera.get_image(self.snapshot)
 

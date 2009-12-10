@@ -91,12 +91,12 @@ class Stemmer(Actor):
                 # The baseline should be built from the start and end points of
                 # the x axis
                 _ , baseline_y = self.baseline.get_data()
-                self.baseline.set_data([min(self.x_axis_data),max(self.x_axis_data)], baseline_y.tolist())
+                self.baseline.set_data([min(self.x_axis_data), max(self.x_axis_data)], baseline_y.tolist())
                 self.baseline.recache()
                 
                 # Construct new stemlines and add them to the current plot
                 for x, y in zip(self.x_axis_data, self.y_axis_data)[len(self.stemlines):]:
-                    stemline = lines.Line2D([0],[0])
+                    stemline = lines.Line2D([0], [0])
                     stemline.update_from(self.stemlines[0]) # Copy format
                     stemline.set_data([x, x], [baseline_y[0], y])
                     stemline.recache()
