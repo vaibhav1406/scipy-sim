@@ -14,16 +14,16 @@ class Ramp(Source):
     This actor is a ramp source
     '''
 
-    def __init__(self, out, amplitude=2.0, freq=1.0/30, res=10, simulation_time=120):
+    def __init__(self, out, amplitude=2.0, freq=1.0/30, resolution=10, simulation_time=120):
         """
         default parameters creates a ramp up to 2 that takes 30 seconds with 10 values per "second"
 
         """
-        Actor.__init__(self, output_queue=out)
+        super(Ramp, self).__init__(output_queue=out, simulation_time=simulation_time)
         self.amplitude = amplitude
         self.frequency = freq
-        self.resolution = res
-        self.simulation_time = simulation_time
+        self.resolution = resolution
+        
 
     def process(self):
         """Create the numbers..."""

@@ -59,7 +59,7 @@ class Plotter(Actor):
 
         # This is a safety check - if we are plotting over a long time period this needs removing
         if self.refreshs >= 1000:
-            logging.info("We have updated the plot 1000 times - forcing a stop of the simulation now")
+            logging.warning("We have updated the plot 1000 times - forcing a stop of the simulation now")
             self.stop = True
             return
         self.refreshs += 1

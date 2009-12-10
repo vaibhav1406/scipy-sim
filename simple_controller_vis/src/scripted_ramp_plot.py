@@ -3,13 +3,9 @@ Created on 23/11/2009
 
 @author: brian
 '''
-try:
-    import queue
-except ImportError:
-    import Queue as queue
+import Queue as queue
 
 from actors.plotter import Plotter
-
 from actors.ramp import Ramp
 import matplotlib.pyplot as plt
 
