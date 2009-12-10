@@ -4,6 +4,7 @@ Created on 03/12/2009
 @author: allan
 '''
 from models.actors import Channel, Plotter, CTSin, Summer
+from models.actors.ctsin import CTSinGenerator
 
 import matplotlib.pyplot as plt
 import numpy
@@ -18,8 +19,8 @@ def run_sum_sin_plot():
     connection2 = Channel(domain="CT")
     connection3 = Channel()
 
-    src1 = CTSin(connection1, 2, 2.0, numpy.pi/2) # 2 Hz, 90 degree phase
-    src2 = CTSin(connection2, 1, 3.5, numpy.pi/4) # 4 Hz, 45 degree phase
+    src1 = CTSinGenerator(connection1, 2, 2.0, numpy.pi/2) # 2 Hz, 90 degree phase
+    src2 = CTSinGenerator(connection2, 1, 3.5, numpy.pi/4) # 4 Hz, 45 degree phase
 
     summer = Summer([connection1, connection2], connection3)
     dst = Plotter(connection3)

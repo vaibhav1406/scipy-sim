@@ -22,7 +22,7 @@ class DTSinGenerator(Model):
         @param out: output channel
         '''
         logging.debug("Constructing a DTSinGenerator")
-        super(DTSinGenerator, self).__init__()
+        super(DTSinGenerator, self).__init__(output_queue=out)
         
         logging.debug("Setting model paramaters.")
         self.amplitude = amplitude
@@ -31,7 +31,7 @@ class DTSinGenerator(Model):
         self.simulation_length = simulation_length
         
         assert out.domain is "DT"
-        self.out = out
+        #self.out = out
         
         logging.info('Constructing the inner actors that make up this "model"')
         self.chan1 = Channel()
