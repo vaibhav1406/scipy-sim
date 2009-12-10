@@ -14,7 +14,7 @@ class Ramp(Source):
     This actor is a ramp source
     '''
 
-    def __init__(self, out, amplitude=2.0, freq=1.0/30, resolution=10, simulation_time=120, endpoint=False):
+    def __init__(self, out, amplitude=2.0, freq=1.0 / 30, resolution=10, simulation_time=120, endpoint=False):
         """
         default parameters creates a ramp up to 2 that takes 30 seconds with 10 values per "second"
 
@@ -29,7 +29,7 @@ class Ramp(Source):
     def process(self):
         """Create the numbers..."""
         logging.debug("Running ramp process")
-        tags = numpy.linspace(0, self.simulation_time, self.simulation_time*self.resolution, endpoint=self.endpoint)  # for now just compute 2 minutes of values
+        tags = numpy.linspace(0, self.simulation_time, self.simulation_time * self.resolution, endpoint=self.endpoint)  # for now just compute 2 minutes of values
 
         for tag in tags:
             value = tag * self.frequency * self.amplitude

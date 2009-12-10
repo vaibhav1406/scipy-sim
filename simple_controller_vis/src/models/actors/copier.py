@@ -46,7 +46,7 @@ class CopierTests(unittest.TestCase):
 
         inp = {'value':15, 'tag':1}
 
-        cloneQ = Copier(q_in, [q_out1,q_out2])
+        cloneQ = Copier(q_in, [q_out1, q_out2])
         cloneQ.start()
         q_in.put(inp)
         q_in.put(None)

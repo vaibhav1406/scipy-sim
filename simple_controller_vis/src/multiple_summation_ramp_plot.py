@@ -30,11 +30,11 @@ def run_multi_sum():
     connection3 = Channel()
     connection4 = Channel()
 
-    src1 = Ramp(connection1, freq=1.0/120)
+    src1 = Ramp(connection1, freq=1.0 / 120)
     src2 = Ramp(connection2)
     src3 = RandomSource(connection3)
     
-    cloning_probe = Copier(connection1,[connection1_1, connection1_2])
+    cloning_probe = Copier(connection1, [connection1_1, connection1_2])
     progress_plotter = Plotter(connection1_2)
     
     summer = Summer([connection1_1, connection2, connection3], connection4)

@@ -16,7 +16,7 @@ class Delay(Siso):
     This siso actor takes a source and delays it by an arbitrary amount of time.
     '''
 
-    def __init__(self, input_queue, output_queue, wait=1.0/10):
+    def __init__(self, input_queue, output_queue, wait=1.0 / 10):
         """
         Constructor for a delay block.
 
@@ -75,9 +75,9 @@ class DelayTests(unittest.TestCase):
         simulation_time = 120   # seconds to simulate
         resolution = 10.0       # samples per second (10hz)
         
-        tags = numpy.linspace(0, simulation_time, simulation_time/resolution) 
+        tags = numpy.linspace(0, simulation_time, simulation_time / resolution) 
         values = numpy.arange(len(tags))
-        data_in = [{'value':values[i],'tag':tags[i]} for i in xrange(len(tags))]
+        data_in = [{'value':values[i], 'tag':tags[i]} for i in xrange(len(tags))]
         expected_output = [{'value':values[i], 'tag': tags[i] + delay } for i in xrange(len(tags))]
         
         
