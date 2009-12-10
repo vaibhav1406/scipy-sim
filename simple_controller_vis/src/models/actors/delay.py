@@ -5,18 +5,18 @@ Created on 23/11/2009
 '''
 
 import logging
-from Actor import Actor
+from siso import Siso
 import Queue as queue
 
 import unittest
 import numpy
 
-class Delay(Actor):
+class Delay(Siso):
     '''
-    This actor takes a source and delays it by an arbitrary amount of time.
+    This siso actor takes a source and delays it by an arbitrary amount of time.
     '''
 
-    def __init__(self, input_queue, output_queue, wait=1.0/10):
+    def __init__(self, input_queue, output_queue, wait=1.0 / 10):
         """
         Constructor for a delay block.
 
@@ -30,24 +30,17 @@ class Delay(Actor):
         super(Delay, self).__init__(input_queue=input_queue, output_queue=output_queue)
         self.delay = wait
 
-    def process(self):
+    def siso_process(self, obj):
         """Delay the input values by a set amount of time..."""
         logging.debug("Running delay process")
 
-        obj = self.input_queue.get(True)     # this is blocking
-        if obj is None:
-            logging.info("We have finished delaying the data")
-            self.stop = True
-            self.output_queue.put(None)
-            return
         tag = obj['tag'] + self.delay
         value = obj['value']
         data = {
             "tag": tag,
             "value": value
             }
-        self.output_queue.put(data)
-        obj = None
+        return data
 
 
 
@@ -82,9 +75,9 @@ class DelayTests(unittest.TestCase):
         simulation_time = 120   # seconds to simulate
         resolution = 10.0       # samples per second (10hz)
         
-        tags = numpy.linspace(0, simulation_time, simulation_time/resolution) 
+        tags = numpy.linspace(0, simulation_time, simulation_time / resolution) 
         values = numpy.arange(len(tags))
-        data_in = [{'value':values[i],'tag':tags[i]} for i in xrange(len(tags))]
+        data_in = [{'value':values[i], 'tag':tags[i]} for i in xrange(len(tags))]
         expected_output = [{'value':values[i], 'tag': tags[i] + delay } for i in xrange(len(tags))]
         
         

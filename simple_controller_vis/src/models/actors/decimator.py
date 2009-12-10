@@ -3,13 +3,11 @@ Created on 1/12/2009
 
 @author: brian
 '''
-from Actor import Actor, InvalidSimulationInput
+from siso import Siso
 import Queue as queue
-import logging
 import unittest
-import numpy
 
-class Decimator(Actor):
+class Decimator(Siso):
     '''
     This actor takes a source and only passes on every Nth value
     '''
@@ -22,20 +20,14 @@ class Decimator(Actor):
         @param reduction: Keep every Nth sample, reduces the signal by factor passed in.
         '''
         super(Decimator, self).__init__(input_queue=input_queue,
-                                        output_queue=output_queue)
+                                        output_queue=output_queue,
+                                        child_handles_output=True)
 
         self.reduction_factor = int(reduction_factor)
         self.sample = 0
 
-    def process(self):
-        obj = self.input_queue.get(True)
-
-        if obj is None:
-            logging.info("We have finished decimating the data")
-            self.stop = True
-            self.output_queue.put(None)
-            return
-
+    def siso_process(self, obj):
+        
         if self.sample % self.reduction_factor == 0:
             self.output_queue.put(obj)
         self.sample += 1

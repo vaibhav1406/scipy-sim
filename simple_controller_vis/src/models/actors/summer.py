@@ -124,8 +124,8 @@ class SummerTests(unittest.TestCase):
         q_in_2 = queue.Queue()
         q_out = queue.Queue()
 
-        input1 = [{'value':1,'tag':i} for i in xrange(100)]
-        input2 = [{'value':2,'tag':i} for i in xrange(100)]
+        input1 = [{'value':1, 'tag':i} for i in xrange(100)]
+        input2 = [{'value':2, 'tag':i} for i in xrange(100)]
 
         summer = Summer([q_in_1, q_in_2], q_out)
         summer.start()
@@ -137,7 +137,7 @@ class SummerTests(unittest.TestCase):
         q_in_2.put(None)
         summer.join()
         for i in xrange(100):
-            self.assertEquals(q_out.get()['value'],3)
+            self.assertEquals(q_out.get()['value'], 3)
         self.assertEquals(q_out.get(), None)
 
     def test_delayed_summer(self):
@@ -149,8 +149,8 @@ class SummerTests(unittest.TestCase):
         q_in_2 = queue.Queue()
         q_out = queue.Queue()
 
-        input1 = [{'value':1,'tag':i} for i in xrange(100)]
-        input2 = [{'value':2,'tag':i + 1} for i in xrange(100)]
+        input1 = [{'value':1, 'tag':i} for i in xrange(100)]
+        input2 = [{'value':2, 'tag':i + 1} for i in xrange(100)]
 
         summer = Summer([q_in_1, q_in_2], q_out, True)
         summer.start()
@@ -175,8 +175,8 @@ class SummerTests(unittest.TestCase):
         q_in_2 = queue.Queue()
         q_out = queue.Queue()
 
-        input1 = [{'value':1,'tag':i} for i in xrange(100)]
-        input2 = [{'value':2,'tag':i + DELAY} for i in xrange(100)]
+        input1 = [{'value':1, 'tag':i} for i in xrange(100)]
+        input2 = [{'value':2, 'tag':i + DELAY} for i in xrange(100)]
 
         summer = Summer([q_in_1, q_in_2], q_out, True)
         summer.start()
@@ -202,8 +202,8 @@ class SummerTests(unittest.TestCase):
         q_in_2 = queue.Queue()
         q_out = queue.Queue()
 
-        input1 = [{'value':1,'tag':i} for i in xrange(100)]
-        input2 = [{'value':2,'tag':i + 1} for i in xrange(100)]
+        input1 = [{'value':1, 'tag':i} for i in xrange(100)]
+        input2 = [{'value':2, 'tag':i + 1} for i in xrange(100)]
 
         summer = Summer([q_in_1, q_in_2], q_out, False)
         summer.start()
@@ -241,7 +241,7 @@ class SummerTests(unittest.TestCase):
         # Fill each queue with num_data_points of its own index
         # So queue 5 will be full of the value 4, then a None
         for i, input_queue in enumerate(input_queues):
-            _ = [input_queue.put({'value':i,'tag':j}) for j in xrange(num_data_points)]
+            _ = [input_queue.put({'value':i, 'tag':j}) for j in xrange(num_data_points)]
         _ = [input_queue.put(None) for input_queue in input_queues]
 
         summer = Summer(input_queues, output_queue)
@@ -266,8 +266,8 @@ class SummerTests(unittest.TestCase):
         # Fill each queue with num_data_points of its own index
         # So queue 5 will be full of the value 4, then a None
         for i, input_queue in enumerate(input_queues):
-            _ = [input_queue.put({'value':i,'tag':j}) for j in xrange(num_data_points) if i is not 0]
-        _ = [input_queues[0].put({'value':0,'tag':j + DELAY}) for j in xrange(num_data_points)]
+            _ = [input_queue.put({'value':i, 'tag':j}) for j in xrange(num_data_points) if i is not 0]
+        _ = [input_queues[0].put({'value':0, 'tag':j + DELAY}) for j in xrange(num_data_points)]
         _ = [input_queue.put(None) for input_queue in input_queues]
 
         summer = Summer(input_queues, output_queue)

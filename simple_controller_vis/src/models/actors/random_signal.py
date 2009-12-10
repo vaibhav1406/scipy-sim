@@ -37,7 +37,7 @@ class RandomSource(Source):
     def process(self):
         """Create the numbers..."""
         logging.debug("Running ramp process")
-        tags = numpy.linspace(0, self.simulation_time, self.simulation_time*self.resolution)
+        tags = numpy.linspace(0, self.simulation_time, self.simulation_time * self.resolution, endpoint=False)
 
         for tag in tags:
             value = random.random() * self.amplitude

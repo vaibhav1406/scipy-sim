@@ -29,7 +29,13 @@ class Channel(queue.Queue):
         queue.Queue.__init__(self)
         self.domain = domain
         
+def MakeChans(num):
+    '''Make a list of channels.
+    @param num of channels to create
+    '''
+    return [Channel() for i in xrange(num)]
 
+    
 class Actor(threading.Thread):
     '''
     This is a base Actor class for use in a simulation.
