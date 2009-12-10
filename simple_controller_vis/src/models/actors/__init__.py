@@ -16,4 +16,8 @@ from sin import Sin
 from stemmer import Stemmer
 from subtract import Subtractor
 from summer import Summer
+from ctsin import CTSinGenerator
+
+
+# This requires pygame... just for kicks
 #from VideoSnapshot import VideoSnapshot
