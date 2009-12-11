@@ -3,8 +3,10 @@ Created on Dec 11, 2009
 
 @author: brianthorne
 '''
-from Actor import Actor
+from Actor import Actor, Channel
+import Queue as queue
 import numpy
+
 import unittest
 class WriteDataFile(Actor):
     '''
@@ -39,7 +41,8 @@ class WriteDataFile(Actor):
                                 'titles': ['Domain', 'Name']    # This might not get used...
                              }
                         )
-        x[:] = [ ( element['tag'], element['value'] ) for element in self.temp_data]
+        x[:-1] = [ ( element['tag'], element['value'] ) for element in self.temp_data if element is not None]
+        
         numpy.save(self.filename, x)
 
 class ReadDataFile(Actor):
@@ -57,13 +60,54 @@ class ReadDataFile(Actor):
                              }
     Note the titles may be used to store domain and signal name information.
     '''
-    def __init__(self, output_queue, file_name="./signal_data.dat"):
+    def __init__(self, output_queue, file_name):
         super(ReadDataFile, self).__init__(output_queue=output_queue)
         self.filename = file_name
     
     def process(self):
         x = numpy.load(self.filename)
         [self.output_queue.put({"tag": tag,'value': value}) for (tag,value) in x]
+        self.output_queue.put(None)
         self.stop = True
             
+import unittest
+import tempfile
+class FileIOTests(unittest.TestCase):
+    '''Test the Proportional Actor'''
+    
+    def setUp(self):
+        self.chan = Channel()
+        self.signal = [{'value':i**3, 'tag':i} for i in xrange(100)] + [None]
+        [self.chan.put(val) for val in self.signal]   
+        self.f = tempfile.NamedTemporaryFile(delete=False)
+        
+    def tearDown(self):
+        self.f.close()
+        
+        
+    def test_file_write(self):
+        '''Test that we can save data'''
+        fileWriter = WriteDataFile(self.chan, self.f.name)
+        fileWriter.start()
+        fileWriter.join()
+        # Check that the queue has been emptied...
+        self.assertRaises(queue.Empty, self.chan.get, timeout=1)
+        
+    
+    def test_file_read(self):
+        fileName = '/Users/brianthorne/temp/numpy_test_data.npy'
+        
+        fileWriter = WriteDataFile(self.chan, fileName)
+        fileWriter.start()
+        fileWriter.join()
+
+                
+        fileReader = ReadDataFile(output_queue=self.chan, file_name=fileName)
+        fileReader.start()
+        fileReader.join()
+        
+        [self.assertEquals(self.chan.get(), i) for i in self.signal]
+        
+        self.f.delete()
+        
         
