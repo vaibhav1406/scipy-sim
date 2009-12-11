@@ -4,11 +4,13 @@ Created on Dec 11, 2009
 @author: brianthorne
 '''
 from Actor import Actor
-
+import numpy
+import unittest
 class WriteDataFile(Actor):
     '''
     This Actor writes tagged signal data to a file.
-    It uses numpy to write a binary file
+    It uses numpy to write a binary file, first it gets all the input
+    So make sure the signal can fit in memory!
     '''
 
 
@@ -18,15 +20,50 @@ class WriteDataFile(Actor):
         '''
         super(WriteDataFile, self).__init__(input_queue=input_queue)
         self.filename = file_name
+        self.temp_data = []
+        
+    def process(self):
+        obj = self.input_queue.get(True)     # this is blocking
+        self.temp_data.append(obj)
+        if obj is None:
+            self.write_file()
+            self.stop = True
+            return
+        
+    def write_file(self):
+        x = numpy.zeros(len(self.temp_data),
+                            dtype=
+                            {
+                                'names': ["Tag", "Value"],
+                                'formats': ['f8','f8'],
+                                'titles': ['Domain', 'Name']    # This might not get used...
+                             }
+                        )
+        x[:] = [ ( element['tag'], element['value'] ) for element in self.temp_data]
+        numpy.save(self.filename, x)
 
 class ReadDataFile(Actor):
     '''
-    This Actor reads a tagged signal from a file.
-    The data must have been saved with the WriteFile Actor
-    NOT CSV
+    This Actor reads a tagged signal from a file - the signal can be any
+    domain - the data for both tags and values are stored as 64bit floats.
+    The data must have been saved with the WriteFile Actor NOT CSV.
+    
+    The numpy structured record array is as follows: 
+                            dtype=
+                            {
+                                'names': ["Tag", "Value"],
+                                'formats': ['f8','f8'],
+                                'titles': ['Domain', 'Name']
+                             }
+    Note the titles may be used to store domain and signal name information.
     '''
     def __init__(self, output_queue, file_name="./signal_data.dat"):
         super(ReadDataFile, self).__init__(output_queue=output_queue)
         self.filename = file_name
     
+    def process(self):
+        x = numpy.load(self.filename)
+        [self.output_queue.put({"tag": tag,'value': value}) for (tag,value) in x]
+        self.stop = True
+            
         
