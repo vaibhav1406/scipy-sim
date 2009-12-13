@@ -24,8 +24,8 @@ class Compare(Siso):
         
     def compare(self, obj):
         '''This method must be overridden. If it returns True
-        the value is put onto the output queue, 
-        OR if boolean_output is true, a boolean is substituted for the 'value'
+        the value is put onto the output queue, else discarded.
+        Or if boolean_output is true, a boolean is substituted for the 'value'
         
         @return Boolean value
         '''
@@ -36,6 +36,10 @@ class Compare(Siso):
             if self.bool_out:
                 obj['value'] = True
             self.output_queue.put(obj)
+        elif self.bool_out:
+            obj['value'] = False
+            self.output_queue.put(obj)
+            
 
 class GreaterThan(Compare):
     '''
