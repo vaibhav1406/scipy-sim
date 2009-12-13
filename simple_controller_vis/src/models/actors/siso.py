@@ -1,6 +1,18 @@
 import logging
 from Actor import Actor
 
+def TestSisoActor(test_case, block, inputs, expected_outputs):
+    '''Helper function for testing SISO actors.
+    '''
+    [block.input_queue.put(val) for val in inputs + [None]]
+    block.start()
+    block.join()
+    for expected_output in expected_outputs:
+        out = block.output_queue.get()
+        test_case.assertEquals(out['value'], expected_output['value'])
+        test_case.assertEquals(out['tag'], expected_output['tag'])
+    test_case.assertEquals(block.output_queue.get(), None)
+
 class Siso(Actor):
     '''This is a generic single input, single output actor.
     The constructor requires one input and one output.
