@@ -1,7 +1,11 @@
 '''
 This Sum actor takes any number of input queues and adds up the data points
 where the tags coincide, if there are missing tags it can discard the data point
-or alternativly sum the remaining inputs.
+or alternatively sum the remaining inputs.
+
+
+@todo There is a bug where two unmatched channels - one channel finishes and a None object
+gets treated like a dictionary... same in subtract.py
 
 Created on 24/11/2009
 
@@ -33,7 +37,7 @@ class Summer(Actor):
         data sets, or discarding.
 
         """
-        Actor.__init__(self, output_queue=output_queue)
+        super(Summer, self).__init__(output_queue=output_queue)
         self.inputs = list(inputs)
         self.discard_incomplete = discard_incomplete_sets
         self.data_is_stored = False
