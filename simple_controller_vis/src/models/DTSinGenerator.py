@@ -31,7 +31,6 @@ class DTSinGenerator(Model):
         self.simulation_length = simulation_length
         
         assert out.domain is "DT"
-        #self.out = out
         
         logging.info('Constructing the inner actors that make up this "model"')
         self.chan1 = Channel()
@@ -40,7 +39,7 @@ class DTSinGenerator(Model):
         self.ramp = Ramp(self.chan1, resolution=1, simulation_time=self.simulation_length)
         # Note in this case we have connected the output of the last inner component directly to
         # the output of the model - this isn't always going to be the case.
-        self.sin = Sin(self.chan1, self.out, amplitude=self.amplitude, freq=self.frequency, phi=self.phase)
+        self.sin = Sin(self.chan1, self.output_queue, amplitude=self.amplitude, freq=self.frequency, phi=self.phase)
         logging.info("Inner actors have been constructed")
         
     def process(self):
