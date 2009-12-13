@@ -5,7 +5,7 @@ Created on 13/12/2009
 '''
 
 
-from models.actors import Plotter, Ramp, Summer, Copier, Sin, GreaterThan, Subtractor, Constant
+from models.actors import Plotter, Ramp, Summer, Copier, Sin, GreaterThan, Subtractor, Constant, PassThrough
 from models import CTSinGenerator
 import matplotlib.pyplot as plt
 from models.actors.Actor import MakeChans
@@ -24,7 +24,7 @@ def run_multi_sum():
     synchronised
     '''
     sim_time = 0.02
-    sim_res = 1.0/0.001
+    sim_res = 10000
     
     wire_names = ('ramp',
                   'sin',
@@ -35,7 +35,10 @@ def run_multi_sum():
                   'offset_sin_probe',
                   'sin_plot',
                   'diff',
-                  'pwm'
+                  'pwm_bool',
+                  'on_value',
+                  'off_value',
+                  'pwm_value'
                   )
     raw_wires = MakeChans(len(wire_names))
     
@@ -57,9 +60,12 @@ def run_multi_sum():
     subtractor = Subtractor(wires['offset_sin'], wires['ramp'], wires['diff'])
 
     # Want to see when that is > 0
-    comparison = GreaterThan(wires['diff'], wires['pwm'], threshold=0.0, boolean_output=True)
+    comparison = GreaterThan(wires['diff'], wires['pwm_bool'], threshold=0.0, boolean_output=True)
+    if_device = PassThrough(wires['pwm_bool'], wires['on_value'], wires['pwm_value'], else_data_input=wires['off_value'])
+    output_value_on = Constant(wires['on_value'], 1.0, resolution=sim_res, simulation_time=sim_time)
+    output_value_off = Constant(wires['off_value'], 0.0, resolution=sim_res, simulation_time=sim_time)
     
-    pwm_plotter = Plotter(wires['pwm'])
+    pwm_plotter = Plotter(wires['pwm_value'])
     
     components = [ramp_src, 
                   sin_src,
@@ -71,7 +77,11 @@ def run_multi_sum():
                   sin_plotter, 
                   subtractor,
                   comparison,
-                  pwm_plotter]
+                  if_device,
+                  output_value_on,
+                  output_value_off,
+                  pwm_plotter
+                  ]
 
     logging.info("Starting simulation")
     [component.start() for component in components]
@@ -85,6 +95,7 @@ def run_multi_sum():
         
 
     logging.debug("Finished running simulation")
+    
 
 if __name__ == '__main__':
     run_multi_sum()

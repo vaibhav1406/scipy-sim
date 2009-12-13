@@ -10,6 +10,7 @@ from dtsin import DTSin
 from fileIO import WriteDataFile, ReadDataFile
 from interpolate import Interpolator
 from model import Model
+from passthrough import PassThrough
 from plotter import Plotter
 from proportional import Proportional
 from ramp import Ramp
