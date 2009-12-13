@@ -37,7 +37,7 @@ class Summer(Actor):
         data sets, or discarding.
 
         """
-        Actor.__init__(self, output_queue=output_queue)
+        super(Summer, self).__init__(output_queue=output_queue)
         self.inputs = list(inputs)
         self.discard_incomplete = discard_incomplete_sets
         self.data_is_stored = False
