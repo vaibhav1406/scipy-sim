@@ -2,6 +2,12 @@ Notes for future work
 
 GUI
 
+A model can be created in pure Python code - see all the early examples.
+Alternatively a simulation can be created with an xml model - this version can 
+be displayed with the GUI program which follows simple rules to make the model python file
+and then run it.
+The Python standard library has an XML module. The ptolemy project has created a markup language
+that MAY be used.
 
 
 Backend System
