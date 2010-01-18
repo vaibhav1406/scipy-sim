@@ -63,3 +63,6 @@ class DecimatorTests(unittest.TestCase):
             self.assertEquals(out['value'], expected_output['value'])
             self.assertEquals(out['tag'], expected_output['tag'])
         self.assertEquals(self.q_out.get(), None)
+
+if __name__ == "__main__":
+    unittest.main()

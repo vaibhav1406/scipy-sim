@@ -17,8 +17,16 @@ determines when the model is being created (component connection time) if it all
 connect to another component based on the actual code. It then creates a real python 
 file containing the model (temporary until saved).
 
+Syntax Highlighter - If pygments is available we could use that.
 
 Backend System
 
 - A model system that automatically adds all connected components into a Model which can be "Run"
  
+ Actors
+ 
+- A few string processing blocks:
+     open file (outputs a stream)
+     read line from stream (outputs a string)
+     split line into string tokens
+     parse a string token into a number
