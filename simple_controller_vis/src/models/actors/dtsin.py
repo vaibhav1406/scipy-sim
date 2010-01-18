@@ -1,6 +1,6 @@
 ﻿'''
 Created on 04/12/2009
-
+@see DTSinGenerator model.
 @author: allan
 '''
 import logging
