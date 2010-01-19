@@ -5,17 +5,19 @@ A user interface for creating and running simulations.
 @author: Brian Thorne
 '''
 
-from Tkinter import Frame, Button, Canvas, Tk, Listbox, Label, Scrollbar, Text
-from Tkconstants import VERTICAL, SINGLE, LEFT, RIGHT, Y, BOTH, END, X, Y, TOP
+from Tkinter import Frame, Button, Canvas, Tk, Text
+from Tkconstants import LEFT, BOTH, END, X, Y, TOP
 
-import commands
+import subprocess
 import os
 from os import path
 import tempfile
 import glob
 import logging
 
+from codefile import CodeFile
 from tabs import Notebook
+from codegroup import ExamplesGroup
 
 logging.basicConfig(level=logging.DEBUG)
 logging.info("GUI module loaded, logging enabled")
@@ -29,92 +31,19 @@ logging.info("Script address is '%s'" % PATH_TO_SCRIPT)
 logging.info("Example path is %s" % (EXAMPLES_DIRECTORY))
 
 
-
-class CodeFile:
-    def __init__(self, filepath, name=None):
-        """If the name is not given it will be the stripped file name.
-        TODO: Add GUI support. image, position, input connectors etc...
-        """
-        self.filepath = filepath
-        self.name = path.split(filepath)[1] if name is None else name
-        self.image = None
-        
-    def get_code(self):
-        """Load an actor or model file."""
-        
-        text = "".join(open(self.filepath, 'r').readlines())
-        return text        
-
-class ExamplesGroup:
-    """A group of actors to be displayed in a block."""
-    def __init__(self, name, frame, codefiles, set_callbacks):
-        """Create a group of examples for display
-        
-        Params:
-        name - the name of this block
-        frame - the frame to be attached to.
-        codefiles - a list of CodeFile objects to be displayed
-        set-callbacks - what gets called when example is clicked on.
-        """
-        self.name = name
-        self.frame = frame
-        self.codefiles = codefiles
-        self.set_text, self.set_filename = set_callbacks
-        
-        self.scrollbar = Scrollbar(self.frame, orient=VERTICAL)
-        self.listbox = Listbox(self.frame, 
-                               yscrollcommand=self.scrollbar.set, 
-                               selectmode=SINGLE)
-        
-        self.draw_list()
-
-    def get_list(self):
-        """Return a list of the actors names."""
-        names = [codefile.name for codefile in self.codefiles]
-        return names
-    
-    def get_dict(self):
-        """Return a dictionary of names: codefile instances."""
-        return dict([[codefile.name, codefile] for codefile in self.codefiles])
-
-    def get_example(self, name):
-        """Get the string of code for a particular actor"""
-        return self.get_dict()[name].get_code()
-
-    def get_selection(self, x):
-        """Set the code preview window to display the source
-        code of the currently selected actor
-        """
-        index = self.listbox.curselection()[0]
-        selected_name = self.listbox.get(index)
-        selected_codefile = self.get_dict()[selected_name]
-        self.set_filename(selected_codefile.filepath)
-        self.set_text(self.get_example(selected_name))
-
-    def draw_list(self):
-        """Print the names of the Actors as a select list box"""
-        label = Label(self.frame, text=self.name)
-        label.pack()
-        self.scrollbar.config(command=self.listbox.yview)
-        self.scrollbar.pack(side=RIGHT, fill=Y)
-        self.listbox.pack(fill=BOTH, expand=1)
-        for i in self.get_list():
-            self.listbox.insert(END, i)
-
-        # left mouse click on a list item to display selection
-        self.listbox.bind('<ButtonRelease-1>', self.get_selection)
-
 def get_models_and_actors():
     """Return dictionaries with the names and paths of each model and actor to display."""
     # The models and actors are loaded from the models/actors directory.
-    model_filenames = [(path.split(a)[1], path.abspath(a)) for a in glob.glob("./../models/[A-z]*.py") ]
-    logging.info("%d model files loaded." % len(model_filenames))
-    actor_filenames = [(path.split(a)[1], path.abspath(a)) for a in glob.glob("./../models/actors/[A-z]*.py")]
-    logging.info("%d actor files loaded" % len(actor_filenames))
-    [logging.debug(a) for a in ["Models:"] + model_filenames + ["\nActors:"] + actor_filenames]
-    # Todo - return a dict of CodeFiles instead
+    # TODO: Parse a tree instead of loading actors and models.
+    
+    model_filenames = [(path.split(a)[1], path.abspath(a)) for a in glob.glob(EXAMPLES_DIRECTORY + "/[A-z]*.py") ]
+    actor_filenames = [(path.split(a)[1], path.abspath(a)) for a in glob.glob(EXAMPLES_DIRECTORY + "/actors/[A-z]*.py")]
+    #[logging.debug(a) for a in ["Models:"] + model_filenames + ["\nActors:"] + actor_filenames]
+
     models = [CodeFile(a[1]) for a in model_filenames if not a[0].startswith("__")]
     actors = [CodeFile(a[1]) for a in actor_filenames if not a[0].startswith("__")]    
+    logging.info("%d model files loaded." % len(models))
+    logging.info("%d actor files loaded" % len(actors))
     return (models, actors)
 
 class App:
@@ -269,12 +198,16 @@ class PythonRunner:
         pass
 
     def runFile(self, file):
-        cmd = "python " + file
-        (status, outtext) = commands.getstatusoutput(cmd)
-        # TODO redirect the stdin to the bottom pane...
-        # TODO do in seperate thread, so we can stop a long running simulation...
-        if status:
-            logging.error( "Error in running simulation. Status error number: %d. Output:\n%s" % (status, outtext) )
+        # FIX: This seems to work from the command line, but not when launched from
+        # eclipse... ?
+        try:
+            retcode = subprocess.call('python2.6 "' + file + '"', shell=True)
+            if retcode < 0:
+                logging.error("Child Python process was terminated by signal: %d" % retcode)
+            else:
+                logging.debug("Child Python process returned: %d" % retcode)
+        except OSError, e:
+            logging.error("Execution failed: %s" % e)
             
 
 def writeFile(filepath, content):
