@@ -6,7 +6,7 @@ A user interface for creating and running simulations.
 '''
 
 from Tkinter import Frame, Button, Canvas, Tk, Text
-from Tkconstants import LEFT, BOTH, END, X, Y, TOP
+from Tkconstants import LEFT, BOTH, END, X, Y, TOP, RIDGE
 
 import subprocess
 import os
@@ -38,13 +38,49 @@ def get_models_and_actors():
     
     model_filenames = [(path.split(a)[1], path.abspath(a)) for a in glob.glob(EXAMPLES_DIRECTORY + "/[A-z]*.py") ]
     actor_filenames = [(path.split(a)[1], path.abspath(a)) for a in glob.glob(EXAMPLES_DIRECTORY + "/actors/[A-z]*.py")]
-    #[logging.debug(a) for a in ["Models:"] + model_filenames + ["\nActors:"] + actor_filenames]
+    [logging.debug(a) for a in ["Models:"] + model_filenames + ["\nActors:"] + actor_filenames]
 
     models = [CodeFile(a[1]) for a in model_filenames if not a[0].startswith("__")]
     actors = [CodeFile(a[1]) for a in actor_filenames if not a[0].startswith("__")]    
     logging.info("%d model files loaded." % len(models))
     logging.info("%d actor files loaded" % len(actors))
     return (models, actors)
+
+class Simulation_Canvas(object):
+    """A canvas where blocks can be dragged around and connected up"""
+    def __init__(self, frame):
+        # Create the canvas
+        self.canvas = Canvas(frame, 
+                             width=550, height=250,
+                             relief=RIDGE, 
+                             background ="black", 
+                             borderwidth =1)
+        # Add event handlers for dragable items
+        self.canvas.tag_bind ("DRAG", "<ButtonPress-1>", self.mouse_down)
+        self.canvas.tag_bind ("DRAG", "<ButtonRelease-1>", self.mouse_release)
+        self.canvas.tag_bind ("DRAG", "<Enter>", self.enter)
+        self.canvas.tag_bind ("DRAG", "<Leave>", self.leave)
+        self.canvas.pack(side=TOP)
+        
+    def preview_actor(self, codefile):
+        """
+        Display a preview of an actor or compisite actor in the canvas,
+        it will be dragable into desired position
+        """
+        font = ("Helvetica", 14)
+        self.canvas.create_text (75, 75, font=font, text ="Preview Item", tags ="DRAG")
+    
+    def mouse_down(self, event):
+        logging.debug("down")
+    
+    def mouse_release(self, event):
+        logging.debug("up")
+        
+    def enter(self, event):
+        logging.debug("Enter")
+        
+    def leave(self, event):
+        logging.debug("Leaving")
 
 class App:
     """The base application"""
@@ -71,8 +107,8 @@ class App:
         main_frame = Frame(frame)
         main_frame.pack(side=LEFT)
 
-        self.canvas = Canvas(main_frame, width=80, height=100)
-        self.canvas.pack(side=TOP)
+        self.simulation = Simulation_Canvas(main_frame)
+
         # Frame to hold all the main buttons
         controls_frame = Frame(main_frame)
         controls_frame.pack(fill=X)
