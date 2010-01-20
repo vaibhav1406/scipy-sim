@@ -1,5 +1,5 @@
-from Tkinter import Listbox, Label, Scrollbar
-from Tkconstants import VERTICAL, SINGLE, RIGHT, Y, BOTH, END
+from Tkinter import Listbox, Label, Scrollbar, Button
+from Tkconstants import VERTICAL, SINGLE, BROWSE, RIGHT, Y, BOTH, END, ANCHOR
 
 class ExamplesGroup:
     """A group of actors to be displayed in a block."""
@@ -20,8 +20,8 @@ class ExamplesGroup:
         self.scrollbar = Scrollbar(self.frame, orient=VERTICAL)
         self.listbox = Listbox(self.frame, 
                                yscrollcommand=self.scrollbar.set, 
-                               selectmode=SINGLE)
-        
+                               selectmode=BROWSE)
+
         self.draw_list()
 
     def get_list(self):
@@ -54,8 +54,8 @@ class ExamplesGroup:
         self.scrollbar.config(command=self.listbox.yview)
         self.scrollbar.pack(side=RIGHT, fill=Y)
         self.listbox.pack(fill=BOTH, expand=1)
-        for i in self.get_list():
+        for i in self.codefiles:#self.get_list():
             self.listbox.insert(END, i)
 
-        # left mouse click on a list item to display selection
+        # left mouse click on a list item to display selection in source viewer
         self.listbox.bind('<ButtonRelease-1>', self.get_selection)

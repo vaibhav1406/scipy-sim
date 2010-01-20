@@ -23,3 +23,6 @@ class CodeFile:
         
         text = "".join(open(self.filepath, 'r').readlines())
         return text        
+
+    def __repr__(self):
+        return self.name
