@@ -8,7 +8,7 @@ from os import path
 class CodeFile:
     """
     This class wraps an Actor ar a model for the GUI.
-    It will contain instructions for drawing, connecting and running
+    It will contain instructions for drawing, connecting and running a simulation.
     """
     def __init__(self, filepath, name=None):
         """If the name is not given it will be the stripped file name.

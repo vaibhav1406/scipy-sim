@@ -2,20 +2,23 @@ from Tkinter import Listbox, Label, Scrollbar, Button
 from Tkconstants import VERTICAL, SINGLE, BROWSE, RIGHT, Y, BOTH, END, ANCHOR
 
 class ExamplesGroup:
-    """A group of actors to be displayed in a block."""
+    """A group of actors to be displayed in a single block."""
     def __init__(self, name, frame, codefiles, set_callbacks):
-        """Create a group of examples for display
+        """Create a group of examples for display and selection.
         
         Params:
         name - the name of this block
         frame - the frame to be attached to.
         codefiles - a list of CodeFile objects to be displayed
-        set-callbacks - what gets called when example is clicked on.
+        set-callbacks - a tuple of two functions: 
+                        both get called when an example is clicked on.
+                * The first is passed the text for the example.
+                * The second is passed the Codefile object.
         """
         self.name = name
         self.frame = frame
         self.codefiles = codefiles
-        self.set_text, self.set_filename = set_callbacks
+        self.set_text, self.set_active_block = set_callbacks
         
         self.scrollbar = Scrollbar(self.frame, orient=VERTICAL)
         self.listbox = Listbox(self.frame, 
@@ -44,7 +47,7 @@ class ExamplesGroup:
         index = self.listbox.curselection()[0]
         selected_name = self.listbox.get(index)
         selected_codefile = self.get_dict()[selected_name]
-        self.set_filename(selected_codefile.filepath)
+        self.set_active_block(selected_codefile)
         self.set_text(self.get_example(selected_name))
 
     def draw_list(self):

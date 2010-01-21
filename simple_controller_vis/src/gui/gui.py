@@ -46,35 +46,63 @@ def get_models_and_actors():
     logging.info("%d actor files loaded" % len(actors))
     return (models, actors)
 
+
+
 class Simulation_Canvas(object):
     """A canvas where blocks can be dragged around and connected up"""
+    # The class atribute colours will hold all the colour info 
+    # Randomly chossen from (visibone.com/colurlab)
+    colours = {
+         "background": "#CCFFCC",   # Pale weak green. A weak yellow is FFFFCC
+         "block": "#00FF66", # a lime green
+         "preview": "#0099FF", # a blue
+         "selected": "#FFCCCC" # pale weak red
+         }
     def __init__(self, frame):
         # Create the canvas
         self.canvas = Canvas(frame, 
                              width=550, height=250,
                              relief=RIDGE, 
-                             background ="black", 
+                             background =self.colours["background"], 
                              borderwidth =1)
         # Add event handlers for dragable items
         self.canvas.tag_bind ("DRAG", "<ButtonPress-1>", self.mouse_down)
-        self.canvas.tag_bind ("DRAG", "<ButtonRelease-1>", self.mouse_release)
+        #self.canvas.tag_bind ("DRAG", "<ButtonRelease-1>", self.mouse_release)
         self.canvas.tag_bind ("DRAG", "<Enter>", self.enter)
         self.canvas.tag_bind ("DRAG", "<Leave>", self.leave)
         self.canvas.pack(side=TOP)
+        
+        # Some locations
+        self.PREVIEW_LOCATION = (self.PREVIEW_X, self.PREVIEW_Y) = (75, 75)
+        self.BLOCK_SIZE = (self.BLOCK_WIDTH, self.BLOCK_HEIGHT) = (100, 50)
         
     def preview_actor(self, codefile):
         """
         Display a preview of an actor or compisite actor in the canvas,
         it will be dragable into desired position
         """
+        logging.debug("Preview of %(name)s on simulation canvas." % {'name':codefile.name})
         font = ("Helvetica", 14)
-        self.canvas.create_text (75, 75, font=font, text ="Preview Item", tags ="DRAG")
+        self.canvas.create_rectangle(*self.PREVIEW_LOCATION + self.BLOCK_SIZE, fill=self.colours["preview"], tags =["DRAG", codefile.name])
+        self.canvas.create_text (*self.PREVIEW_LOCATION, font=font, text = codefile.name, tags =["DRAG", codefile.name])
     
     def mouse_down(self, event):
-        logging.debug("down")
+        logging.debug("The mouse went down on a block. Binding mouse release...")
+        # TODO: WHAT BLOCK? SELECT IT.
+        self.select_location = (event.x, event.y)
+        self.canvas.addtag('Selected', 'withtag', 'DRAG')
+        event.widget.itemconfigure("DRAG", fill=self.colours["selected"])
+        self.canvas.bind("<ButtonRelease-1>", self.mouse_release)
     
     def mouse_release(self, event):
-        logging.debug("up")
+        logging.debug("The mouse was released at (%d, %d)" % (event.x, event.y))
+        if event.x >= 0 and event.x <= self.canvas.winfo_width() \
+            and event.y >= 0 and event.y <= self.canvas.winfo_height():
+                logging.debug("Valid move")
+                event.widget.itemconfigure("DRAG", fill=self.colours["block"])
+                self.canvas.move("Selected", event.x - self.select_location[0], event.y - self.select_location[1])                
+        else: logging.debug("Invalid move.") 
+        # TODO: Move selected block to here.
         
     def enter(self, event):
         logging.debug("Enter")
@@ -85,8 +113,10 @@ class Simulation_Canvas(object):
 class App:
     """The base application"""
     
-    def set_loaded_component(self, filename):
-        self.loadedComponent = filename
+    def set_active_block(self, codefile):
+        logging.debug("Loaded file: %s" % codefile.name)
+        self.loadedComponent = codefile.name
+        self.simulation.preview_actor(codefile)
     
     def __init__(self, frame):
         self.componentLoaded = False
@@ -99,7 +129,7 @@ class App:
         self.loadedComponent = ""
         
         # Create the list box widgets for models, and actors.
-        callbacks = (self.write_to_win, self.set_loaded_component)
+        callbacks = (self.write_to_win, self.set_active_block)
         ExamplesGroup("Models", file_frame, models, callbacks)
         ExamplesGroup("Actors", file_frame, actors, callbacks)
         
