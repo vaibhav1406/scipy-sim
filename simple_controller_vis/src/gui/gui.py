@@ -46,7 +46,16 @@ def get_models_and_actors():
     logging.info("%d actor files loaded" % len(actors))
     return (models, actors)
 
-
+class ID_Generator:
+    def __init__(self):
+        self.generator = self._get_unique_id()
+    
+    def get_unique_id(self):
+        return self.generator.next()
+    
+    def _get_unique_id(self):
+        for i in xrange(1e8):
+            yield i
 
 class Simulation_Canvas(object):
     """A canvas where blocks can be dragged around and connected up"""
@@ -73,7 +82,7 @@ class Simulation_Canvas(object):
         self.canvas.pack(side=TOP)
         
         # Some locations
-        self.PREVIEW_LOCATION = (self.PREVIEW_X, self.PREVIEW_Y) = (75, 75)
+        self.PREVIEW_LOCATION = (self.PREVIEW_X, self.PREVIEW_Y) = (50, 30)
         self.BLOCK_SIZE = (self.BLOCK_WIDTH, self.BLOCK_HEIGHT) = (100, 50)
         
     def preview_actor(self, codefile):
@@ -89,9 +98,13 @@ class Simulation_Canvas(object):
     def mouse_down(self, event):
         logging.debug("The mouse went down on a block. Binding mouse release...")
         # TODO: WHAT BLOCK? SELECT IT.
+        selected = self.canvas.gettags("current")
+        logging.debug("Currently selected items tags are %s" % selected.__repr__())
+        self.selected_name = [a for a in selected if a not in ["current", "DRAG"]][0]
+        logging.debug("Block selected was %s" % self.selected_name)
         self.select_location = (event.x, event.y)
-        self.canvas.addtag('Selected', 'withtag', 'DRAG')
-        event.widget.itemconfigure("DRAG", fill=self.colours["selected"])
+        self.canvas.addtag('Selected', 'withtag', self.selected_name) 
+        event.widget.itemconfigure("Selected", fill=self.colours["selected"])
         self.canvas.bind("<ButtonRelease-1>", self.mouse_release)
     
     def mouse_release(self, event):
@@ -99,8 +112,14 @@ class Simulation_Canvas(object):
         if event.x >= 0 and event.x <= self.canvas.winfo_width() \
             and event.y >= 0 and event.y <= self.canvas.winfo_height():
                 logging.debug("Valid move")
-                event.widget.itemconfigure("DRAG", fill=self.colours["block"])
-                self.canvas.move("Selected", event.x - self.select_location[0], event.y - self.select_location[1])                
+                event.widget.itemconfigure("Selected", fill=self.colours["block"])
+                
+                self.canvas.move("Selected", event.x - self.select_location[0], event.y - self.select_location[1])
+                #block = self.canvas.find_withtag('Selected')
+                block = self.canvas.gettags("Selected")
+                logging.debug("Block moved was made up of these components: %s" % block.__repr__())
+                self.canvas.dtag("Selected", "Selected")
+                                
         else: logging.debug("Invalid move.") 
         # TODO: Move selected block to here.
         
