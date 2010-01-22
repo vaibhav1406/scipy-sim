@@ -1,4 +1,4 @@
-﻿'''
+'''
 Created on 03/12/2009
 
 @author: allan
@@ -41,3 +41,4 @@ class CTSin(Source):
         logging.debug("CT Sinusoid process finished adding all data to queue")
         self.stop = True
         self.output_queue.put(None)
+
