@@ -47,6 +47,7 @@ def get_models_and_actors():
     return (models, actors)
 
 class ID_Generator:
+    #could use count from itertools
     def __init__(self):
         self.generator = self._get_unique_id()
     
@@ -59,8 +60,8 @@ class ID_Generator:
 
 class Simulation_Canvas(object):
     """A canvas where blocks can be dragged around and connected up"""
-    # The class atribute colours will hold all the colour info 
-    # Randomly chossen from (visibone.com/colurlab)
+    # The class attribute colours will hold all the colour info 
+    # Randomly chosen from (visibone.com/colurlab)
     colours = {
          "background": "#CCFFCC",   # Pale weak green. A weak yellow is FFFFCC
          "block": "#00FF66", # a lime green
@@ -148,7 +149,8 @@ class Simulation_Canvas(object):
                         #TODO HERE - add to model compiler or what ever...
                     event.widget.itemconfigure("Selected", fill=self.colours["block"])
                 else:
-                    event.widget.itemconfigure("Selected", fill=self.colours["preview"])    
+                    event.widget.itemconfigure("Selected", fill=self.colours["preview"])
+                    self.canvas.addtag_withtag("preview", "Selected")
                 
                 #block = self.canvas.gettags("Selected")
                 #logging.debug("Block moved was made up of these components: %s" % block.__repr__())
@@ -156,7 +158,7 @@ class Simulation_Canvas(object):
                                 
         else: 
             logging.info("Invalid move.")
-        # TODO: Move selected block to here.
+        
         
     def enter(self, event):
         logging.debug("Enter")
