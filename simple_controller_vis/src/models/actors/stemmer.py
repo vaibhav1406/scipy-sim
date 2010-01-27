@@ -2,7 +2,7 @@
 This dynamic stemmer shows a live signal stream.
 '''
 
-from Actor import Actor
+from Actor import DisplayActor
 import matplotlib.pyplot as plt
 import matplotlib.lines as lines
 import logging
@@ -13,7 +13,7 @@ GUI_LOCK = threading.Condition()
 
 import time
 
-class Stemmer(Actor):
+class Stemmer(DisplayActor):
     '''
     This actor shows a signal dynamically as it comes off the buffer with matplotlib.
     The max refresh rate is an optional input - default is 2Hz.

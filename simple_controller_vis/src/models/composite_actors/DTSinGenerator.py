@@ -1,13 +1,10 @@
-from actors.sin import Sin
-from actors.ramp import Ramp
-from actors.Actor import Channel
-from actors.model import Model
+from models.actors import Sin, Ramp, Channel, Source
 
 import logging
 logging.basicConfig(level=logging.info)
 logging.info("Logger enabled in DTSinGenerator")
 
-class DTSinGenerator(Model):
+class DTSinGenerator(Source):
     '''A discrete sinusoidal signal generator. 
     Generates points with a ramp source which feeds into a sin trig function.
     

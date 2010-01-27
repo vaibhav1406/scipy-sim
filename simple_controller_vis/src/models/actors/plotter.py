@@ -2,7 +2,7 @@
 This dynamic plotter shows a live signal stream.
 '''
 
-from Actor import Actor
+from Actor import DisplayActor
 import matplotlib.pyplot as plt
 import logging
 import threading
@@ -11,7 +11,7 @@ GUI_LOCK = threading.Condition()
 
 import time
 
-class Plotter(Actor):
+class Plotter(DisplayActor):
     '''
     This actor shows a signal dynamically as it comes off the buffer with matplotlib.
     The max refresh rate is an optional input - default is 2Hz
