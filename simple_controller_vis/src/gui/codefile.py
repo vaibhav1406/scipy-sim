@@ -49,8 +49,11 @@ class CodeFile:
             logging.info("Inherits from SISO - we know that it has one input and one output")
             self.num_inputs = 1
             self.num_outputs = 1
+        elif hasattr(block_class, "num_inputs") and hasattr(block_class, "num_outputs"):
+            self.num_inputs = block_class.num_inputs
+            self.num_outputs = block_class.num_outputs
         else:
-            logging.info("Non siso module, how many inputs/outputs?")
+            logging.info("Non siso module, and no info on how many inputs/outputs?")
             raise NotImplementedError()
         
         

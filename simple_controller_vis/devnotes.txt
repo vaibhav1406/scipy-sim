@@ -1,5 +1,11 @@
 Notes for future work
 
+NAME
+
+Posidonius - From Rhodes thought to have contributed to the antikythera machine - the earliest
+known example of "computing"
+
+
 GUI
 
 A model can be created in pure Python code - see all the early examples.

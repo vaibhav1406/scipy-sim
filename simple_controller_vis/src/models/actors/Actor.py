@@ -41,7 +41,7 @@ class Actor(threading.Thread):
     This is a base Actor class for use in a simulation.
     If an input queue was not explicitly passed in, creates one.
     '''
-    def __init__(self, input_queue=None, output_queue=None):
+    def __init__(self, input_queue=None, output_queue=None, *args, **kwargs):
         '''
         Constructor for a generic actor.
         
@@ -58,7 +58,7 @@ class Actor(threading.Thread):
             input_queue = queue.Queue(0)
         self.input_queue = input_queue
 
-        # A source doesn't require an output queue so this could be None
+        # A sink doesn't require an output queue so this could be None
         self.output_queue = output_queue
 
         self.stop = False
@@ -81,15 +81,20 @@ class Actor(threading.Thread):
         '''
         raise NotImplementedError()
 
+class DisplayActor(Actor):
+    pass
+
 class Source(Actor):
     '''
     This is just an abstract interface for a signal source.
     Requires an output queue.
     '''
 
-    def __init__(self, output_queue, simulation_time):
+    def __init__(self, output_queue, simulation_time=None):
         super(Source, self).__init__(output_queue=output_queue)
         self.simulation_time = simulation_time
+        self.num_inputs = 0
+        self.num_outputs = 1
 
     def process(self):
         '''

@@ -47,16 +47,13 @@ def get_models_and_actors():
     return (models, actors)
 
 class ID_Generator:
-    #could use count from itertools
+    from itertools import count
     def __init__(self):
-        self.generator = self._get_unique_id()
+        self.generator = count()
     
     def get_unique_id(self):
         return self.generator.next()
     
-    def _get_unique_id(self):
-        for i in xrange(1e8):
-            yield i
 
 class Simulation_Canvas(object):
     """A canvas where blocks can be dragged around and connected up"""

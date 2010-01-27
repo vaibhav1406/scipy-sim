@@ -1,6 +1,6 @@
-from actors import Model, Sin, Channel, Ramp
+from models.actors import Sin, Channel, Ramp, Source
 
-class CTSinGenerator(Model):
+class CTSinGenerator(Source):
     '''
     This model combines a ramp source with the sin trig function 
     to create a ct sin source.
