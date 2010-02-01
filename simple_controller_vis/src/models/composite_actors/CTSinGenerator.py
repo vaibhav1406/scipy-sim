@@ -5,6 +5,7 @@ class CTSinGenerator(Source):
     This model combines a ramp source with the sin trig function 
     to create a ct sin source.
     '''
+    
     def __init__(self, out, amplitude=1.0, freq=1.0, phi=0.0, timestep=0.001, simulation_time=10):
         super(CTSinGenerator, self).__init__(output_queue=out)
         self.chan = Channel()

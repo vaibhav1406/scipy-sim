@@ -24,7 +24,9 @@ class Summer(Actor):
     together at the corresponding tagged time.
     This has to be used with discrete signals, or at least aligned continuous signals.
     '''
-
+    num_outputs = 1
+    num_inputs = None
+    
     def __init__(self, inputs, output_queue, discard_incomplete_sets=True):
         """
         Constructor for a summation block
@@ -39,6 +41,7 @@ class Summer(Actor):
         """
         super(Summer, self).__init__(output_queue=output_queue)
         self.inputs = list(inputs)
+        self.num_inputs = len(self.inputs)
         self.discard_incomplete = discard_incomplete_sets
         self.data_is_stored = False
         self.future_data = []

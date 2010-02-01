@@ -82,19 +82,20 @@ class Actor(threading.Thread):
         raise NotImplementedError()
 
 class DisplayActor(Actor):
-    pass
+    num_inputs = 1
+    num_outputs = 0
 
 class Source(Actor):
     '''
     This is just an abstract interface for a signal source.
     Requires an output queue.
     '''
+    num_inputs = 0
+    num_outputs = 1
 
     def __init__(self, output_queue, simulation_time=None):
         super(Source, self).__init__(output_queue=output_queue)
         self.simulation_time = simulation_time
-        self.num_inputs = 0
-        self.num_outputs = 1
 
     def process(self):
         '''
