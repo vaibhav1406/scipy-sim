@@ -102,10 +102,9 @@ class Test_Code_File(unittest.TestCase):
         
     def test_composite_model(self):
         '''Test a composite_actor for num of inputs and output channels'''
-        c = CodeFile(self.src_dir + '/models/composite_actors/CTSinGenerator.py')
+        c = CodeFile(self.src_dir + '/models/composite_actors/DTSinGenerator.py')
         self.assertEqual(c.num_outputs, 1)
         self.assertEqual(c.num_inputs, 0)
         
 if __name__ == "__main__":
     unittest.main()
-    #c = CodeFile(Test_Code_File.src_dir + '/models/composite_actors/CTSinGenerator.py')

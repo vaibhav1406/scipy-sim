@@ -2,7 +2,7 @@
 This dynamic stemmer shows a live signal stream.
 '''
 
-from Actor import DisplayActor
+from models.actors import DisplayActor
 import matplotlib.pyplot as plt
 import matplotlib.lines as lines
 import logging

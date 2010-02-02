@@ -1,6 +1,6 @@
 
-from models.actors import Model, MakeChans, Plotter, Ramp, Summer
-
+from models.actors import Model, MakeChans, Ramp, Summer
+from models.actors.display import Plotter
 import matplotlib.pyplot as plt
 
 import logging
