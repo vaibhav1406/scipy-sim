@@ -2,7 +2,7 @@
 This dynamic plotter shows a live signal stream.
 '''
 
-from Actor import DisplayActor
+from models.actors import DisplayActor
 import matplotlib.pyplot as plt
 import logging
 import threading
@@ -16,13 +16,15 @@ class Plotter(DisplayActor):
     This actor shows a signal dynamically as it comes off the buffer with matplotlib.
     The max refresh rate is an optional input - default is 2Hz
     '''
-
+    active_plots = 0
     def __init__(self, input_queue, refresh_rate=2):
         super(Plotter, self).__init__(input_queue=input_queue)
+        Plotter.active_plots += 1 
         self.x_axis_data = []
         self.y_axis_data = []
         assert refresh_rate != 0
         self.refresh_rate = refresh_rate
+        
         plt.ion()
         self.line, = plt.plot(self.x_axis_data, self.y_axis_data)
         self.refreshs = 0

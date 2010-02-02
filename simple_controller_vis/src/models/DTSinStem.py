@@ -1,4 +1,5 @@
-from models.actors import Stemmer, Channel, Model
+from models.actors import Channel, Model
+from models.actors.display import Stemmer
 from models.composite_actors import DTSinGenerator
 
 

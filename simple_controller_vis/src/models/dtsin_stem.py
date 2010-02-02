@@ -11,7 +11,8 @@ Created on 04/12/2009
 @author: allan, brian
 '''
 #import models.actors
-from models.actors import Channel, Stemmer, Model
+from models.actors import Channel, Model
+from models.actors.display import Stemmer
 from models.actors.dtsin import DTSin # has been removed from main actors imports
 
 

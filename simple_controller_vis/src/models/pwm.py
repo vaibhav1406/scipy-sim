@@ -8,7 +8,7 @@ Created on 13/12/2009
 from models.actors import Model, Plotter, Ramp, Summer, Copier, \
         GreaterThan, Subtractor, Constant, PassThrough
 from models.composite_actors import CTSinGenerator
-import matplotlib.pyplot as plt
+
 from models.actors.Actor import MakeChans
 
 import logging

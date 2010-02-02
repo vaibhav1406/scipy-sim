@@ -4,9 +4,8 @@ Created on 23/11/2009
 @author: brian
 '''
 
-from models.actors import MakeChans, Model, Plotter, Ramp, Summer, Delay, RandomSource
-
-import matplotlib.pyplot as plt
+from models.actors import MakeChans, Model, Ramp, Summer, Delay, RandomSource
+from models.actors.display import Plotter
 
 import logging
 logging.basicConfig(level=logging.INFO)

@@ -1,5 +1,7 @@
 from models.actors import Channel, Plotter, Ramp, Summer, Copier, RandomSource, Model
 
+from models.actors.buffer import Bundle
+from models.actors.display.bundlePlotter import BundlePlotter
 class MultiSumPlot(Model):
     '''
     This example connects 3 sources ( 2 ramps and a random) to a summer block
@@ -18,6 +20,7 @@ class MultiSumPlot(Model):
         connection2 = Channel()
         connection3 = Channel()
         connection4 = Channel()
+        connection5 = Channel()
     
         src1 = Ramp(connection1, freq=1.0 / 120)
         src2 = Ramp(connection2)
@@ -27,9 +30,11 @@ class MultiSumPlot(Model):
         progress_plotter = Plotter(connection1_2)
         
         summer = Summer([connection1_1, connection2, connection3], connection4)
-        dst = Plotter(connection4)
+        
+        bundler = Bundle(connection4, connection5)
+        dst = BundlePlotter(connection5)
     
-        self.components = [src1, src2, src3, summer, dst, cloning_probe, progress_plotter]
+        self.components = [src1, src2, src3, summer, dst, cloning_probe, progress_plotter, bundler]
 
 if __name__ == '__main__':
     MultiSumPlot().run()
