@@ -4,8 +4,8 @@ Created on 23/11/2009
 @author: brian
 '''
 import logging
-import numpy
-from Actor import Source
+from numpy import linspace
+from scipysim.actors import Source
 
 class Constant(Source):
     '''
@@ -26,7 +26,7 @@ class Constant(Source):
     def process(self):
         """Create the numbers..."""
         logging.debug("Running ramp process")
-        tags = numpy.linspace(0, self.simulation_time, self.simulation_time * self.resolution, endpoint=self.endpoint)  # for now just compute 2 minutes of values
+        tags = linspace(0, self.simulation_time, self.simulation_time * self.resolution, endpoint=self.endpoint)  # for now just compute 2 minutes of values
 
         [self.output_queue.put( {
                     "tag": tag,

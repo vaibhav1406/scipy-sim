@@ -6,9 +6,7 @@ Created on 23/11/2009
 
 import logging
 import numpy
-from siso import Siso
-
-import Queue as queue
+from scipysim.actors import Siso, Channel
 
 class Proportional(Siso):
     '''
@@ -41,8 +39,8 @@ class ProportionalTests(unittest.TestCase):
     '''Test the Proportional Actor'''
     def test_basic_proportional(self):
         '''Test doubling a queue.'''
-        q_in = queue.Queue()
-        q_out = queue.Queue()
+        q_in = Channel()
+        q_out = Channel()
 
         inp = [{'value':1, 'tag':i} for i in xrange(100)]
         expected_output = [{'value':2, 'tag':i} for i in xrange(100)]

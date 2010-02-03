@@ -7,12 +7,9 @@ Created on 13/12/2009
 
 @author: Brian
 '''
+
+from scipysim.actors import Actor, Channel
 import logging
-#logging.basicConfig(level=logging.DEBUG)
-
-from Actor import Actor, Channel
-import unittest
-
 
 class PassThrough(Actor):
     '''
@@ -75,114 +72,3 @@ class PassThrough(Actor):
                 self.output_queue.put(else_data_in)
             else:
                 logging.debug("Discarding data.")
-                
-            
-
-class PassThroughTests(unittest.TestCase):
-    '''Test the IF actor'''
-    def setUp(self):
-        '''General set up that will be used in all tests'''
-        self.data_in = Channel()
-        self.bool_in = Channel()
-        self.output = Channel()
-        
-        # Some fake boolean data
-        self.every_second_point = [True, False] * 50
-        self.no_points = [False] * 100
-        
-        # some fake pass through data, and add it to the queue
-        self.data = range(100)
-        [self.data_in.put({'tag':i, 'value':i}) for i in range(100)]
-        self.data_in.put(None)
-        
-        # create the block
-        self.block = PassThrough(self.bool_in, self.data_in, self.output)
-        
-    def test_all_points(self):
-        '''Test that it passes through every point when given True control signal'''
-        every_point = [True] * 100
-        [self.bool_in.put({'tag':i, 'value':every_point[i]}) for i in self.data]
-        self.bool_in.put(None)
-        self.block.start()
-        self.block.join()
-        [self.assertEquals(self.output.get()['tag'], i) for i in self.data]
-        self.assertEquals(None, self.output.get())
-    
-    def test_every_second_point(self):
-        '''Test every second point is passed through
-        and that the rest is discarded
-        '''
-        [self.bool_in.put(
-                          {'tag':i, 'value':self.every_second_point[i]}
-                         ) for i in self.data]
-        self.bool_in.put(None)
-        self.block.start()
-        self.block.join()
-        [self.assertEquals(self.output.get()['tag'], 
-                           i) for i in self.data if i % 2 == 0]
-        self.assertEquals(None, self.output.get())
-        
-
-    def test_no_points(self):
-        '''Test that no points get passed through for an all False signal'''
-        [self.bool_in.put(
-                          {'tag':i, 
-                           'value':self.no_points[i]
-                           } ) for i in self.data]
-        self.bool_in.put(None)
-        self.block.start()
-        self.block.join()
-        self.assertEquals(None, self.output.get())
-
-class ElsePassThroughTests(unittest.TestCase):
-    '''Test the IF-Else actor'''
-    def setUp(self):
-        '''General set up that will be used in all tests'''
-        self.data_in = Channel()
-        self.alt_data_in = Channel()
-        self.bool_in = Channel()
-        self.output = Channel()
-        
-        # Some fake boolean data
-        self.every_second_point = [True, False] * 50
-        
-        # some fake pass through data, and add it to the queue
-        self.data = range(100)
-        self.data_alt = 10*self.data
-        [self.alt_data_in.put(
-                              {'tag':i, 'value':self.data_alt[i]}
-                              ) for i in range(100)]
-        [self.data_in.put({'tag':i, 'value':i}) for i in range(100)]
-        self.data_in.put(None)
-        self.alt_data_in.put(None)
-        
-        # create the block
-        self.block = PassThrough(self.bool_in, 
-                                 self.data_in, 
-                                 self.output, 
-                                 else_data_input=self.alt_data_in)
-        
-    def test_every_second_alternative(self):
-        '''Test merging with if - else actor.
-        half the values come from one queue, and half from the other'''
-        [self.bool_in.put(
-                          {'tag':i, 'value':self.every_second_point[i]}
-                         ) for i in self.data]
-        self.bool_in.put(None)
-        self.block.start()
-        self.block.join()
-        for i in self.data:
-            output = self.output.get(True)
-            self.assertEquals(output['tag'], i)
-            if i % 2 == 0:
-                self.assertEquals(output['value'], i)
-            else:
-                self.assertEquals(output['value'], self.data_alt[i])
-        self.assertEquals(None, self.output.get())
-        
-                
-if __name__ == "__main__":
-    unittest.main()
-    #suite = unittest.TestLoader().loadTestsFromTestCase(PassThroughTests)
-    #unittest.TextTestRunner(verbosity=4).run(suite)
-

@@ -13,10 +13,7 @@ Created on 24/11/2009
 '''
 import logging
 import numpy as np
-from Actor import Actor
-
-import Queue as queue
-
+from scipysim.actors import Actor, Channel
 
 class Summer(Actor):
     '''
@@ -127,9 +124,9 @@ import unittest
 class SummerTests(unittest.TestCase):
     def test_basic_summer(self):
         '''Test adding two queues of complete pairs together'''
-        q_in_1 = queue.Queue()
-        q_in_2 = queue.Queue()
-        q_out = queue.Queue()
+        q_in_1 = Channel()
+        q_in_2 = Channel()
+        q_out = Channel()
 
         input1 = [{'value':1, 'tag':i} for i in xrange(100)]
         input2 = [{'value':2, 'tag':i} for i in xrange(100)]
@@ -152,9 +149,9 @@ class SummerTests(unittest.TestCase):
         Test adding two queues where one is delayed by ONE time step difference
         Summer is set up to discard incomplete sets
         '''
-        q_in_1 = queue.Queue()
-        q_in_2 = queue.Queue()
-        q_out = queue.Queue()
+        q_in_1 = Channel()
+        q_in_2 = Channel()
+        q_out = Channel()
 
         input1 = [{'value':1, 'tag':i} for i in xrange(100)]
         input2 = [{'value':2, 'tag':i + 1} for i in xrange(100)]
@@ -178,9 +175,9 @@ class SummerTests(unittest.TestCase):
         time step difference. Summer is set up to discard incomplete sets
         '''
         DELAY = 2
-        q_in_1 = queue.Queue()
-        q_in_2 = queue.Queue()
-        q_out = queue.Queue()
+        q_in_1 = Channel()
+        q_in_2 = Channel()
+        q_out = Channel()
 
         input1 = [{'value':1, 'tag':i} for i in xrange(100)]
         input2 = [{'value':2, 'tag':i + DELAY} for i in xrange(100)]
@@ -205,9 +202,9 @@ class SummerTests(unittest.TestCase):
         Test adding two queues where one is delayed by ONE time step difference
         Summer is set up to SUM incomplete sets
         '''
-        q_in_1 = queue.Queue()
-        q_in_2 = queue.Queue()
-        q_out = queue.Queue()
+        q_in_1 = Channel()
+        q_in_2 = Channel()
+        q_out = Channel()
 
         input1 = [{'value':1, 'tag':i} for i in xrange(100)]
         input2 = [{'value':2, 'tag':i + 1} for i in xrange(100)]
@@ -242,8 +239,8 @@ class SummerTests(unittest.TestCase):
         '''
         num_input_queues, num_data_points = 50, 100
 
-        input_queues = [queue.Queue() for i in xrange(num_input_queues)]
-        output_queue = queue.Queue()
+        input_queues = [Channel() for i in xrange(num_input_queues)]
+        output_queue = Channel()
 
         # Fill each queue with num_data_points of its own index
         # So queue 5 will be full of the value 4, then a None
@@ -267,8 +264,8 @@ class SummerTests(unittest.TestCase):
         DELAY = 20
         num_input_queues, num_data_points = 50, 100
 
-        input_queues = [queue.Queue() for i in xrange(num_input_queues)]
-        output_queue = queue.Queue()
+        input_queues = [Channel() for i in xrange(num_input_queues)]
+        output_queue = Channel()
 
         # Fill each queue with num_data_points of its own index
         # So queue 5 will be full of the value 4, then a None

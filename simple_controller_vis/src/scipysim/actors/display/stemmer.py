@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import matplotlib.lines as lines
 import logging
 import threading
-import copy
 
 GUI_LOCK = threading.Condition()
 

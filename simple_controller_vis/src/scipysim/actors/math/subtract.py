@@ -9,9 +9,7 @@ Created on 24/11/2009
 '''
 import logging
 import numpy as np
-from Actor import Actor
-
-import Queue as queue
+from scipysim.actors import Actor, Channel
 
 
 class Subtractor(Actor):
@@ -124,9 +122,9 @@ import unittest
 class SubtractionTests(unittest.TestCase):
     def test_basic_subtract(self):
         '''Test subtracting two queues of complete pairs together'''
-        q_in_1 = queue.Queue()
-        q_in_2 = queue.Queue()
-        q_out = queue.Queue()
+        q_in_1 = Channel()
+        q_in_2 = Channel()
+        q_out = Channel()
 
         input1 = [{'value':10, 'tag':i} for i in xrange(100)]
         input2 = [{'value':2, 'tag':i} for i in xrange(100)]
