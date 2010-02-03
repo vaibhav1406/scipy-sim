@@ -21,6 +21,7 @@ class Reader(Source):
                                 'titles': ['Domain', 'Name']
                              }
     Note the titles may be used to store domain and signal name information.
+    
     The data can be recovered as seperate arrays with data['Tag'] and data['Value']
     or it can be treated as a list of event tuples.
     '''
@@ -33,4 +34,42 @@ class Reader(Source):
         [self.output_queue.put({"tag": tag,'value': value}) for (tag,value) in x]
         self.output_queue.put(None)
         self.stop = True
+    
+
+class TextReader(Source):
+    '''This source creates string objects from a file.
+    
+    '''
+    def __init__(self, output_queue, filename, send_as_words=False):
+        '''A TextReader requires a valid filename to read from.
+        The data may be sent as lines or words, lines are the
+        default
+        '''
+        super(TextReader, self).__init__(output_queue=output_queue)
+        self.file = open(filename, 'r')
+        self.send_as_words = send_as_words
+   
+    def process(self):
+        for i,line in enumerate(self.file):
+            if self.send_as_words:
+                [self.output_queue.put({"tag": i*j,'value': word.strip()}) for j, word in enumerate(line.split())]
+            else:
+                self.output_queue.put({"tag": i,'value': line.strip()})
+        self.output_queue.put(None)
+        self.stop = True
             
+from models.actors import Channel
+def test_text_reader():
+    filename = "reader.py"
+    output = Channel()
+    reader = TextReader(output, filename, send_as_words=True)
+    reader.start()
+    reader.join()
+    print output.get()
+    print output.get()
+
+if __name__ == "__main__":
+    test_text_reader()
+
+    
+    

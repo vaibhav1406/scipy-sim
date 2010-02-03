@@ -1,27 +1,37 @@
 '''
-Created on Feb 1, 2010
-@see multiple_summation... for a use.
+This plotting actor creates an output image (png) and optionally opens it.
+Since static images don't animate very well it gets all the input at once in a "bundle".
+
+@see multiple_summation_r... for a model which uses both dynamic and static plots.
+@see noisy_ramp_plot for a model which uses just this static plot.
+
 @author: brianthorne
 '''
+
 from models.actors.buffer import Bundle
-from models.actors import DisplayActor, Channel
+from models.actors import Actor, DisplayActor, Channel
+
 import numpy
 
-import matplotlib.pyplot as plt
+import logging
+
+import matplotlib
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
+
+
 
 class BundlePlotter(DisplayActor):
     '''
     A plot that is NOT dynamic. It takes a packet or bundle of events
     and plots it all at once.
     '''
-    def __init__(self, input_queue):
+    def __init__(self, input_queue, title="ScipySim"):
         super(BundlePlotter, self).__init__(input_queue=input_queue)
-        #plt.figure()
-
+        self.title = title
         
     def process(self):
         self.data = self.input_queue.get(True)     # this is blocking
-        
         if self.data is None:
             self.stop = True
         else:
@@ -30,7 +40,25 @@ class BundlePlotter(DisplayActor):
     def plot(self):
         self.x_axis_data = self.data["Tag"]
         self.y_axis_data = self.data["Value"]
-        self.line, = plt.plot(self.x_axis_data, self.y_axis_data)
+        logging.info("Creating static plot of %d items" % len(self.data))
+        
+        f = Figure()
+        canvas = FigureCanvas(f)
+        
+        a = f.add_subplot(111)
+        a.plot(self.x_axis_data, self.y_axis_data)
+        a.set_title(self.title)
+        a.grid(True)
+        
+        # This creates a png image in the current directory
+        canvas.print_figure(self.title, dpi=80) 
+        logging.info("Saved output png image.")
+        import webbrowser
+        import os
+        url = "file://" + os.getcwd() + "/" + self.title + ".png"
+        logging.info("Image was saved at %s" % url)
+        webbrowser.open_new_tab(url)
+
             
 import unittest
 class BundlePlotTests(unittest.TestCase):
