@@ -4,12 +4,12 @@ Created on 1/12/2009
 @author: brian
 '''
 
-from Actor import Actor
+from scipysim.actors import Actor
 import logging
 import unittest
 
 class Interpolator(Actor):
-    pass
+    raise NotImplementedError
 
 
 

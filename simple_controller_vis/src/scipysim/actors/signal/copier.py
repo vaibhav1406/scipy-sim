@@ -1,8 +1,8 @@
 import logging
 
-from Actor import Actor
+from scipysim.actors import Actor, Channel
 
-import Queue as queue
+
 
 class Copier(Actor):
     '''
@@ -40,9 +40,9 @@ class CopierTests(unittest.TestCase):
     '''Test the Copier Actor'''
     def test_basic_copy(self):
         '''Test getting two for the price of one - cloning a queue'''
-        q_in = queue.Queue()
-        q_out1 = queue.Queue()
-        q_out2 = queue.Queue()
+        q_in = Channel()
+        q_out1 = Channel()
+        q_out2 = Channel()
 
         inp = {'value':15, 'tag':1}
 

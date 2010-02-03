@@ -4,8 +4,8 @@ Created on 23/11/2009
 @author: brian
 '''
 import logging
-import numpy
-from Actor import Source, Actor
+from numpy import linspace
+from scipysim.actors import Source, Actor
 
 import time, random # These are used to test the async
 
@@ -29,7 +29,7 @@ class Ramp(Source):
     def process(self):
         """Create the numbers..."""
         logging.debug("Running ramp process")
-        tags = numpy.linspace(0, self.simulation_time, self.simulation_time * self.resolution, endpoint=self.endpoint)  # for now just compute 2 minutes of values
+        tags = linspace(0, self.simulation_time, self.simulation_time * self.resolution, endpoint=self.endpoint)  # for now just compute 2 minutes of values
 
         for tag in tags:
             value = tag * self.frequency * self.amplitude

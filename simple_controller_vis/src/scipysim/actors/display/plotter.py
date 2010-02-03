@@ -17,7 +17,7 @@ class Plotter(DisplayActor):
     The max refresh rate is an optional input - default is 1/2Hz
     '''
     active_plots = 0
-    def __init__(self, input_queue, refresh_rate=0.5):
+    def __init__(self, input_queue, refresh_rate=0.5, title='Scipy Simulator Dynamic Plot'):
         super(Plotter, self).__init__(input_queue=input_queue)
         Plotter.active_plots += 1 
         self.x_axis_data = []
@@ -29,7 +29,7 @@ class Plotter(DisplayActor):
         
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(111)
-        self.title = self.ax.set_title('Scipy Simulator Dynamic Plot') 
+        self.title = self.ax.set_title(title) 
         self.line, = self.ax.plot(self.x_axis_data, self.y_axis_data)
         self.refreshs = 0
 

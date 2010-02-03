@@ -3,7 +3,10 @@ Created on 23/11/2009
 
 @author: brian
 '''
-from scipysim.actors import Plotter, Proportional, Ramp, Channel, Model
+from scipysim.actors.display import Plotter
+from scipysim.actors import Channel, Model
+from scipysim.actors.math import Proportional
+from scipysim.actors.signal import Ramp
 
 class RampGainPlot(Model):
     '''

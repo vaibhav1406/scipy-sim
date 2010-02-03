@@ -1,6 +1,6 @@
 import logging
 
-from Actor import Actor, DisplayActor
+from scipysim.actors import Actor, DisplayActor
 
 class Model(Actor):
     '''
@@ -42,7 +42,7 @@ class Model(Actor):
         if any(issubclass(a.__class__, DisplayActor) for a in self.components):
             import matplotlib.pyplot as plt
             logging.info('The program will stay "running" while the plot is open')
-            #plt.show()
+            plt.show()
     
         [component.join() for component in self.components]
 

@@ -1,4 +1,6 @@
-from scipysim.actors import Sin, Channel, Ramp, Source
+from scipysim.actors import Channel, Source
+from sin import Sin
+from scipysim.actors.signal import Ramp
 
 class CTSinGenerator(Source):
     '''

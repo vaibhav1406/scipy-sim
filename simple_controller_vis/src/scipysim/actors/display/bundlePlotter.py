@@ -21,7 +21,7 @@ from matplotlib.figure import Figure
 
 
 
-class BundlePlotter(DisplayActor):
+class BundlePlotter(Actor):
     '''
     A plot that is NOT dynamic. It takes a packet or bundle of events
     and plots it all at once.

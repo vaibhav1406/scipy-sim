@@ -4,7 +4,7 @@ From this module there are several submodules containing groups
 of actors.
 """
 # First we import the bits that every block will probably need
-from Actor import Channel, Actor, MakeChans, Source, DisplayActor
+from Actor import Channel, Actor, MakeChans, Source, DisplayActor, InvalidSimulationInput
 from model import Model
 from siso import Siso, TestSisoActor, TestCTSisoActor
 

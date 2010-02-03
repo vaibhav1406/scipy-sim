@@ -5,8 +5,7 @@ Created on 23/11/2009
 '''
 
 import logging
-from siso import Siso
-import Queue as queue
+from scipysim.actors import Siso, Channel
 
 import unittest
 import numpy
@@ -43,11 +42,11 @@ class Delay(Siso):
         return data
 
 
-
+from numpy import linspace, arange
 class DelayTests(unittest.TestCase):
     def setUp(self):
-        self.q_in = queue.Queue()
-        self.q_out = queue.Queue()
+        self.q_in = Channel()
+        self.q_out = Channel()
 
     def tearDown(self):
         del self.q_in
@@ -75,8 +74,8 @@ class DelayTests(unittest.TestCase):
         simulation_time = 120   # seconds to simulate
         resolution = 10.0       # samples per second (10hz)
         
-        tags = numpy.linspace(0, simulation_time, simulation_time / resolution) 
-        values = numpy.arange(len(tags))
+        tags = linspace(0, simulation_time, simulation_time / resolution) 
+        values = arange(len(tags))
         data_in = [{'value':values[i], 'tag':tags[i]} for i in xrange(len(tags))]
         expected_output = [{'value':values[i], 'tag': tags[i] + delay } for i in xrange(len(tags))]
         

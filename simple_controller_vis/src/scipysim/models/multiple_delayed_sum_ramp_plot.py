@@ -4,7 +4,9 @@ Created on 23/11/2009
 @author: brian
 '''
 
-from scipysim.actors import MakeChans, Model, Ramp, Summer, Delay, RandomSource
+from scipysim.actors import MakeChans, Model
+from scipysim.actors.signal import  Ramp, Delay, RandomSource
+from scipysim.actors.math import Summer
 from scipysim.actors.display import Plotter
 
 import logging
