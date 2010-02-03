@@ -1,7 +1,8 @@
 
-from scipysim.actors import Model, MakeChans, Ramp, Summer
+from scipysim.actors import Model, MakeChans
+from scipysim.actors.signal import Ramp
+from scipysim.actors.math import Summer
 from scipysim.actors.display import Plotter
-import matplotlib.pyplot as plt
 
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -13,7 +14,7 @@ class Double_Ramp_Plot(Model):
     are connected to a summer block and then plotted.
     '''
     
-    def run(self):
+    def __init__(self):
         '''
         A basic simulation that sums two (default) Ramp sources 
         together and plots the combined output.
@@ -24,19 +25,9 @@ class Double_Ramp_Plot(Model):
         src2 = Ramp(connection2)
         
         summer = Summer([connection1, connection2], connection3)
-        dst = Plotter(connection3)
+        dst = Plotter(connection3, title="Double Ramp Sum")
     
-        components = [src1, src2, summer, dst]
-    
-        logging.info("Starting actors in simulation")
-        [component.start() for component in components]
-        logging.info("Finished starting actors, running simulation...")
-    
-        plt.show()   # The program will stay "running" while this plot is open
-    
-        [component.join() for component in components]
-        logging.info("Finished running simulation")
-
+        self.components = [src1, src2, summer, dst]
 
 if __name__ == '__main__':
     Double_Ramp_Plot().run()

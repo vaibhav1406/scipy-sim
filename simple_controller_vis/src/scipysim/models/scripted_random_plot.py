@@ -3,7 +3,9 @@ Created on 23/11/2009
 
 @author: brian
 '''
-from scipysim.actors import Plotter, RandomSource, Channel, Model
+from scipysim.actors import Channel, Model
+from scipysim.actors.display import Plotter
+from scipysim.actors.signal import RandomSource
 
 class RandomPlot(Model):
     '''

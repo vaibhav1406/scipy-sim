@@ -8,12 +8,10 @@ Notes
 How do we deal with "weird" input signals... what about random time intervals in DE?
 Incompatible input/output frequencies...?
 '''
-from siso import Siso
-from Actor import Actor, InvalidSimulationInput
-from Actor import Channel
+from scipysim.actors import Siso, Actor, Channel, InvalidSimulationInput
 import logging
 import unittest
-import numpy
+from numpy import linspace
 
 
 class Sampler(Siso):
@@ -90,7 +88,7 @@ class SamplerTests(unittest.TestCase):
         # Create tags for a signal from 0 to 120 seconds. 
         # length = number of seconds * ( samples per second + 1)
         freq = simulation_time * resolution
-        tags = numpy.linspace(0, simulation_time , (freq) + 1)
+        tags = linspace(0, simulation_time , (freq) + 1)
 
         # Create 120 seconds of a discrete time signal with a 10hz frequency
         inp = [{'value':1, 'tag':i} for i in tags]
@@ -123,7 +121,7 @@ class SamplerTests(unittest.TestCase):
         # Create tags for a signal from 0 to 120 seconds. 
         # length = number of seconds * ( samples per second + 1)
         freq = simulation_time * resolution
-        tags = numpy.linspace(0, simulation_time , (freq) + 1)
+        tags = linspace(0, simulation_time , (freq) + 1)
 
         # Create 120 seconds of a discrete time signal with a 10hz frequency
         inp = [{'value':1, 'tag':i} for i in tags]

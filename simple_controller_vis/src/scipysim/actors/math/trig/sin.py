@@ -1,6 +1,6 @@
 
 import logging
-import numpy
+from numpy import sin, pi
 #from Actor import Source, Actor
 from scipysim.actors.siso import Siso
 
@@ -27,7 +27,7 @@ class Sin(Siso):
         logging.debug("Running sin process")
 
         tag = obj['tag']        
-        value = self.amplitude * numpy.sin(2 * numpy.pi * self.frequency * tag + self.phase)
+        value = self.amplitude * sin(2 * pi * self.frequency * tag + self.phase)
 
         data = {
                 "tag": tag,

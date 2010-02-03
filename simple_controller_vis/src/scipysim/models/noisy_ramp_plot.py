@@ -4,9 +4,12 @@ Created on 23/11/2009
 @author: brian
 '''
 
-from scipysim.actors import Channel, Ramp, Summer, RandomSource, Model
+from scipysim.actors import Channel, Model
 from scipysim.actors.display.bundlePlotter import BundlePlotter
-from scipysim.actors.buffer import Bundle
+from scipysim.actors.io import Bundle
+from scipysim.actors.signal import Ramp, RandomSource
+from scipysim.actors.math import Summer
+
 import logging
 logging.basicConfig(level=logging.INFO)
 logging.info("Logger enabled")

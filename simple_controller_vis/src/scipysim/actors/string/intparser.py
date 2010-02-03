@@ -4,27 +4,27 @@ Created on Feb 2, 2010
 @author: brianthorne
 '''
 from scipysim.actors import Siso
+import logging
 
 class IntParser(Siso):
     '''
     Takes a tagged string input and if possible converts into integers.
     '''
 
-    def __init__(self, input_queue, output_queue, child_handles_output=True):
+    def __init__(self, input_queue, output_queue):
         super(IntParser, self).__init__(input_queue=input_queue,
-                                  output_queue=output_queue)
+                                        output_queue=output_queue,
+                                        child_handles_output=True)
 
     def siso_process(self, obj):
-        try:
-            obj['value'] = int(obj['value'])
-            self.output_queue.put(obj)
-        except:
-            pass
+        obj['value'] = int(obj['value'])
+        self.output_queue.put(obj)
+        #logging.warn("Probably just broke something... tried to parse string to int but failed")
         
 import unittest
 from scipysim.actors import Channel
 from scipysim.actors.siso import TestSisoActor
-class TestIntParser(unittest.TestCase):
+class IntParserTests(unittest.TestCase):
     
     def setUp(self):
         self.q_in = Channel()

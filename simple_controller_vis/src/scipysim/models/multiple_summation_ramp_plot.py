@@ -1,6 +1,8 @@
-from scipysim.actors import Channel, Plotter, Ramp, Summer, Copier, RandomSource, Model
-
-from scipysim.actors.buffer import Bundle
+from scipysim.actors import Channel, Model
+from scipysim.actors.display import Plotter
+from scipysim.actors.signal import Ramp, Copier, RandomSource
+from scipysim.actors.math import Summer
+from scipysim.actors.io import Bundle
 from scipysim.actors.display.bundlePlotter import BundlePlotter
 
 class MultiSumPlot(Model):

@@ -3,8 +3,7 @@ Created on 1/12/2009
 
 @author: brian
 '''
-from siso import Siso
-import Queue as queue
+from scipysim.actors import Siso, Channel
 import unittest
 
 class Decimator(Siso):
@@ -39,8 +38,8 @@ class DecimatorTests(unittest.TestCase):
         '''
         Unit test setup code
         '''
-        self.q_in = queue.Queue()
-        self.q_out = queue.Queue()
+        self.q_in = Channel()
+        self.q_out = Channel()
 
     def test_basic_integer_tags(self):
         '''Test halving the frequency we sample a simple integer signal.

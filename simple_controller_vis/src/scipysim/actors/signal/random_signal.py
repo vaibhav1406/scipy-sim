@@ -3,9 +3,9 @@ Created on 19/11/2009
 TODO
 @author: brian
 '''
-from Actor import Source, Actor
+from scipysim.actors import Source
 import logging
-import numpy
+from numpy import linspace
 import time
 import random
 
@@ -37,7 +37,7 @@ class RandomSource(Source):
     def process(self):
         """Create the numbers..."""
         logging.debug("Running ramp process")
-        tags = numpy.linspace(0, self.simulation_time, self.simulation_time * self.resolution, endpoint=False)
+        tags = linspace(0, self.simulation_time, self.simulation_time * self.resolution, endpoint=False)
 
         for tag in tags:
             value = random.random() * self.amplitude

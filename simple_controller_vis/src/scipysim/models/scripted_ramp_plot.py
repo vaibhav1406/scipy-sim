@@ -3,7 +3,9 @@ Created on 23/11/2009
 
 @author: brian
 '''
-from scipysim.actors import Plotter, Ramp, Channel, Model
+from scipysim.actors.signal import Ramp
+from scipysim.actors.display import Plotter
+from scipysim.actors import Channel, Model
 
 class RampPlot(Model):
     '''This example simulation connects a ramp source to a plotter.'''
