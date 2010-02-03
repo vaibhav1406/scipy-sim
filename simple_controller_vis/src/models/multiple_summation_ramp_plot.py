@@ -2,6 +2,7 @@ from models.actors import Channel, Plotter, Ramp, Summer, Copier, RandomSource, 
 
 from models.actors.buffer import Bundle
 from models.actors.display.bundlePlotter import BundlePlotter
+
 class MultiSumPlot(Model):
     '''
     This example connects 3 sources ( 2 ramps and a random) to a summer block

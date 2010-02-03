@@ -31,7 +31,7 @@ class Model(Actor):
 
     def run(self):
         '''The run function starts the model or simulation usually by calling the process
-        function. 
+        function. It counts as the "main" thread for a running simulation.
         '''
         assert hasattr(self, 'components')
         
@@ -42,7 +42,7 @@ class Model(Actor):
         if any(issubclass(a.__class__, DisplayActor) for a in self.components):
             import matplotlib.pyplot as plt
             logging.info('The program will stay "running" while the plot is open')
-            plt.show()   
+            #plt.show()
     
         [component.join() for component in self.components]
 

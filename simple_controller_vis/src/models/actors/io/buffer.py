@@ -1,7 +1,7 @@
 
 import logging
-from models.actors import Actor
-import Queue as queue
+from models.actors import Actor, Channel
+
 
 import unittest
 import numpy
@@ -75,9 +75,9 @@ class Unbundle(Actor):
         
 class BundleTests(unittest.TestCase):
     def setUp(self):
-        self.q_in = queue.Queue()
-        self.q_out = queue.Queue()
-        self.q_out2 = queue.Queue()
+        self.q_in = Channel()
+        self.q_out = Channel()
+        self.q_out2 = Channel()
         self.input = [{'value': 1, 'tag': i } for i in xrange(100)]
 
     def tearDown(self):
