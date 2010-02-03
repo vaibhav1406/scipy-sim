@@ -4,7 +4,7 @@ Created on Feb 1, 2010
 @author: brianthorne
 '''
 
-from models.actors import Actor
+from scipysim.actors import Actor
 import Queue as queue
 import numpy
 

@@ -1,6 +1,6 @@
 
 import logging
-from models.actors import Actor, Channel
+from scipysim.actors import Actor, Channel
 
 
 import unittest

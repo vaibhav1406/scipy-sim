@@ -4,8 +4,8 @@ Created on Dec 11, 2009
 @author: brianthorne
 '''
 
-from models.actors import Channel
-from models.actors.io import Reader, Writer
+from scipysim.actors import Channel
+from scipysim.actors.io import Reader, Writer
 import Queue as queue
 import numpy
 

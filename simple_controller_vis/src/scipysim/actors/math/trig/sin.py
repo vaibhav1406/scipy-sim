@@ -2,7 +2,7 @@
 import logging
 import numpy
 #from Actor import Source, Actor
-from models.actors.siso import Siso
+from scipysim.actors.siso import Siso
 
 class Sin(Siso):
     '''

@@ -3,8 +3,8 @@ Created on 03/12/2009
 
 @author: allan
 '''
-from models.actors import Channel, Plotter, Summer, Model
-from models.composite_actors import CTSinGenerator
+from scipysim.actors import Channel, Plotter, Summer, Model
+from scipysim.composite_actors import CTSinGenerator
 
 import numpy
 

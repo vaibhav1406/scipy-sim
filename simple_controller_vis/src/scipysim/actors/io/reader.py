@@ -3,7 +3,7 @@ Created on Feb 1, 2010
 
 @author: brianthorne
 '''
-from models.actors import Source
+from scipysim.actors import Source
 import Queue as queue
 import numpy
 
@@ -58,7 +58,7 @@ class TextReader(Source):
         self.output_queue.put(None)
         self.stop = True
             
-from models.actors import Channel
+from scipysim.actors import Channel
 def test_text_reader():
     filename = "reader.py"
     output = Channel()

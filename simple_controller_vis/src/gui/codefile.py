@@ -9,9 +9,9 @@ import sys
 import logging
 logging.basicConfig(level=logging.DEBUG)
 from introspection import interrogate
-from models.actors.siso import Siso
+from scipysim.actors.siso import Siso
 
-from models.actors import Actor
+from scipysim.actors import Actor
 
 class CodeFile:
     """
@@ -31,8 +31,8 @@ class CodeFile:
         
         logging.debug("Trying to load the module in Python")
         """ We can use a import statement like: 
-        from models.actors import sin
-        or import models.actors.sin
+        from scipysim.actors import sin
+        or import scipysim.actors.sin
         but not import sin unless sin was in the top directory or on the python path"""
         
         sys.path.insert(0,path.split(filepath)[0])

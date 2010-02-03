@@ -1,6 +1,6 @@
-from models.actors import Channel, Model
-from models.actors.display import Stemmer
-from models.composite_actors import DTSinGenerator
+from scipysim.actors import Channel, Model
+from scipysim.actors.display import Stemmer
+from scipysim.composite_actors import DTSinGenerator
 
 
 class DT_Sin_Plot(Model):

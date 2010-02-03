@@ -5,11 +5,11 @@ Created on 13/12/2009
 '''
 
 
-from models.actors import Model, Plotter, Ramp, Summer, Copier, \
+from scipysim.actors import Model, Plotter, Ramp, Summer, Copier, \
         GreaterThan, Subtractor, Constant, PassThrough
-from models.composite_actors import CTSinGenerator
+from scipysim.composite_actors import CTSinGenerator
 
-from models.actors.Actor import MakeChans
+from scipysim.actors.Actor import MakeChans
 
 import logging
 logging.basicConfig(level=logging.INFO)

@@ -3,7 +3,7 @@ Created on Feb 2, 2010
 
 @author: brianthorne
 '''
-from models.actors import Siso
+from scipysim.actors import Siso
 
 class IntParser(Siso):
     '''
@@ -22,8 +22,8 @@ class IntParser(Siso):
             pass
         
 import unittest
-from models.actors import Channel
-from models.actors.siso import TestSisoActor
+from scipysim.actors import Channel
+from scipysim.actors.siso import TestSisoActor
 class TestIntParser(unittest.TestCase):
     
     def setUp(self):

@@ -32,7 +32,7 @@ class Siso(Actor):
         @param child_handles_output: If the actor wants to deal with its own
         output, make this true - for example if every input doesn't 
         get mapped to an output.
-        @see models.actors.Sampler
+        @see scipysim.actors.Sampler
         """
         super(Siso, self).__init__(input_queue=input_queue, output_queue=output_queue)
         self.child_handles_output = child_handles_output
