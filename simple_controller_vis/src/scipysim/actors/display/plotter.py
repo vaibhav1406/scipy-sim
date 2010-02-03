@@ -2,7 +2,7 @@
 This dynamic plotter shows a live signal stream.
 '''
 
-from models.actors import DisplayActor
+from scipysim.actors import DisplayActor
 import matplotlib.pyplot as plt
 import logging
 import threading

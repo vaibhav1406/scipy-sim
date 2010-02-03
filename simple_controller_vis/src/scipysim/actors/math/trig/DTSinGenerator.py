@@ -1,4 +1,4 @@
-from models.actors import Sin, Ramp, Channel, Source
+from scipysim.actors import Sin, Ramp, Channel, Source
 
 import logging
 logging.basicConfig(level=logging.info)

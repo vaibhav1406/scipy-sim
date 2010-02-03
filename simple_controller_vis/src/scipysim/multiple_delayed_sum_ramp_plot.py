@@ -4,8 +4,8 @@ Created on 23/11/2009
 @author: brian
 '''
 
-from models.actors import MakeChans, Model, Ramp, Summer, Delay, RandomSource
-from models.actors.display import Plotter
+from scipysim.actors import MakeChans, Model, Ramp, Summer, Delay, RandomSource
+from scipysim.actors.display import Plotter
 
 import logging
 logging.basicConfig(level=logging.INFO)
