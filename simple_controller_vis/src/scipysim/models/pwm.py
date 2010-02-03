@@ -10,12 +10,6 @@ from scipysim.actors.logic import GreaterThan, PassThrough
 from scipysim.actors.math.trig import CTSinGenerator
 from scipysim.actors.math import Subtractor, Summer, Constant
 
-"""
-from scipysim.actors import Model, Plotter, Ramp, Summer, Copier, \
-        GreaterThan, Subtractor, Constant, PassThrough
-from scipysim.composite_actors import CTSinGenerator"""
-
-
 
 import logging
 logging.basicConfig(level=logging.INFO)

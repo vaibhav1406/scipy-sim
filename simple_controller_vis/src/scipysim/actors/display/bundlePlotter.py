@@ -26,23 +26,29 @@ class BundlePlotter(Actor):
     A plot that is NOT dynamic. It takes a packet or bundle of events
     and plots it all at once.
     '''
-    def __init__(self, input_queue, title="ScipySim"):
+    def __init__(self, input_queue, title="ScipySim", show=False):
         super(BundlePlotter, self).__init__(input_queue=input_queue)
         self.title = title
+        self.show = show
         
     def process(self):
         self.data = self.input_queue.get(True)     # this is blocking
         if self.data is None:
             self.stop = True
         else:
-            self.plot()
+            url = self.save_image()
+            if self.show: 
+                import webbrowser
+                #webbrowser.open_new_tab(url)
             
-    def plot(self):
+            print "Output graph is at '%s'" % url
+            
+    def save_image(self):
         self.x_axis_data = self.data["Tag"]
         self.y_axis_data = self.data["Value"]
         logging.info("Creating static plot of %d items" % len(self.data))
         
-        f = Figure()
+        f = Figure()    # Could give the figure a size and dpi here
         canvas = FigureCanvas(f)
         
         a = f.add_subplot(111)
@@ -51,13 +57,12 @@ class BundlePlotter(Actor):
         a.grid(True)
         
         # This creates a png image in the current directory
-        canvas.print_figure(self.title, dpi=80) 
+        canvas.print_figure(filename=self.title,format='png', dpi=150) 
         logging.info("Saved output png image.")
-        import webbrowser
         import os
         url = "file://" + os.getcwd() + "/" + self.title + ".png"
         logging.info("Image was saved at %s" % url)
-        webbrowser.open_new_tab(url)
+        return url
 
             
 import unittest
