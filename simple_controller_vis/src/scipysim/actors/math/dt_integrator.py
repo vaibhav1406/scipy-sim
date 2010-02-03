@@ -3,31 +3,15 @@ Created on 9/12/2009
 
 @author: brian
 '''
-from Actor import Actor, Channel
-from siso import Siso
-
-from model import Model
-from copier import Copier
-from summer import Summer
-from delay import Delay
-import Queue as queue
-class RunningSum(Siso):
-    def __init__(self, in_chan, out_chan):
-        super(RunningSum, self).__init__(in_chan, out_chan)
-        self.delay = Delay()
-        self.feedback = Channel()
-        self.out = Channel()
-        self.outputCloner = Copier(self.out, [self.output_queue, self.feedback])
-        self.summer = Summer([in_chan, self.feedback])
-        # This could be made up of smaller blocks... but why?
+from scipysim.actors import Actor, Channel, Siso
 
 class DTIntegrator(Siso):
     '''
-    This 
+    This is the docs for a instance of a DTIntegrator
     '''
     def __init__(self, input_queue, output_queue):
         '''
-        Constructor for the running sum actor. 
+        Constructor for the running sum integrator actor. 
         '''
         super(DTIntegrator, self).__init__(input_queue=input_queue,
                                   output_queue=output_queue)
@@ -40,19 +24,18 @@ class DTIntegrator(Siso):
 
 
 import unittest
-
-class AbsTests(unittest.TestCase):
+class DTIntegratorTests(unittest.TestCase):
     '''Test the simple integrator actor'''
 
     def setUp(self):
         '''
         Unit test setup code
         '''
-        self.q_in = queue.Queue()
-        self.q_out = queue.Queue()
+        self.q_in = Channel()
+        self.q_out = Channel()
 
     def test_positive_integers(self):
-        '''Test a simple positive integer signal.
+        '''Test running sum of a simple positive integer signal.
         '''
         inp = [{'value':i, 'tag':i} for i in xrange(0, 10, 1)]
 

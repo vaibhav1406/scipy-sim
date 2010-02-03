@@ -8,7 +8,7 @@ Since static images don't animate very well it gets all the input at once in a "
 @author: brianthorne
 '''
 
-from scipysim.actors.buffer import Bundle
+from scipysim.actors.io import Bundle
 from scipysim.actors import Actor, DisplayActor, Channel
 
 import numpy

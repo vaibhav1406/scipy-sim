@@ -13,6 +13,18 @@ def TestSisoActor(test_case, block, inputs, expected_outputs):
         test_case.assertEquals(out['tag'], expected_output['tag'])
     test_case.assertEquals(block.output_queue.get(), None)
 
+def TestCTSisoActor(test_case, block, inputs, expected_outputs):
+    '''Helper function for testing SISO actors. This one uses assertAlmostEqual.
+    '''
+    [block.input_queue.put(val) for val in inputs + [None]]
+    block.start()
+    block.join()
+    for expected_output in expected_outputs:
+        out = block.output_queue.get()
+        test_case.assertAlmostEqual(out['value'], expected_output['value'], 6)
+        test_case.assertAlmostEqual(out['tag'], expected_output['tag'], 6)
+    test_case.assertEquals(block.output_queue.get(), None)
+
 class Siso(Actor):
     '''This is a generic single input, single output actor.
     The constructor requires one input and one output.

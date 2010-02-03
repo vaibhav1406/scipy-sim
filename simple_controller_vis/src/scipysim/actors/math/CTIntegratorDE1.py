@@ -3,7 +3,7 @@ Created on 21/12/2009
 
 @author: allan
 '''
-from siso import Siso
+from scipysim.actors import Siso
 import numpy as np  # Only here for the sign() function at this stage
 
 
@@ -62,20 +62,9 @@ class CTIntegratorDE1(Siso):
 
 import unittest
 import Queue as queue
-
-def TestSisoActor(test_case, block, inputs, expected_outputs):
-    '''Helper function for testing SISO actors. This one uses assertAlmostEqual.
-    '''
-    [block.input_queue.put(val) for val in inputs + [None]]
-    block.start()
-    block.join()
-    for expected_output in expected_outputs:
-        out = block.output_queue.get()
-        test_case.assertAlmostEqual(out['value'], expected_output['value'], 6)
-        test_case.assertAlmostEqual(out['tag'], expected_output['tag'], 6)
-    test_case.assertEquals(block.output_queue.get(), None)
+from scipysim.actors import TestCTSisoActor
     
-class CTintegratorTests(unittest.TestCase):
+class CTintegratorTest(unittest.TestCase):
     '''Test the integrator actor'''
 
     def setUp(self):
@@ -102,7 +91,7 @@ class CTintegratorTests(unittest.TestCase):
         expected_outputs = [{'value':val, 'tag':tag} for (val,tag) in zip(expected_output_values, expected_output_tags)]
 
         block = CTIntegratorDE1(self.q_in, self.q_out, init=1.0, delta=0.15)
-        TestSisoActor(self, block, inputs, expected_outputs)
+        TestCTSisoActor(self, block, inputs, expected_outputs)
         
 if __name__ == '__main__':
     unittest.main()
