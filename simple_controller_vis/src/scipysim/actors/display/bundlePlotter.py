@@ -12,14 +12,11 @@ from scipysim.actors.io import Bundle
 from scipysim.actors import Actor, DisplayActor, Channel
 
 import numpy
-
 import logging
 
 import matplotlib
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
-
-
 
 class BundlePlotter(Actor):
     '''
@@ -27,11 +24,15 @@ class BundlePlotter(Actor):
     and plots it all at once.
     '''
     def __init__(self, input_queue, title="ScipySim", show=False):
+        '''A bundle plotter takes bundled data in the input queue.
+        The individual discrete events must be compressed using the bundler first
+        '''
         super(BundlePlotter, self).__init__(input_queue=input_queue)
         self.title = title
         self.show = show
         
     def process(self):
+        '''Collect the data in one lot from the queue and create an image'''
         self.data = self.input_queue.get(True)     # this is blocking
         if self.data is None:
             self.stop = True
@@ -39,7 +40,8 @@ class BundlePlotter(Actor):
             url = self.save_image()
             if self.show: 
                 import webbrowser
-                #webbrowser.open_new_tab(url)
+                # I don't know why this is breaking things... but it is...
+                webbrowser.open(url)
             
             print "Output graph is at '%s'" % url
             
@@ -57,7 +59,7 @@ class BundlePlotter(Actor):
         a.grid(True)
         
         # This creates a png image in the current directory
-        canvas.print_figure(filename=self.title,format='png', dpi=150) 
+        canvas.print_figure(filename=self.title, dpi=150) 
         logging.info("Saved output png image.")
         import os
         url = "file://" + os.getcwd() + "/" + self.title + ".png"
