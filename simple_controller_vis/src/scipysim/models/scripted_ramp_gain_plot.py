@@ -8,6 +8,10 @@ from scipysim.actors import Channel, Model
 from scipysim.actors.math import Proportional
 from scipysim.actors.signal import Ramp
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logging.info("Logger enabled")
+
 class RampGainPlot(Model):
     '''
     This example connects a ramp to a gain to a plotter.

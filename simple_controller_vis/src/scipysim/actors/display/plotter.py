@@ -1,8 +1,12 @@
 '''
 This dynamic plotter shows a live signal stream.
+
+When the refresh_rate is the same for a single plot it slows down lots.
 '''
 
 from scipysim.actors import DisplayActor
+
+
 import matplotlib.pyplot as plt
 import logging
 import threading
@@ -14,15 +18,18 @@ import time
 class Plotter(DisplayActor):
     '''
     This actor shows a signal dynamically as it comes off the buffer with matplotlib.
-    The max refresh rate is an optional input - default is 1/2Hz
+    The max refresh rate is an optional input - default is 2Hz
     '''
     
     active_plots = 0
+    
+    # This was a class attrib is broken on tk8.5/matplotlib.99?
+    # Works on osx tk8.4
     fig = plt.figure()
     
     def __init__(self, 
                  input_queue, 
-                 refresh_rate=0.5, 
+                 refresh_rate=2, 
                  title='Scipy Simulator Dynamic Plot',
                  own_fig=False):
         super(Plotter, self).__init__(input_queue=input_queue)
@@ -32,10 +39,14 @@ class Plotter(DisplayActor):
         assert refresh_rate != 0
         self.refresh_rate = refresh_rate
         self.min_refresh_time =  1.0 / self.refresh_rate
-        plt.ion()
-        if own_fig:
+        
+        plt.ioff() # Only draw when we say
+        assert plt.isinteractive() == False
+        
+        
+        if own_fig and Plotter.active_plots > 1:
             self.fig = plt.figure()
-        self.ax = self.fig.add_subplot(111)
+        self.ax = self.fig.add_subplot(1,1,1)
         self.title = self.ax.set_title(title) 
         self.line, = self.ax.plot(self.x_axis_data, self.y_axis_data)
         self.refreshs = 0
@@ -84,6 +95,10 @@ class Plotter(DisplayActor):
             self.line.recache()
             axes.relim()
             axes.autoscale_view()
+            '''
+            This draw command realy needs to be using the matplotlib api
+            directly.
+            '''
             plt.draw() # redraw the canvas
 
         # It might prove to be beneficial just to redraw small bits
