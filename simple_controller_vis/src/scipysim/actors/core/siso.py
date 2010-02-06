@@ -1,7 +1,7 @@
 import logging
-from Actor import Actor
+from actor import Actor
 
-def TestSisoActor(test_case, block, inputs, expected_outputs):
+def SisoTestHelper(test_case, block, inputs, expected_outputs):
     '''Helper function for testing SISO actors.
     '''
     [block.input_queue.put(val) for val in inputs + [None]]
@@ -13,7 +13,7 @@ def TestSisoActor(test_case, block, inputs, expected_outputs):
         test_case.assertEquals(out['tag'], expected_output['tag'])
     test_case.assertEquals(block.output_queue.get(), None)
 
-def TestCTSisoActor(test_case, block, inputs, expected_outputs):
+def SisoCTTestHelper(test_case, block, inputs, expected_outputs):
     '''Helper function for testing SISO actors. This one uses assertAlmostEqual.
     '''
     [block.input_queue.put(val) for val in inputs + [None]]

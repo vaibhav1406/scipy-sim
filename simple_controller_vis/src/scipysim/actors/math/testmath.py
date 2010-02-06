@@ -1,5 +1,5 @@
 import unittest
-from scipysim.actors import TestSisoActor, Channel
+from scipysim.actors import SisoTestHelper, Channel
 import numpy
 from scipysim.actors.math import Abs
 

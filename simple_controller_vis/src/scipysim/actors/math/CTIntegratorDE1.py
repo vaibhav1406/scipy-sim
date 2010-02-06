@@ -18,6 +18,10 @@ class CTIntegratorDE1(Siso):
     See James Nutaro, "Discrete-Event Simulation of Continuous Systems", in
     Handbook of Dynamic System Modeling (Paul Fishwick Ed.)
     '''
+    
+    input_domains = ("CT",)
+    output_domains = ("CT",)
+    
     def __init__(self, xdot, x, init=0.0, delta=0.1, maxstep=10.0):
         '''
         Construct a SISO CT integrator.
@@ -62,7 +66,7 @@ class CTIntegratorDE1(Siso):
 
 import unittest
 import Queue as queue
-from scipysim.actors import TestCTSisoActor
+from scipysim.actors import SisoCTTestHelper
     
 class CTintegratorTest(unittest.TestCase):
     '''Test the integrator actor'''
@@ -91,7 +95,7 @@ class CTintegratorTest(unittest.TestCase):
         expected_outputs = [{'value':val, 'tag':tag} for (val,tag) in zip(expected_output_values, expected_output_tags)]
 
         block = CTIntegratorDE1(self.q_in, self.q_out, init=1.0, delta=0.15)
-        TestCTSisoActor(self, block, inputs, expected_outputs)
+        SisoCTTestHelper(self, block, inputs, expected_outputs)
         
 if __name__ == '__main__':
     unittest.main()

@@ -1,13 +1,16 @@
 '''
 This dynamic plotter shows a live signal stream.
-
-When the refresh_rate is the same for a single plot it slows down lots.
 '''
 
 from scipysim.actors import DisplayActor
 
+import matplotlib
+matplotlib.use('TkAgg')
+#from matplotlib.backends.backend_tkagg import FigureCanvasAgg as FigureCanvas
+#from matplotlib.figure import Figure
 
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
+
 import logging
 import threading
 
@@ -21,11 +24,13 @@ class Plotter(DisplayActor):
     The max refresh rate is an optional input - default is 2Hz
     '''
     
-    active_plots = 0
+    additional_figures = 0
     
     # This was a class attrib is broken on tk8.5/matplotlib.99?
     # Works on osx tk8.4
+    #fig = Figure()
     fig = plt.figure()
+    #canvas = FigureCanvas(fig)
     
     def __init__(self, 
                  input_queue, 
@@ -33,7 +38,6 @@ class Plotter(DisplayActor):
                  title='Scipy Simulator Dynamic Plot',
                  own_fig=False):
         super(Plotter, self).__init__(input_queue=input_queue)
-        Plotter.active_plots += 1 
         self.x_axis_data = []
         self.y_axis_data = []
         assert refresh_rate != 0
@@ -43,10 +47,15 @@ class Plotter(DisplayActor):
         plt.ioff() # Only draw when we say
         assert plt.isinteractive() == False
         
+        self.fig_num = self.additional_figures
+        if own_fig:
+            Plotter.additional_figures += 1 
+            with GUI_LOCK:
+                fig = self.myfig = plt.figure()
+        else:
+            fig = self.fig
         
-        if own_fig and Plotter.active_plots > 1:
-            self.fig = plt.figure()
-        self.ax = self.fig.add_subplot(1,1,1)
+        self.ax = fig.add_subplot(1,1,1)
         self.title = self.ax.set_title(title) 
         self.line, = self.ax.plot(self.x_axis_data, self.y_axis_data)
         self.refreshs = 0
@@ -61,7 +70,6 @@ class Plotter(DisplayActor):
         if obj is None:
             logging.info("We have finished processing the queue of data to be displayed")
             self.update_plot()
-            plt.ioff()
             self.stop = True
             return
 
@@ -89,17 +97,17 @@ class Plotter(DisplayActor):
             return
         self.refreshs += 1
 
+        self.line.set_data(self.x_axis_data, self.y_axis_data)
+        axes = self.line.get_axes()
+        self.line.recache()
+        axes.relim()
+        axes.autoscale_view()
+        
         with GUI_LOCK:
-            self.line.set_data(self.x_axis_data, self.y_axis_data)
-            axes = self.line.get_axes()
-            self.line.recache()
-            axes.relim()
-            axes.autoscale_view()
-            '''
-            This draw command realy needs to be using the matplotlib api
-            directly.
-            '''
-            plt.draw() # redraw the canvas
+            # At this point we are 100% sure the main Tk loop has started
+            # but for multiple figures we cannot "draw"???
+            if self.additional_figures == 0:
+                plt.draw()
 
         # It might prove to be beneficial just to redraw small bits
         # just redraw the axes rectangle

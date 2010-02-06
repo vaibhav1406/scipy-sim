@@ -4,7 +4,7 @@ Created on Feb 2, 2010
 @author: brianthorne
 '''
 import unittest
-from scipysim.actors import TestSisoActor, Channel
+from scipysim.actors import SisoTestHelper, Channel
 import numpy
 from scipysim.actors.logic import GreaterThan, LessThan, PassThrough
 
@@ -127,7 +127,7 @@ class CompareTests(unittest.TestCase):
         inp = [{'value':input_values[i], 'tag':i} for i in xrange(len(input_values))]
         expected_outputs = [i for i in inp if i['value'] < 50]
         less_than_block = LessThan(self.q_in, self.q_out, threshold=50)
-        TestSisoActor(self, less_than_block, inp, expected_outputs)
+        SisoTestHelper(self, less_than_block, inp, expected_outputs)
   
     def test_greater_than_positive_integers(self):
         '''Test a simple positive integer signal.
@@ -135,14 +135,14 @@ class CompareTests(unittest.TestCase):
         inp = [{'value':i, 'tag':i} for i in xrange(0, 100, 1)]
         expected_outputs = [i for i in inp if i['value'] >= 50]
         greater_than_block = GreaterThan(self.q_in, self.q_out, 50)
-        TestSisoActor(self, greater_than_block, inp, expected_outputs)
+        SisoTestHelper(self, greater_than_block, inp, expected_outputs)
         
     def test_boolean_output(self):
         '''Test thresholding a signal into a binary signal'''
         inp = [{'value':i, 'tag':i} for i in xrange(0, 100, 1)]
         expected_outputs = [{'value': True if i['value'] >= 50 else False, 'tag': i['tag']} for i in inp ]
         block = GreaterThan(self.q_in, self.q_out, 50, True)
-        TestSisoActor(self, block, inp, expected_outputs)
+        SisoTestHelper(self, block, inp, expected_outputs)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

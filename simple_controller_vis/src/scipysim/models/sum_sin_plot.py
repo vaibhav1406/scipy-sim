@@ -31,7 +31,7 @@ class SumSinPlot(Model):
         src2 = CTSinGenerator(connection2, 1, 3.5, numpy.pi / 4)
     
         summer = Summer([connection1, connection2], connection3)
-        dst = Plotter(connection3)
+        dst = Plotter(connection3, refresh_rate=1.0/2)
     
         self.components = [src1, src2, summer, dst]
 

@@ -3,8 +3,7 @@ Created on Feb 1, 2010
 
 @author: brianthorne
 '''
-from scipysim.actors import Source
-import Queue as queue
+from scipysim.actors import Source, Channel
 import numpy
 
 class Reader(Source):
@@ -43,7 +42,7 @@ class TextReader(Source):
     def __init__(self, output_queue, filename, send_as_words=False):
         '''A TextReader requires a valid filename to read from.
         The data may be sent as lines or words, lines are the
-        default
+        default. The tag is the line number.
         '''
         super(TextReader, self).__init__(output_queue=output_queue)
         self.file = open(filename, 'r')
@@ -52,24 +51,12 @@ class TextReader(Source):
     def process(self):
         for i,line in enumerate(self.file):
             if self.send_as_words:
-                [self.output_queue.put({"tag": i*j,'value': word.strip()}) for j, word in enumerate(line.split())]
+                [self.output_queue.put({"tag": i,'value': word.strip()}) for j, word in enumerate(line.split())]
             else:
                 self.output_queue.put({"tag": i,'value': line.strip()})
         self.output_queue.put(None)
         self.stop = True
-            
-from scipysim.actors import Channel
-def test_text_reader():
-    filename = "reader.py"
-    output = Channel()
-    reader = TextReader(output, filename, send_as_words=True)
-    reader.start()
-    reader.join()
-    print output.get()
-    print output.get()
 
-if __name__ == "__main__":
-    test_text_reader()
 
     
     
