@@ -1,6 +1,6 @@
 import logging
 
-from scipysim.actors import Actor, DisplayActor
+from actor import Actor, DisplayActor
 
 class Model(Actor):
     '''
@@ -35,6 +35,14 @@ class Model(Actor):
         '''
         assert hasattr(self, 'components')
         
+        """
+        As this is the "main" thread we will assume control of the GUI
+        untill we enter the TK main loop, then plotters can paint their pictures.
+        """
+        if any(issubclass(a.__class__, DisplayActor) for a in self.components):
+            from scipysim.actors.display.plotter import GUI_LOCK
+            GUI_LOCK.acquire(blocking=True)
+            
         logging.info("Starting simulation")
         [component.start() for component in self.components]
         logging.debug("Finished starting actors")
@@ -42,6 +50,10 @@ class Model(Actor):
         if any(issubclass(a.__class__, DisplayActor) for a in self.components):
             import matplotlib.pyplot as plt
             logging.info('The program will stay "running" while the plot is open')
+            
+            GUI_LOCK.notifyAll()
+            GUI_LOCK.release()
+            
             plt.show()
     
         [component.join() for component in self.components]

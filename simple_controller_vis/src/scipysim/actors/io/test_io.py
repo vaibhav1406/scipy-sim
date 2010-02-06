@@ -6,11 +6,26 @@ Created on Dec 11, 2009
 
 from scipysim.actors import Channel
 from scipysim.actors.io import Reader, Writer, Bundle, Unbundle
+from scipysim.actors.io import TextReader
 import Queue as queue
 import numpy
 
 import unittest
 import tempfile
+import os
+PATH_TO_THIS_FILE = '/Volumes/Share/Dev/scipy-sim/simple_controller_vis/src/scipysim/actors/io/test_io.py'
+
+class TestReader(unittest.TestCase):
+    
+    def test_text_reader(self):
+        filename = PATH_TO_THIS_FILE
+        output = Channel()
+        reader = TextReader(output, filename, send_as_words=True)
+        reader.start()
+        reader.join()
+        self.assertEquals("'''", output.get()['value'])
+        self.assertEquals(1, output.get()['tag'])
+
 
 class FileIOTests(unittest.TestCase):
     '''Test the FileIO Actors'''

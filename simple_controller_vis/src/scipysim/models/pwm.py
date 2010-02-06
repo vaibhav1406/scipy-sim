@@ -68,7 +68,7 @@ class Pulse_Width_Modulator(Model):
         output_value_on = Constant(wires['on_value'], 1.0, resolution=self.sim_res, simulation_time=self.sim_time)
         output_value_off = Constant(wires['off_value'], 0.0, resolution=self.sim_res, simulation_time=self.sim_time)
         
-        pwm_plotter = Plotter(wires['pwm_value'])
+        pwm_plotter = Plotter(wires['pwm_value'], own_fig=True)
         
         self.components = [ramp_src, 
                       sin_src,

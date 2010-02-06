@@ -7,19 +7,22 @@ Created on Jan 18, 2010
 from os import path
 import sys
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
+
 from introspection import interrogate
-from scipysim.actors.siso import Siso
+from scipysim.actors import Siso
 
 from scipysim.actors import Actor
 
 class CodeFile:
     """
     This class wraps an Actor or a model for the GUI.
-    It will contain instructions for drawing, connecting and running a simulation.
+    It contains instructions for drawing, connecting and running a simulation.
+    
     """
     def __init__(self, filepath, name=None):
-        """If the name is not given it will be the stripped file name.
+        """Wrap an Actor for the GUI, parses the number of inputs etc.
+        If the name is not given it will be the stripped file name.
         TODO: Add GUI support. image, position, input connectors etc...
         """
         self.filepath = filepath
@@ -38,7 +41,7 @@ class CodeFile:
         sys.path.insert(0,path.split(filepath)[0])
         module = __import__(self.name)
     
-        logging.info("%s module imported" % self.name.title())
+        logging.debug("%s module imported" % self.name.title())
         
         
         # TODO: we need to dynamically find the class that is not a unittest
@@ -47,6 +50,7 @@ class CodeFile:
             # Hopefully the module contains a class with the same name as the module
             block_class = getattr(module, self.name.title())
         except AttributeError:
+            # otherwise try harder...
             logging.debug("Module was not called the same as the filename")
             logging.debug(interrogate(module))
             modules = [c for c in dir(module) if callable(getattr(module, c)) and issubclass(getattr(module,c), Actor)]
@@ -54,19 +58,26 @@ class CodeFile:
             if len(modules) > 1:
                 modules = [c for c in modules if c.lower() == self.name.lower()]
             block_class = getattr(module, modules[0])
+            # TODO: A third level here could be to find all classes in that file and choose the
+            # one without test in the name...
         
+        # Find out how many input and output channels the block can take.
         logging.debug(interrogate(block_class))
         if issubclass(block_class, Siso):
-            logging.info("Inherits from SISO - we know that it has one input and one output")
+            logging.debug("Inherits from SISO - we know that it has one input and one output")
             self.num_inputs = 1
             self.num_outputs = 1
         elif hasattr(block_class, "num_inputs") and hasattr(block_class, "num_outputs"):
             self.num_inputs = block_class.num_inputs
             self.num_outputs = block_class.num_outputs
         else:
-            logging.info("Non siso module, and no info on how many inputs/outputs?")
+            logging.error("Non siso module, and no info on how many inputs/outputs?")
             raise NotImplementedError()
-        
+      
+        # Find out the domains for those channels
+        assert hasattr(block_class, 'output_domains') and hasattr(block_class, 'input_domains')
+        self.output_domains = block_class.output_domains
+        self.input_domains = block_class.input_domains
         
     def get_code(self):
         """Load an actor or model file."""
@@ -76,35 +87,4 @@ class CodeFile:
     def __repr__(self):
         '''Return the name of this code file object'''
         return self.name
- 
-import unittest
-class Test_Code_File(unittest.TestCase):
-    src_dir = '/Volumes/Share/Dev/scipy-sim/simple_controller_vis/src'
-    
-    def test_siso_code_file(self):
-        '''Test by loading a siso actor from a hardcoded path'''
-        logging.info("starting test")
-        c = CodeFile(self.src_dir + '/models/actors/sin.py')    
-        self.assertEqual(c.num_inputs, 1)
-        self.assertEqual(c.num_outputs, 1)
-        
-    def test_display_actor(self):
-        '''Test that a plotter has one channel input'''
-        c = CodeFile(self.src_dir + '/models/actors/stemmer.py')
-        self.assertEqual(c.num_inputs, 1)
-        self.assertEqual(c.num_outputs, 0)
 
-    def test_dynamic_actor(self):
-        '''Test the summer block can have multiple inputs'''
-        c = CodeFile(self.src_dir + '/models/actors/summer.py')
-        self.assertEqual(c.num_outputs, 1)
-        self.assertEqual(c.num_inputs, None)
-        
-    def test_composite_model(self):
-        '''Test a composite_actor for num of inputs and output channels'''
-        c = CodeFile(self.src_dir + '/models/composite_actors/DTSinGenerator.py')
-        self.assertEqual(c.num_outputs, 1)
-        self.assertEqual(c.num_inputs, 0)
-        
-if __name__ == "__main__":
-    unittest.main()

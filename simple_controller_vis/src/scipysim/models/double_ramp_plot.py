@@ -1,4 +1,3 @@
-
 from scipysim.actors import Model, MakeChans
 from scipysim.actors.signal import Ramp
 from scipysim.actors.math import Summer

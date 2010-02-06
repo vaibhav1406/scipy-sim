@@ -23,7 +23,7 @@ class IntParser(Siso):
         
 import unittest
 from scipysim.actors import Channel
-from scipysim.actors.siso import TestSisoActor
+from scipysim.actors import SisoTestHelper
 class IntParserTests(unittest.TestCase):
     
     def setUp(self):
@@ -34,7 +34,7 @@ class IntParserTests(unittest.TestCase):
         inputs = [{'value':str(i), 'tag':i} for i in xrange(10)]
         expected_outputs = [{'value':int(i), 'tag':i} for i in xrange(10)]
         block = IntParser(self.q_in, self.q_out)
-        TestSisoActor(self, block, inputs, expected_outputs)
+        SisoTestHelper(self, block, inputs, expected_outputs)
         
 if __name__ == '__main__':
     unittest.main()

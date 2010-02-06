@@ -1,5 +1,3 @@
-
-
 def interrogate(item):
     """Print lots of useful information about a python object."""
     result = ""

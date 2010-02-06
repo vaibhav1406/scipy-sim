@@ -15,13 +15,14 @@ class DTSinGenerator(Source):
     "normalized frequency"), and phase in radians.
     '''
     
+    output_domains = ("DT",)
+    
     def __init__(self, out, amplitude=1.0, freq=0.01, phi=0.0, simulation_length=100):
         '''
         Construct a discrete sin generator model.
         
         @param out: output channel
         '''
-        logging.debug("Constructing a DTSinGenerator")
         super(DTSinGenerator, self).__init__(output_queue=out)
         
         logging.debug("Setting model paramaters.")

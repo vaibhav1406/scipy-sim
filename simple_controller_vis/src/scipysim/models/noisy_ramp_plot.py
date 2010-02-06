@@ -34,7 +34,7 @@ class NoiseyRamp(Model):
         summer = Summer([connection1, connection2], connection3)
         
         bundler = Bundle(connection3,connection4)
-        dst = BundlePlotter(connection4)
+        dst = BundlePlotter(connection4, title="Scipy-Simulation: Noise + Ramp Sum",show=True)
         #dst = Plotter(connection3)
 
         self.components = [src1, src2, summer, bundler, dst]

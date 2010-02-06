@@ -3,6 +3,8 @@
 TODO: A notebook should have minimise symbol in the top right corner when
 expanded, and an expand symbol when minimised.
 A quick work around is to have an empty frame as a tab.
+
+TODO replace this with tile or pyttk or one of the thousands of prebuilt widget sets...
 """ 
 
 from Tkinter import TOP, LEFT, BOTTOM, Frame, Tk, Radiobutton, IntVar, RIDGE, BOTH

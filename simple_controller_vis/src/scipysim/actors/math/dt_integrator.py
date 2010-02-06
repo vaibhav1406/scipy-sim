@@ -7,8 +7,12 @@ from scipysim.actors import Actor, Channel, Siso
 
 class DTIntegrator(Siso):
     '''
-    This is the docs for a instance of a DTIntegrator
+    This is the docs for an instance of a DTIntegrator
     '''
+    
+    input_domains = ("DT",)
+    output_domains = ("DT",)
+    
     def __init__(self, input_queue, output_queue):
         '''
         Constructor for the running sum integrator actor. 
