@@ -13,7 +13,7 @@ import numpy
 import unittest
 import tempfile
 import os
-PATH_TO_THIS_FILE = '/Volumes/Share/Dev/scipy-sim/simple_controller_vis/src/scipysim/actors/io/test_io.py'
+PATH_TO_THIS_FILE = __file__
 
 class TestReader(unittest.TestCase):
     
