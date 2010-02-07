@@ -33,7 +33,7 @@ class AbsTests(unittest.TestCase):
             self.assertEquals(out['tag'], expected_output['tag'])
         self.assertEquals(self.q_out.get(), None)
 
-from CTIntegratorDE1 import CTintegratorTest
+from ct_integrator_de1 import CTintegratorTest
 
 from dt_integrator import DTIntegratorTests
 
