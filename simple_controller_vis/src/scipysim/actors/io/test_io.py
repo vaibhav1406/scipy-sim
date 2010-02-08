@@ -13,7 +13,7 @@ import numpy
 import unittest
 import tempfile
 import os
-PATH_TO_THIS_FILE = __file__
+PATH_TO_THIS_FILE = __file__.replace('.pyc','.py') # Make sure we don't get the compiled file
 
 class TestReader(unittest.TestCase):
     
