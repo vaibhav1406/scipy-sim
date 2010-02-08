@@ -58,8 +58,6 @@ class CodeFile:
             if len(modules) > 1:
                 modules = [c for c in modules if c.lower() == self.name.lower()]
             block_class = getattr(module, modules[0])
-            # TODO: A third level here could be to find all classes in that file and choose the
-            # one without test in the name...
         
         # Find out how many input and output channels the block can take.
         logging.debug(interrogate(block_class))
@@ -86,5 +84,9 @@ class CodeFile:
 
     def __repr__(self):
         '''Return the name of this code file object'''
-        return self.name
+        return "<%(name)s - %(inputs)d inputs, %(outputs)d outputs >" % {
+                "name": self.name,
+                "inputs": self.num_inputs,
+                "outputs": self.num_outputs
+            }
 
