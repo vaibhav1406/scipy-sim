@@ -13,7 +13,7 @@ import numpy
 import unittest
 import tempfile
 import os
-PATH_TO_THIS_FILE = __file__
+PATH_TO_THIS_FILE = __file__.replace('.pyc','.py') # Make sure we don't get the compiled file
 
 class TestReader(unittest.TestCase):
     
@@ -50,12 +50,14 @@ class FileIOTests(unittest.TestCase):
         
     
     def test_file_read(self):
-        fileName = '/Users/brianthorne/temp/numpy_test_data.npy'
+        '''Test that we can retrieve data'''
+        # Using self.f here, even with delete set to false, doesn't seem to
+        # work. So we need to manually create a temp file.
+        fileName = tempfile.gettempdir() + '/numpy_test_data.npy'
         
         fileWriter = Writer(self.chan, fileName)
         fileWriter.start()
         fileWriter.join()
-
                 
         fileReader = Reader(output_queue=self.chan, file_name=fileName)
         fileReader.start()
@@ -67,6 +69,7 @@ class FileIOTests(unittest.TestCase):
                 self.assertEqual(received['tag'], expected['tag'])
                 self.assertEqual(received['value'], expected['value'])
         self.assertEqual(expected, None)
+        os.remove(fileName) # clean up
 
 class BundleTests(unittest.TestCase):
     def setUp(self):
