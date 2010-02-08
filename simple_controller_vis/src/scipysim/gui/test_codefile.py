@@ -7,8 +7,11 @@ from os import path
 import sys
 from codefile import CodeFile
 import unittest
+
+PATH_TO_SRC_DIR = path.join(path.dirname(__file__),'..','..')
+
 class Test_Code_File_Num_Input_Output_Parsing(unittest.TestCase):
-    src_dir = '/Volumes/Share/Dev/scipy-sim/simple_controller_vis/src'
+    src_dir = PATH_TO_SRC_DIR
     
     def test_siso_code_file(self):
         '''Test by loading a siso actor from a hardcoded path'''
@@ -35,7 +38,7 @@ class Test_Code_File_Num_Input_Output_Parsing(unittest.TestCase):
         self.assertEqual(c.num_inputs, 0)
 
 class Test_Code_File_Input_Output_Domain_Parsing(unittest.TestCase):
-    src_dir = '/Volumes/Share/Dev/scipy-sim/simple_controller_vis/src'
+    src_dir = PATH_TO_SRC_DIR
     
 
     def test_dynamic_actor(self):
