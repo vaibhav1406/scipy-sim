@@ -1,5 +1,8 @@
 '''
 This dynamic plotter shows a live signal stream.
+
+An alternative to using the queue infrastructure would be 
+to "monitor" a variable - http://simpy.sourceforge.net/_build/Recipes/Recipe002.html
 '''
 
 from scipysim.actors import DisplayActor

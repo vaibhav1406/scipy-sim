@@ -8,7 +8,7 @@ import unittest
 from copier import CopierTests
 from decimator import DecimatorTests
 from delay import DelayTests
-#from interpolate import InterpolateTests
+from interpolate import InterpolateTests
 
 #from ramp import RampTests # TODO
 #from random_signal import RandomSourceTest # Todo

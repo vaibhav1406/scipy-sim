@@ -28,7 +28,7 @@ class Stemmer(DisplayActor):
         self.y_axis_data = []
         assert refresh_rate != 0
         self.refresh_rate = refresh_rate
-        plt.ion()
+        #plt.ion()
         
         # stem() doesn't seem to like empty datasets, so we'll defer creating
         # the plot until there's actually data. For now just create an

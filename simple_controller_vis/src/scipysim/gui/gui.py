@@ -4,8 +4,8 @@ A user interface for creating and running simulations.
 
 @author: Brian Thorne
 '''
-
-from Tkinter import Frame, Button, Canvas, Tk, Text
+from Tix import NoteBook, Tk
+from Tkinter import Frame, Button, Canvas, Text
 from Tkconstants import LEFT, BOTH, END, X, Y, TOP, RIDGE
 
 import subprocess
@@ -16,7 +16,7 @@ import glob
 import logging
 
 from codefile import CodeFile
-from tabs import Notebook
+
 from codegroup import ExamplesGroup
 
 logging.basicConfig(level=logging.DEBUG)
@@ -26,7 +26,7 @@ WELCOME_MESSAGE = "Select an actor or model on the left to preview here."
 
 # Find the path to this file
 PATH_TO_SCRIPT = os.path.dirname(os.path.realpath(__file__))
-EXAMPLES_DIRECTORY = os.path.join(os.path.split(PATH_TO_SCRIPT)[0],'models')
+EXAMPLES_DIRECTORY = os.path.split(PATH_TO_SCRIPT)[0]
 logging.info("Script address is '%s'" % PATH_TO_SCRIPT)
 logging.info("Example path is %s" % (EXAMPLES_DIRECTORY))
 
@@ -34,9 +34,10 @@ logging.info("Example path is %s" % (EXAMPLES_DIRECTORY))
 def get_models_and_actors():
     """Return dictionaries with the names and paths of each model and actor to display."""
     # The models and actors are loaded from the models/actors directory.
-    # TODO: Parse a tree instead of loading actors and models.
+    # TODO: Parse the directory tree for both actors and models. (os.walk)
     
-    model_filenames = [(path.split(a)[1], path.abspath(a)) for a in glob.glob(EXAMPLES_DIRECTORY + "/[A-z]*.py") ]
+    
+    model_filenames = [(path.split(a)[1], path.abspath(a)) for a in glob.glob(EXAMPLES_DIRECTORY + "/models/[A-z]*.py") ]
     actor_filenames = [(path.split(a)[1], path.abspath(a)) for a in glob.glob(EXAMPLES_DIRECTORY + "/actors/[A-z]*.py")]
     [logging.debug(a) for a in ["Models:"] + model_filenames + ["\nActors:"] + actor_filenames]
 
@@ -58,7 +59,7 @@ class ID_Generator:
 class Simulation_Canvas(object):
     """A canvas where blocks can be dragged around and connected up"""
     # The class attribute colours will hold all the colour info 
-    # Randomly chosen from (visibone.com/colurlab)
+    # Randomly chosen from (visibone.com colour-lab)
     colours = {
          "background": "#CCFFCC",   # Pale weak green. A weak yellow is FFFFCC
          "block": "#00FF66", # a lime green
@@ -216,7 +217,7 @@ class App:
         # the other will show the selected components
         source_frame = Frame(main_frame)
         source_frame.pack(side=TOP)
-        self.notebook = Notebook(source_frame, TOP)
+        self.notebook = NoteBook(source_frame, TOP)
         
         # Get the notebooks main frame as the Model src viewer
         model_src_frame = Frame(self.notebook())
@@ -239,7 +240,7 @@ class App:
         # to the Notebook (but not the frame itself)!
         b1.pack(side=TOP, fill=X, expand=0)
         
-        # An empty frame so the source viewer can be "minimized"
+        # An empty frame so the source viewer can be "minimised"
         blank_src_frame = Frame(self.notebook())
         
         # Add the screens to the notebook
@@ -341,6 +342,7 @@ def writeFile(filepath, content):
 
 if __name__ == "__main__":
     root = Tk()
+
     root.title("Scipy-Simulator Gui")
 
     app = App(root)
