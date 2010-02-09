@@ -1,9 +1,12 @@
 import logging
 import os
 import re
+
 from Tkinter import Label, Scrollbar, Button
 from Tkconstants import VERTICAL, SINGLE, BROWSE, RIGHT, Y, BOTH, END, ANCHOR
 from ttk import Treeview, Button
+
+from codefile import CodeFile
 
 PATH_TO_SCRIPT = os.path.dirname(os.path.realpath(__file__))
 EXAMPLES_DIRECTORY = os.path.split(PATH_TO_SCRIPT)[0]
@@ -38,12 +41,11 @@ class ExamplesGroup:
 
     def get_list(self):
         """Return a list of the actors names."""
-        names = [codefile.name for codefile in self.codefiles]
-        return names
+        return self.codefiles.keys()
     
     def get_dict(self):
         """Return a dictionary of names: codefile instances."""
-        return dict([[codefile.name, codefile] for codefile in self.codefiles])
+        return self.codefiles
 
     def get_example(self, name):
         """Get the string of code for a particular actor"""
@@ -53,8 +55,10 @@ class ExamplesGroup:
         """Set the code preview window to display the source
         code of the currently selected actor
         """
+        logging.debug("In 'get_selection'")
         index = self.listbox.curselection()[0]
         selected_name = self.listbox.get(index)
+        
         selected_codefile = self.get_dict()[selected_name]
         self.set_active_block(selected_codefile)
         self.set_text(self.get_example(selected_name))
@@ -64,7 +68,7 @@ class ExamplesGroup:
         label = Label(self.frame, text=self.name)
         label.pack()
         
-        self.tree = make_tree(self.frame, self.directory)
+        self.tree, self.codefiles = make_tree(self.frame, self.directory)
         
         
         #self.scrollbar.config(command=self.listbox.yview)
@@ -79,6 +83,7 @@ class ExamplesGroup:
 def fill_tree(tree, directory):
     '''Parse a directory and add to an existing tree.
     Return a dictionary of the tree id: CodeFile'''
+    codefiles = {}
     for file_tuple in os.walk(directory):
         '''The tuples contains:
             [0] - The path
@@ -92,12 +97,13 @@ def fill_tree(tree, directory):
         logging.debug("Current node is: <%s>, Parent node is: <%s>" % (current_node, parent_node))
         
         # Search for interesting files
-        python_file_regex = re.compile("^(?!tests?).*[^_]\.py$", re.IGNORECASE)          
+        python_file_regex = re.compile("^(?!tests?).*[^_]\.py$", re.IGNORECASE)
         files = filter(python_file_regex.search, file_tuple[2])
         logging.info("Under the %s directory are %d files: \n%s" % (os.path.basename(file_tuple[0]), len(files), files))
         
         # Add the files to the parent node
         for file in files:
+            codefiles[current_node] = CodeFile(os.path.join(file_tuple[0], file))
             # Inserted underneath an existing node:
             tree.insert(current_node, 'end', text=file, tags=('node'))
             #tree.set(plotterID, 'ins', 1)
@@ -113,7 +119,7 @@ def fill_tree(tree, directory):
             node = os.path.relpath( os.path.join(file_tuple[0], subdir), directory)
             logging.debug("Child node is: <%s>" % node)
             tree.insert(current_node, 'end', node, text=subdir.title(), tags=('dir'))
-            
+    return codefiles
 
 def make_tree(mainframe, directory):
     # Make a tree
@@ -130,10 +136,10 @@ def make_tree(mainframe, directory):
     
     
     actor_dir = os.path.join(EXAMPLES_DIRECTORY, 'actors')
-    fill_tree(tree, actor_dir)
+    codefiles = fill_tree(tree, actor_dir)
     def go(*args):
         print "going"
         print args[0]
     tree.tag_bind('node', '<1>', go)
     #tree.tag_configure('node', background='green')
-    return tree
+    return tree, codefiles

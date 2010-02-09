@@ -7,7 +7,7 @@ Created on 29/11/2009
 '''
 import logging
 import numpy
-from Actor import Source, Actor
+from scipysim import Source, Actor
 
 import logging
 verbose = True
@@ -19,7 +19,7 @@ WIDTH, HEIGHT = 320, 240
 # This requires a recent pygame with a camera module (1.9.1 or greater)
 import pygame
 import pygame.camera as camera
-logging.info("Pygame Version: %s" % pygame.__version__)
+logging.debug("Pygame Version: %s" % pygame.__version__)
 
 class VideoSnapshot(Source):
     '''

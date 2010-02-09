@@ -55,14 +55,18 @@ class CodeFile:
             logging.debug("Module was not called the same as the filename")
             logging.debug(interrogate(module))
             
-            # [c for c in dir(module) if not inspect.isfunction(getattr(module,c)) 
-            # and inspect.isclass(getattr(module,c)) and issubclass(getattr(module,c), Actor)]
-            
             modules = [c for c in dir(module) if not inspect.isfunction(getattr(module,c)) and inspect.isclass(getattr(module,c)) and callable(getattr(module, c)) and issubclass(getattr(module,c), Actor)]
             logging.debug("Got a list of classes that inherit from Actor: %s" % repr(modules))
             if len(modules) > 1:
-                modules = [c for c in modules if c.lower() == self.name.lower()]
-            block_class = getattr(module, modules[0])
+                """
+                If there is still more than one module chances are SISO, Actor and Models 
+                are getting picked up. difflib
+                """
+                from difflib import get_close_matches
+                modules = get_close_matches(self.name, modules, 1,0.1)
+            assert len(modules) > 0
+            module_name = modules[0]
+            block_class = getattr(module, module_name)
         
         # Find out how many input and output channels the block can take.
         logging.debug(interrogate(block_class))
