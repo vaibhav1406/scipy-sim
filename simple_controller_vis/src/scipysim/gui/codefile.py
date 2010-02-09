@@ -93,9 +93,10 @@ class CodeFile:
 
     def __repr__(self):
         '''Return the name of this code file object'''
-        return "<%(name)s - %(inputs)d inputs, %(outputs)d outputs >" % {
+        return self.name
+        '''return "<%(name)s - %(inputs)d inputs, %(outputs)d outputs >" % {
                 "name": self.name,
                 "inputs": self.num_inputs,
                 "outputs": self.num_outputs
-            }
+            }'''
 

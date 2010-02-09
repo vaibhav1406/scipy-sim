@@ -55,9 +55,9 @@ class ExamplesGroup:
         """Set the code preview window to display the source
         code of the currently selected actor
         """
-        logging.debug("In 'get_selection'")
-        index = self.listbox.curselection()[0]
-        selected_name = self.listbox.get(index)
+        logging.debug("In 'get_selection' - x: %s" % x)
+        logging.debug("Dir(x): %s" % dir(x))
+        #selected_name = 
         
         selected_codefile = self.get_dict()[selected_name]
         self.set_active_block(selected_codefile)
@@ -103,9 +103,10 @@ def fill_tree(tree, directory):
         
         # Add the files to the parent node
         for file in files:
-            codefiles[current_node] = CodeFile(os.path.join(file_tuple[0], file))
             # Inserted underneath an existing node:
-            tree.insert(current_node, 'end', text=file, tags=('node'))
+            node = os.path.relpath( os.path.join(file_tuple[0], file), directory)
+            codefiles[node] = CodeFile(os.path.join(file_tuple[0], file))
+            tree.insert(current_node, 'end', node, text=file, tags=('node'))
             #tree.set(plotterID, 'ins', 1)
             #tree.set(plotterID, 'outs', 0)
         
@@ -134,9 +135,7 @@ def make_tree(mainframe, directory):
     tree.column('ins', width=60, anchor='center')
     tree.column('outs', width=60, anchor='center')
     
-    
-    actor_dir = os.path.join(EXAMPLES_DIRECTORY, 'actors')
-    codefiles = fill_tree(tree, actor_dir)
+    codefiles = fill_tree(tree, directory)
     def go(*args):
         print "going"
         print args[0]
