@@ -27,7 +27,7 @@ def go(*args):
     print "Going"
 
 
-from codegroup import make_tree, fill_tree
+from codegroup import make_tree, fill_tree, ExamplesGroup
 
 if __name__ == "__main__":
     root = Tk()
@@ -49,7 +49,8 @@ if __name__ == "__main__":
     import os
     src_dir = os.path.normpath(__file__ + '../../../')
     actor_dir = os.path.join(src_dir, 'actors')
-    make_tree(mainframe, actor_dir)
+    
+    ExamplesGroup("Actors", mainframe, actor_dir, (go,go))
     
     for child in mainframe.winfo_children():
         child.grid_configure(padx=5, pady=5)
