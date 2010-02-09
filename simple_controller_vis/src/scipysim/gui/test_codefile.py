@@ -10,6 +10,14 @@ import unittest
 
 PATH_TO_SRC_DIR = path.join(path.dirname(__file__),'..','..')
 
+class Test_Code_File_Path(unittest.TestCase):
+    def test_file_is_class_name(self):
+        '''Test that a class with the same name as the filename makes valid CodeFile'''
+        c = CodeFile(path.join(PATH_TO_SRC_DIR, 'scipysim', 'actors', 'math', 'trig', 'sin.py'))
+
+    def test_file_isnt_class_name(self):
+        c = CodeFile(path.join(PATH_TO_SRC_DIR, 'scipysim', 'actors', 'strings', 'intparser.py'))
+        
 class Test_Code_File_Num_Input_Output_Parsing(unittest.TestCase):
     src_dir = PATH_TO_SRC_DIR
     
