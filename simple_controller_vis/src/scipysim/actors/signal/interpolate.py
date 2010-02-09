@@ -9,13 +9,16 @@ import logging
 import unittest
 
 class Interpolator(Actor):
-    raise NotImplementedError
+    pass
+    
+    def process(self):
+        raise NotImplementedError
 
 
 
 class InterpolateTests(unittest.TestCase):
     def test_basic_intepolate(self):
-        pass
+        Interpolator().process()
 
 
 if __name__ == "__main__":
