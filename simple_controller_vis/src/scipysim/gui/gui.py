@@ -4,7 +4,10 @@ A user interface for creating and running simulations.
 
 @author: Brian Thorne
 '''
-from Tix import NoteBook, Tk
+try:
+    from Tix import Tk
+except:
+    from Tkinter import Tk
 from Tkinter import Frame, Button, Canvas, Text
 from Tkconstants import LEFT, BOTH, END, X, Y, TOP, RIDGE
 
@@ -15,8 +18,10 @@ import tempfile
 import glob
 import logging
 
-from codefile import CodeFile
+# Todo: replace with ttk(or Tix) NoteBook
+from tabs import Notebook as NoteBook
 
+from codefile import CodeFile
 from codegroup import ExamplesGroup
 
 logging.basicConfig(level=logging.DEBUG)
@@ -179,13 +184,14 @@ class App:
         file_frame.pack(side=LEFT, fill=BOTH, expand=1)
 
         # Get the contents for the models and actors.
-        (models, actors) = get_models_and_actors()
-        self.loadedComponent = ""
+        # Now will be parsed in codegroup.py
+
+        (models, actors) = [os.path.join(EXAMPLES_DIRECTORY, a) for a in ["models", "actors"]]
         
-        # Create the list box widgets for models, and actors.
+        # Create the tree widgets for models, and actors.
         callbacks = (self.write_to_win, self.set_active_block)
-        ExamplesGroup("Models", file_frame, models, callbacks)
-        ExamplesGroup("Actors", file_frame, actors, callbacks)
+        #ExamplesGroup("Models", file_frame, models, callbacks)
+        #ExamplesGroup("Actors", file_frame, actors, callbacks)
         
         # The frame for the main window
         main_frame = Frame(frame)
