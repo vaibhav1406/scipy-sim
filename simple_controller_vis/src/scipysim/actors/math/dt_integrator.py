@@ -1,7 +1,11 @@
 '''
-Created on 9/12/2009
+Discrete-time integrator
 
-@author: brian
+@author: Brian Thorne
+@author: Allan McInnes
+
+Created on 9/12/2009
+Additional integration algorithms added 08/02/2010
 '''
 from scipysim.actors import Actor, Channel, Siso
 
