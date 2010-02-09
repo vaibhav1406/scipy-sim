@@ -36,6 +36,7 @@ def get_models_and_actors():
     # The models and actors are loaded from the models/actors directory.
     # TODO: Parse the directory tree for both actors and models. (os.walk)
     
+    
     model_filenames = [(path.split(a)[1], path.abspath(a)) for a in glob.glob(EXAMPLES_DIRECTORY + "/models/[A-z]*.py") ]
     actor_filenames = [(path.split(a)[1], path.abspath(a)) for a in glob.glob(EXAMPLES_DIRECTORY + "/actors/[A-z]*.py")]
     [logging.debug(a) for a in ["Models:"] + model_filenames + ["\nActors:"] + actor_filenames]
