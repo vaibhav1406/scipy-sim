@@ -2,9 +2,9 @@ import logging
 import os
 import re
 
-from Tkinter import Label, Scrollbar, Button
-from Tkconstants import VERTICAL, SINGLE, BROWSE, RIGHT, Y, BOTH, END, ANCHOR
-from ttk import Treeview, Button
+from Tkinter import Label, Scrollbar
+from Tkconstants import VERTICAL
+from ttk import Treeview
 
 from codefile import CodeFile
 
@@ -55,11 +55,15 @@ class ExamplesGroup:
         """Set the code preview window to display the source
         code of the currently selected actor
         """
-        logging.debug("In 'get_selection' - x: %s" % x)
-        logging.debug("Dir(x): %s" % dir(x))
-        #selected_name = 
-        
-        selected_codefile = self.get_dict()[selected_name]
+        logging.debug("In 'get_selection' - Event: %s" % x)
+        selected_name = self.tree.selection()
+        logging.debug("Selected: %s\nDictionary has:%s" % (selected_name, self.codefiles.keys()))
+        selected_name = selected_name[0]
+        try:
+            selected_codefile = self.get_dict()[selected_name]
+        except KeyError,e:
+            logging.debug("The directory is probably selected.")
+            return
         self.set_active_block(selected_codefile)
         self.set_text(self.get_example(selected_name))
 
@@ -78,7 +82,8 @@ class ExamplesGroup:
         #    self.listbox.insert(END, i)
 
         # left mouse click on a list item to display selection in source viewer
-        self.tree.bind('<ButtonRelease-1>', self.get_selection)
+        # '<ButtonRelease-1>'
+        self.tree.tag_bind('node', '<1>', self.get_selection)
         
 def fill_tree(tree, directory):
     '''Parse a directory and add to an existing tree.
@@ -107,6 +112,7 @@ def fill_tree(tree, directory):
             node = os.path.relpath( os.path.join(file_tuple[0], file), directory)
             codefiles[node] = CodeFile(os.path.join(file_tuple[0], file))
             tree.insert(current_node, 'end', node, text=file, tags=('node'))
+            logging.debug("Inserted '%s' node under '%s' with ID: '%s'" % (file, current_node,node))
             #tree.set(plotterID, 'ins', 1)
             #tree.set(plotterID, 'outs', 0)
         
