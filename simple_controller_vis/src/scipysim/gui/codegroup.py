@@ -74,6 +74,7 @@ class ExamplesGroup:
 
         self.tree, self.codefiles = make_tree( self.frame, self.directory )
         logging.debug( "Finished drawing tree. Binding events now." )
+        self.tree.pack()
 
         #self.scrollbar.config(command=self.listbox.yview)
         #self.scrollbar.pack(side=RIGHT, fill=Y)
