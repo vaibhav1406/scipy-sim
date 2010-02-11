@@ -1,5 +1,14 @@
 '''
-Discrete-time integrator
+Discrete-time integrator.
+
+Three different discrete-time integration algorithms are available:
+
+ * Backward Euler (aka Backward Rectangular)
+ * Forward Euler (aka Forward Rectangular)
+ * Trapezoidal
+ 
+Note that all three implementations current assume uniform unit intervals between
+input time tags.
 
 @author: Brian Thorne
 @author: Allan McInnes
@@ -11,68 +20,70 @@ from scipysim.actors import Actor, Channel, Siso
 
 class DTIntegrator(Siso):
     '''
-    A discrete-time integrator block.
-    
-    Implements three different discrete-time integration algorithms:
-    
-     * Backward Euler (aka Backward Rectangular)
-     * Forward Euler (aka Forward Rectangular)
-     * Trapezoidal
-     
-   Note that all three implementations current assume uniform unit intervals between
-   input time tags.
+    Abstract base class for discrete-time integrator blocks.
    '''
-    
     input_domains = ("DT",)
     output_domains = ("DT",)
     
-    def __init__(self, input_queue, output_queue, init=0.0, alg='backward_euler'):
+    def __init__(self, input_queue, output_queue, init=0.0):
         '''
         Constructor for the discrete-time integrator actor. 
         '''
         super(DTIntegrator, self).__init__(input_queue=input_queue,
-                                  output_queue=output_queue)
-                                  
+                                           output_queue=output_queue)       
         self.y_old = init  # y[n-1] : the last output
         self.y = init      # y[n] : the output
-        self.x_old = 0.0   # x[n] : the last input
-        
-        algorithm = { 
-            'backward_euler' : self.backward_euler,
-            'forward_euler' : self.forward_euler,
-            'trapezoidal' : self.trapezoidal,
-            }        
-        self.integrate = algorithm[alg]
 
-    def siso_process(self, obj):
-        obj = self.integrate(obj)
-        return obj
+    def siso_process(self, event):
+        event = self.integrate(event)
+        return event
         
-    def backward_euler(self, obj):
+    def integrate(self, event): 
+        '''This method must be overridden. It implements the integration algorithm
+        based on the current and previous events.
+        @return Event
+        '''
+        raise NotImplementedError    
+        
+        
+class DTIntegratorBackwardEuler(DTIntegrator):   
+    '''Backward Euler (aka Backward Rectangular) discrete-time integration.'''
+    def integrate(self, event):
         ''' y[n] = y[n-1] + x[n] '''
-        self.y = self.y_old + obj['value']
+        self.y = self.y_old + event['value']
         self.y_old = self.y        
-        obj['value'] = self.y
-        return obj  
+        event['value'] = self.y
+        return event  
         
-    def forward_euler(self, obj):
+class DTIntegratorForwardEuler(DTIntegrator):   
+    '''Forward Euler (aka Forward Rectangular) discrete-time integration.'''
+    def integrate(self, event):
         ''' y[n] = y[n-1] + x[n-1] '''
         self.y = self.y_old
-        self.y_old += obj['value']    
-        obj['value'] = self.y
-        return obj          
+        self.y_old += event['value']    
+        event['value'] = self.y
+        return event          
 
-    def trapezoidal(self, obj):
+
+class DTIntegratorTrapezoidal(DTIntegrator):   
+    '''Trapezoidal discrete-time integration.'''
+    def __init__(self, input_queue, output_queue, init=0.0):
+        super(DTIntegratorTrapezoidal, self).__init__(input_queue=input_queue,
+                                                      output_queue=output_queue)
+        self.x_old = 0.0   # x[n] : the last input    
+        
+    def integrate(self, event):
         ''' y[n] = y[n-1] + 0.5*(x[n] + x[n-1]) '''
-        self.y = self.y_old + 0.5*(obj['value'] + self.x_old)
-        self.x_old = obj['value']
+        self.y = self.y_old + 0.5*(event['value'] + self.x_old)
+        self.x_old = event['value']
         self.y_old = self.y    
-        obj['value'] = self.y
-        return obj    
+        event['value'] = self.y
+        return event    
+
 
 import unittest
 class DTIntegratorTests(unittest.TestCase):
-    '''Test the simple integrator actor'''
+    '''Test the integrator actors'''
 
     def setUp(self):
         '''
@@ -88,7 +99,7 @@ class DTIntegratorTests(unittest.TestCase):
 
         expected_output_values = [sum(range(i)) for i in xrange(1,11)]
 
-        block = DTIntegrator(self.q_in, self.q_out, alg='backward_euler')
+        block = DTIntegratorBackwardEuler(self.q_in, self.q_out)
         block.start()
         [self.q_in.put(val) for val in inp]
         self.q_in.put(None)
@@ -106,7 +117,7 @@ class DTIntegratorTests(unittest.TestCase):
 
         expected_output_values = [sum(range(i)) for i in xrange(0,10)]
 
-        block = DTIntegrator(self.q_in, self.q_out, alg='forward_euler')
+        block = DTIntegratorForwardEuler(self.q_in, self.q_out)
         block.start()
         [self.q_in.put(val) for val in inp]
         self.q_in.put(None)
@@ -125,7 +136,7 @@ class DTIntegratorTests(unittest.TestCase):
         x_avgs = [0.5*(x + (x-1)) for x in xrange(1, 11, 1)]
         expected_output_values = [sum(x_avgs[:i]) for i in range(10)]
 
-        block = DTIntegrator(self.q_in, self.q_out, alg='trapezoidal')
+        block = DTIntegratorTrapezoidal(self.q_in, self.q_out)
         block.start()
         [self.q_in.put(val) for val in inp]
         self.q_in.put(None)
