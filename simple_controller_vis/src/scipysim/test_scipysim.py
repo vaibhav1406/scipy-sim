@@ -5,5 +5,5 @@ at the command line.
 
 import nose
 
-if __name__ == "__main__":                   
+if __name__ == "__main__":
     nose.run()
