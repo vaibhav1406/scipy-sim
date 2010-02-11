@@ -8,16 +8,16 @@ from scipysim.actors import Actor
 import logging
 import unittest
 
-class Interpolator(Actor):
+class Interpolator( Actor ):
     pass
-    
-    def process(self):
+
+    def process( self ):
         raise NotImplementedError
 
 
 
-class InterpolateTests(unittest.TestCase):
-    def test_basic_intepolate(self):
+class InterpolateTests( unittest.TestCase ):
+    def test_basic_intepolate( self ):
         Interpolator().process()
 
 

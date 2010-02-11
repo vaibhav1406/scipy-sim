@@ -11,7 +11,7 @@ Created on 13/12/2009
 from scipysim.actors import Actor, Channel
 import logging
 
-class PassThrough(Actor):
+class PassThrough( Actor ):
     '''
     This actor takes a boolean tagged signal and a data channel.
     At the tag points where the boolean signal is True, the values from the input are
@@ -20,7 +20,7 @@ class PassThrough(Actor):
     @note: For now this has to be used with discrete signals, or at least aligned continuous signals.
     '''
 
-    def __init__(self, bool_input, data_input, output_queue, else_data_input=None):
+    def __init__( self, bool_input, data_input, output_queue, else_data_input=None ):
         """
         Constructor for a PassThrough block
 
@@ -32,43 +32,43 @@ class PassThrough(Actor):
 
         @param output_queue: A single queue where the output will be put.
         """
-        super(PassThrough, self).__init__(output_queue=output_queue)
+        super( PassThrough, self ).__init__( output_queue=output_queue )
         self.bool_input = bool_input
         self.data_input = data_input
         self.has_else_clause = else_data_input is not None
         if self.has_else_clause:
             self.else_data_input = else_data_input
-        
-        logging.info("We have set up a pass through actor")
 
-    def process(self):
+        logging.info( "We have set up a pass through actor" )
+
+    def process( self ):
         """Wait for data from both input queues"""
-        logging.debug("Running pass-through, blocking on both queues")
+        logging.debug( "Running pass-through, blocking on both queues" )
 
         # this is blocking on each queue in sequence
-        bool_in = self.bool_input.get(True)
-        logging.debug("Got a boolean value, waiting for data point")
-        data_in = self.data_input.get(True)
-        
+        bool_in = self.bool_input.get( True )
+        logging.debug( "Got a boolean value, waiting for data point" )
+        data_in = self.data_input.get( True )
+
         if self.has_else_clause:
-            else_data_in = self.else_data_input.get(True)
-            
+            else_data_in = self.else_data_input.get( True )
+
         # We are finished iff all the input objects are None
         if bool_in is None and data_in is None:
-            logging.info("We have finished PassingThrough the data")
+            logging.info( "We have finished PassingThrough the data" )
             self.stop = True
-            self.output_queue.put(None)
+            self.output_queue.put( None )
             return
-        logging.debug("Received a boolean and a data point. Tags = (%e,%e)" % (bool_in['tag'], data_in['tag']))
+        logging.debug( "Received a boolean and a data point. Tags = (%e,%e)" % ( bool_in['tag'], data_in['tag'] ) )
 
         # For now we require the signals are in sync
         assert bool_in['tag'] == data_in['tag']
 
         if bool_in['value'] is True:
-            logging.debug("The input was positive, passing data through")
-            self.output_queue.put(data_in)
+            logging.debug( "The input was positive, passing data through" )
+            self.output_queue.put( data_in )
         else:
             if self.has_else_clause:
-                self.output_queue.put(else_data_in)
+                self.output_queue.put( else_data_in )
             else:
-                logging.debug("Discarding data.")
+                logging.debug( "Discarding data." )

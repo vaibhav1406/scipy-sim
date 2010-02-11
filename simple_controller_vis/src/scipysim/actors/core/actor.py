@@ -8,10 +8,10 @@ import Queue as queue
 import threading
 import logging
 
-class InvalidSimulationInput(TypeError):
+class InvalidSimulationInput( TypeError ):
     pass
 
-class Channel(queue.Queue):
+class Channel( queue.Queue ):
     '''
     A Channel is a derived class of the Python Queue, used for communicating between Actors.
     
@@ -22,21 +22,21 @@ class Channel(queue.Queue):
         
     @param domain: The two letter domain code as a string
     '''
-    
-    def __init__(self, domain="CT"):
+
+    def __init__( self, domain="CT" ):
         '''Construct a queue with type information.
         '''
-        queue.Queue.__init__(self)
+        queue.Queue.__init__( self )
         self.domain = domain
-        
-def MakeChans(num):
+
+def MakeChans( num ):
     '''Make a list of channels.
     @param num of channels to create
     '''
-    return [Channel() for i in xrange(num)]
+    return [Channel() for i in xrange( num )]
 
-    
-class Actor(threading.Thread):
+
+class Actor( threading.Thread ):
     '''
     This is a base Actor class for use in a simulation.
     All blocks should inherit from this, including composite models.
@@ -57,10 +57,10 @@ class Actor(threading.Thread):
     '''
     num_inputs = None
     num_outputs = None
-    output_domains = (None,)
-    input_domains = (None,)
-    
-    def __init__(self, input_queue=None, output_queue=None, *args, **kwargs):
+    output_domains = ( None, )
+    input_domains = ( None, )
+
+    def __init__( self, input_queue=None, output_queue=None, *args, **kwargs ):
         '''Constructor for a generic base actor.
         
         @param input_queue: If an input queue is not passed in, one will be created.
@@ -69,31 +69,30 @@ class Actor(threading.Thread):
         
         Any other named parameters will be passed on to the Thread constructor.
         '''
-        super(Actor, self).__init__()
-        logging.debug("Constructing a new Actor thread")
+        super( Actor, self ).__init__()
 
         # Every actor will have at least an input thread - even if its just a control
         if input_queue is None:
-            input_queue = queue.Queue(0)
+            input_queue = queue.Queue( 0 )
         self.input_queue = input_queue
 
         # A sink doesn't require an output queue so this could be None
         self.output_queue = output_queue
 
         self.stop = False
-        self.setDaemon(True)
+        self.setDaemon( True )
 
 
-    def run(self):
+    def run( self ):
         '''
         Run this actors objects thread
         '''
-        logging.debug("Started running an actor thread")
+        logging.debug( "Started running an actor thread" )
         while not self.stop:
             #logging.debug("Some actor is processing now")
             self.process()
 
-    def process(self):
+    def process( self ):
         '''
         The process function is called as often as possible by the threading 
         or multitasking library. No guarantees are made about timing, or that
@@ -101,12 +100,12 @@ class Actor(threading.Thread):
         '''
         raise NotImplementedError()
 
-class DisplayActor(Actor):
+class DisplayActor( Actor ):
     '''A display actor is a sink. It also draws to the screen'''
     num_inputs = 1
     num_outputs = 0
 
-class Source(Actor):
+class Source( Actor ):
     '''
     A Source is an abstract interface for a signal source.
     Requires an output queue.
@@ -114,11 +113,11 @@ class Source(Actor):
     num_inputs = 0
     num_outputs = 1
 
-    def __init__(self, output_queue, simulation_time=None):
-        super(Source, self).__init__(output_queue=output_queue)
+    def __init__( self, output_queue, simulation_time=None ):
+        super( Source, self ).__init__( output_queue=output_queue )
         self.simulation_time = simulation_time
 
-    def process(self):
+    def process( self ):
         '''
         This abstract method gets called in a loop untill the actor sets its stop variable to true
         '''
