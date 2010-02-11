@@ -20,11 +20,11 @@ from scipysim.actors import Siso, Channel, SisoTestHelper
 import logging
 import unittest
 
-class Interpolator(Siso):
+class Interpolator( Siso ):
     '''
     Abstract base class for interpolation actors.
     '''
-    def __init__(self, input_queue, output_queue, interpolation_factor=2):
+    def __init__( self, input_queue, output_queue, interpolation_factor=2 ):
         '''
         Constructor for an interpolation actor. 
                 
@@ -32,22 +32,22 @@ class Interpolator(Siso):
                                      by this factor. For interpolation_factor N, the interpolator
                                      will add N-1 events between each pair of input events.
         '''
-        super(Interpolator, self).__init__(input_queue=input_queue,
+        super( Interpolator, self ).__init__( input_queue=input_queue,
                                            output_queue=output_queue,
-                                           child_handles_output=True)
-        self.interpolation_factor = int(interpolation_factor)
+                                           child_handles_output=True )
+        self.interpolation_factor = int( interpolation_factor )
         self.last_event = None
         self.last_out_tag = None
         self.domain = input_queue.domain
         
-    def interpolate(self, event, tag):
+    def interpolate( self, event, tag ):
         '''This method must be overridden. It implements the interpolation algorithm
         based on the current and previous events.
         @return Event
         '''
-        raise NotImplementedError   
-        
-    def siso_process(self, event):
+        raise NotImplementedError
+
+    def siso_process( self, event ):
         if self.last_event:
             for i in range(1, self.interpolation_factor):
 
@@ -82,45 +82,46 @@ class Interpolator(Siso):
         self.output_queue.put(event)        
 
 
-class InterpolatorZero(Interpolator):
-    '''zero interpolation - insert zero values.'''
-    def interpolate(self, event, tag):
-        return { 'tag': tag, 'value': 0.0 }
-        
-class InterpolatorStep(Interpolator):   
-    '''step interpolation - holds the last value.'''
-    def interpolate(self, event, tag):
-        return { 'tag': tag, 'value': self.last_event['value'] }       
 
-class InterpolatorLinear(Interpolator):   
+class InterpolatorZero( Interpolator ):
+    '''zero interpolation - insert zero values.'''
+    def interpolate( self, event, tag ):
+        return { 'tag': tag, 'value': 0.0 }
+
+class InterpolatorStep( Interpolator ):
+    '''step interpolation - holds the last value.'''
+    def interpolate( self, event, tag ):
+        return { 'tag': tag, 'value': self.last_event['value'] }
+
+class InterpolatorLinear( Interpolator ):
     '''linear interpolation - places values on a straight line between 
        successive events.
     '''
-    def interpolate(self, event, tag):
-        m = ((event['value'] - self.last_event['value']) 
-                    / float(event['tag'] - self.last_event['tag']))              
-        dt = (tag - self.last_event['tag'])
-        val = m*dt  + self.last_event['value']
-        return { 'tag': tag, 'value': val }       
+    def interpolate( self, event, tag ):
+        m = ( ( event['value'] - self.last_event['value'] )
+                    / ( event['tag'] - self.last_event['tag'] ) )
+        dt = ( tag - self.last_event['tag'] )
+        val = m * dt + self.last_event['value']
+        return { 'tag': tag, 'value': val }
 
 
-class InterpolateTests(unittest.TestCase):
+class InterpolateTests( unittest.TestCase ):
     '''Test the interpolation actors'''
-    def setUp(self):
+    def setUp( self ):
         '''
         Unit test setup code
         '''
         self.q_in = Channel()
         self.q_out = Channel()
 
-    def test_zero_interpolation_ct(self):
+    def test_zero_interpolation_ct( self ):
         '''Test zero interpolation of a simple CT signal.
         '''
-        inp = [{'value':i, 'tag':i} for i in xrange(-10, 11, 2)]
-        expected_outputs = [{'tag':t, 'value':t if not (t % 2) else 0.0 } 
-                                                for t in xrange(-10, 11, 1)]
-        block = InterpolatorZero(self.q_in, self.q_out)
-        SisoTestHelper(self, block, inp, expected_outputs)
+        inp = [{'value':i, 'tag':i} for i in xrange( -10, 11, 2 )]
+        expected_outputs = [{'tag':t, 'value':t if not ( t % 2 ) else 0.0 }
+                                                for t in xrange( -10, 11, 1 )]
+        block = InterpolatorZero( self.q_in, self.q_out )
+        SisoTestHelper( self, block, inp, expected_outputs )
 
     def test_zero_interpolation_dt(self):
         '''Test zero interpolation of a simple DT signal.
@@ -134,14 +135,14 @@ class InterpolateTests(unittest.TestCase):
         SisoTestHelper(self, block, inp, expected_outputs)
 
 
-    def test_step_interpolation_ct(self):
+    def test_step_interpolation_ct( self ):
         '''Test step interpolation of a simple CT signal.
         '''
-        inp = [{'value':i, 'tag':i} for i in xrange(-10, 11, 2)]
-        expected_outputs = [{'tag':t, 'value':t if not (t % 2) else t-1 } 
-                                                for t in xrange(-10, 11, 1)]
-        block = InterpolatorStep(self.q_in, self.q_out)
-        SisoTestHelper(self, block, inp, expected_outputs)
+        inp = [{'value':i, 'tag':i} for i in xrange( -10, 11, 2 )]
+        expected_outputs = [{'tag':t, 'value':t if not ( t % 2 ) else t - 1 }
+                                                for t in xrange( -10, 11, 1 )]
+        block = InterpolatorStep( self.q_in, self.q_out )
+        SisoTestHelper( self, block, inp, expected_outputs )
 
     def test_step_interpolation_dt(self):
         '''Test step interpolation of a simple DT signal.
@@ -175,6 +176,6 @@ class InterpolateTests(unittest.TestCase):
         block = InterpolatorLinear(self.q_in, self.q_out)
         SisoTestHelper(self, block, inp, expected_outputs)
         
-        
+
 if __name__ == "__main__":
     unittest.main()
