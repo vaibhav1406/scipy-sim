@@ -18,50 +18,50 @@ import matplotlib
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-class BundlePlotter(Actor):
+class BundlePlotter( Actor ):
     '''
     A plot that is NOT dynamic. It takes a packet or bundle of events
     and plots it all at once.
     '''
-    def __init__(self, input_queue, title="Scipy Simulation Output", show=False):
+    def __init__( self, input_queue, title="Scipy Simulation Output", show=False ):
         '''A bundle plotter takes bundled data in the input queue.
         The individual discrete events must be compressed using the bundler first
         '''
-        super(BundlePlotter, self).__init__(input_queue=input_queue)
+        super( BundlePlotter, self ).__init__( input_queue=input_queue )
         self.title = title
         self.show = show
-        
-    def process(self):
+
+    def process( self ):
         '''Collect the data in one lot from the queue and create an image'''
-        self.data = self.input_queue.get(True)     # this is blocking
+        self.data = self.input_queue.get( True )     # this is blocking
         if self.data is None:
             self.stop = True
         else:
             url = self.save_image()
-            if self.show: 
+            if self.show:
                 import webbrowser
                 # I don't know why this is breaking things... but it is...
-                webbrowser.open(url)
-            
-            logging.info("Output graph is at '%s'" % url)
-            
-    def save_image(self):
+                webbrowser.open( url )
+
+            logging.info( "Output graph is at '%s'" % url )
+
+    def save_image( self ):
         self.x_axis_data = self.data["Tag"]
         self.y_axis_data = self.data["Value"]
-        logging.info("Creating static plot of %d items" % len(self.data))
-        
+        logging.info( "Creating static plot of %d items" % len( self.data ) )
+
         f = Figure()    # Could give the figure a size and dpi here
-        canvas = FigureCanvas(f)
-        
-        a = f.add_subplot(111)
-        a.plot(self.x_axis_data, self.y_axis_data)
-        a.set_title(self.title)
-        a.grid(True)
-        
+        canvas = FigureCanvas( f )
+
+        a = f.add_subplot( 111 )
+        a.plot( self.x_axis_data, self.y_axis_data )
+        a.set_title( self.title )
+        a.grid( True )
+
         # This creates a png image in the current directory
-        canvas.print_figure(filename=self.title, dpi=150) 
-        logging.info("Saved output png image.")
+        canvas.print_figure( filename=self.title, dpi=150 )
+        logging.info( "Saved output png image." )
         import os
         url = "file://" + os.getcwd() + "/" + self.title + ".png"
-        logging.info("Image was saved at %s" % url)
+        logging.info( "Image was saved at %s" % url )
         return url

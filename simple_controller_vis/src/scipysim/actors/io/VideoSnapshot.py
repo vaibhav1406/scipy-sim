@@ -12,23 +12,23 @@ from scipysim import Source, Actor
 import logging
 verbose = True
 LOG_FILENAME = None
-logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG)
+logging.basicConfig( filename=LOG_FILENAME, level=logging.DEBUG )
 WIDTH, HEIGHT = 320, 240
 
 
 # This requires a recent pygame with a camera module (1.9.1 or greater)
 import pygame
 import pygame.camera as camera
-logging.debug("Pygame Version: %s" % pygame.__version__)
+logging.debug( "Pygame Version: %s" % pygame.__version__ )
 
-class VideoSnapshot(Source):
+class VideoSnapshot( Source ):
     '''
     This actor is an image source,
     This component polls a connected webcam, returning the latest
     single image when requested.
     '''
 
-    def __init__(self, input_queue, output_queue, device=0, max_freq=10, size=(WIDTH, HEIGHT), grey=True):
+    def __init__( self, input_queue, output_queue, device=0, max_freq=10, size=( WIDTH, HEIGHT ), grey=True ):
         """
         Constructor for a VideoSnapshot source.
 
@@ -57,53 +57,53 @@ class VideoSnapshot(Source):
             >>> img1 = out_queue.get()
             >>> assert out_queue.get()['value'] == None
         """
-        super(VideoSnapshot, self).__init__(self, input_queue=input_queue, output_queue=out)
+        super( VideoSnapshot, self ).__init__( self, input_queue=input_queue, output_queue=out )
         self.MAX_FREQUENCY = max_freq
         self.device = device
         self.size = size
         self.grey = grey
-        logging.debug("Initializing Video Capture")
+        logging.debug( "Initializing Video Capture" )
         camera.init()
 
         # gets a list of available cameras.
         self.clist = camera.list_cameras()
         if not self.clist:
-            raise IOError("Sorry, no cameras detected.")
+            raise IOError( "Sorry, no cameras detected." )
 
-        logging.info("Opening device %s, with video size (%s,%s)" % (self.clist[0], self.size[0], self.size[1]))
+        logging.info( "Opening device %s, with video size (%s,%s)" % ( self.clist[0], self.size[0], self.size[1] ) )
 
-        self.camera = camera.Camera(self.clist[0], self.size, "RGB")
+        self.camera = camera.Camera( self.clist[0], self.size, "RGB" )
 
 
-    def process(self):
+    def process( self ):
         """Carry out the image capture"""
-        logging.debug("Running Video capture process")
+        logging.debug( "Running Video capture process" )
 
         # starts the camera
         self.camera.start()
 
         while True:
-            obj = self.input_queue.get(True)     # this is blocking
+            obj = self.input_queue.get( True )     # this is blocking
             if obj is None:
-                logging.info("We have finished multiplying the data")
+                logging.info( "We have finished multiplying the data" )
                 self.stop = True
-                self.output_queue.put(None)
+                self.output_queue.put( None )
                 return
             tag = obj['tag']
 
-            surface = self.camera.get_image(self.snapshot)
+            surface = self.camera.get_image( self.snapshot )
 
             #Convert the image to a numpy array
-            image = surfarray.array3d(surface)
+            image = surfarray.array3d( surface )
             if self.grey:
                 # convert to grayscale numpy array for image processing
-                image = numpy.mean(image, 2)
+                image = numpy.mean( image, 2 )
 
             data = {
                     "tag": tag,
                     "value": image
                     }
 
-            self.output_queue.put(data)
-            logging.debug("Video Snapshot process added data at tag: %2." % tag)
+            self.output_queue.put( data )
+            logging.debug( "Video Snapshot process added data at tag: %2." % tag )
 
