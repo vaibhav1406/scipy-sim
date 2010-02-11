@@ -2,9 +2,9 @@ import logging
 import os
 import re
 
-from Tkinter import Label, Scrollbar, Button
-from Tkconstants import VERTICAL, SINGLE, BROWSE, RIGHT, Y, BOTH, END, ANCHOR
-from ttk import Treeview, Button
+from Tkinter import Label, Scrollbar
+from Tkconstants import VERTICAL
+from ttk import Treeview
 
 from codefile import CodeFile
 
@@ -55,11 +55,15 @@ class ExamplesGroup:
         """Set the code preview window to display the source
         code of the currently selected actor
         """
-        logging.debug( "In 'get_selection' - x: %s" % x )
-        logging.debug( "Dir(x): %s" % dir( x ) )
-        #selected_name = 
-
-        selected_codefile = self.get_dict()[selected_name]
+        logging.debug( "In 'get_selection' - Event: %s" % x )
+        selected_name = self.tree.selection()
+        logging.debug( "Selected: %s\nDictionary has:%s" % ( selected_name, self.codefiles.keys() ) )
+        selected_name = selected_name[0]
+        try:
+            selected_codefile = self.get_dict()[selected_name]
+        except KeyError, e:
+            logging.debug( "The directory is probably selected." )
+            return
         self.set_active_block( selected_codefile )
         self.set_text( self.get_example( selected_name ) )
 
@@ -69,7 +73,8 @@ class ExamplesGroup:
         label.pack()
 
         self.tree, self.codefiles = make_tree( self.frame, self.directory )
-
+        logging.debug( "Finished drawing tree. Binding events now." )
+        self.tree.pack()
 
         #self.scrollbar.config(command=self.listbox.yview)
         #self.scrollbar.pack(side=RIGHT, fill=Y)
@@ -78,7 +83,9 @@ class ExamplesGroup:
         #    self.listbox.insert(END, i)
 
         # left mouse click on a list item to display selection in source viewer
-        self.tree.bind( '<ButtonRelease-1>', self.get_selection )
+
+        # '<ButtonRelease-1>'
+        self.tree.tag_bind( 'node', '<1>', self.get_selection )
 
 def fill_tree( tree, directory ):
     '''Parse a directory and add to an existing tree.
@@ -101,12 +108,14 @@ def fill_tree( tree, directory ):
         files = filter( python_file_regex.search, file_tuple[2] )
         logging.info( "Under the %s directory are %d files: \n%s" % ( os.path.basename( file_tuple[0] ), len( files ), files ) )
 
-        # Add the files to the parent node
+        logging.debug( "Add the files in directory to the current node" )
         for file in files:
-            # Inserted underneath an existing node:
+            logging.debug( "Inserting %s underneath an existing node" % file )
             node = os.path.relpath( os.path.join( file_tuple[0], file ), directory )
             codefiles[node] = CodeFile( os.path.join( file_tuple[0], file ) )
             tree.insert( current_node, 'end', node, text=file, tags=( 'node' ) )
+
+            logging.debug( "Inserted '%s' node under '%s' with ID: '%s'" % ( file, current_node, node ) )
             #tree.set(plotterID, 'ins', 1)
             #tree.set(plotterID, 'outs', 0)
 
@@ -123,9 +132,11 @@ def fill_tree( tree, directory ):
     return codefiles
 
 def make_tree( mainframe, directory ):
-    # Make a tree
+    logging.debug( "Creating a new tree" )
     tree = Treeview( mainframe, columns=( 'ins', 'outs' ) )
-    # Pack the tree into the GUI
+
+    logging.debug( "Packing the tree into the GUI. Adding columns and headings" )
+
     tree.grid( column=2, row=4 )
     tree.heading( "#0", text="Block" )
     tree.heading( 'ins', text='Inputs' )
@@ -135,10 +146,8 @@ def make_tree( mainframe, directory ):
     tree.column( 'ins', width=60, anchor='center' )
     tree.column( 'outs', width=60, anchor='center' )
 
+    logging.debug( "Filling the tree with directory: %s" % directory )
     codefiles = fill_tree( tree, directory )
-    def go( *args ):
-        print "going"
-        print args[0]
-    tree.tag_bind( 'node', '<1>', go )
-    #tree.tag_configure('node', background='green')
+    logging.debug( "Done filling tree" )
+
     return tree, codefiles

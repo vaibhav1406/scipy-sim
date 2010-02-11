@@ -1,11 +1,6 @@
 '''
 Created on Feb 8, 2010
-Works on Ubuntu.
-
-* Tix is in the Python standard library but seems to be a third party extension to tk so doesn't 
-  work off the bat.
-
-* ttk is a third party Python addon, but needs either a new tk (8.5) or the tile extension.
+Works on Ubuntu and OSX
 
 @author: brianthorne
 '''

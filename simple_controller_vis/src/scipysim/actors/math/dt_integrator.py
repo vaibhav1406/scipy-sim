@@ -22,6 +22,8 @@ class DTIntegrator( Siso ):
     '''
     Abstract base class for discrete-time integrator blocks.
    '''
+
+
     input_domains = ( "DT", )
     output_domains = ( "DT", )
 
@@ -31,6 +33,7 @@ class DTIntegrator( Siso ):
         '''
         super( DTIntegrator, self ).__init__( input_queue=input_queue,
                                            output_queue=output_queue )
+
         self.y_old = init  # y[n-1] : the last output
         self.y = init      # y[n] : the output
 
@@ -81,6 +84,7 @@ class DTIntegratorTrapezoidal( DTIntegrator ):
         return event
 
 
+
 import unittest
 class DTIntegratorTests( unittest.TestCase ):
     '''Test the integrator actors'''
@@ -118,6 +122,7 @@ class DTIntegratorTests( unittest.TestCase ):
         expected_output_values = [sum( range( i ) ) for i in xrange( 0, 10 )]
 
         block = DTIntegratorForwardEuler( self.q_in, self.q_out )
+
         block.start()
         [self.q_in.put( val ) for val in inp]
         self.q_in.put( None )
@@ -137,6 +142,7 @@ class DTIntegratorTests( unittest.TestCase ):
         expected_output_values = [sum( x_avgs[:i] ) for i in range( 10 )]
 
         block = DTIntegratorTrapezoidal( self.q_in, self.q_out )
+
         block.start()
         [self.q_in.put( val ) for val in inp]
         self.q_in.put( None )

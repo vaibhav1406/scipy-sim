@@ -8,7 +8,7 @@ from os import path
 import sys
 import inspect
 import logging
-logging.basicConfig( level=logging.INFO )
+#logging.basicConfig( level=logging.INFO )
 
 from introspection import interrogate
 from scipysim.actors import Siso
@@ -69,7 +69,7 @@ class CodeFile:
             block_class = getattr( module, module_name )
 
         # Find out how many input and output channels the block can take.
-        logging.debug( interrogate( block_class ) )
+        #logging.debug(interrogate(block_class))
         if issubclass( block_class, Siso ):
             logging.debug( "Inherits from SISO - we know that it has one input and one output" )
             self.num_inputs = 1
