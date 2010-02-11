@@ -4,13 +4,10 @@ A user interface for creating and running simulations.
 
 @author: Brian Thorne
 '''
-try:
-    from Tix import Tk
-except:
-    from Tkinter import Tk
+from Tkinter import Tk
 from Tkinter import Frame, Button, Canvas, Text
 from Tkconstants import LEFT, BOTH, END, X, Y, TOP, RIDGE
-
+from ttk import *
 import subprocess
 import os
 from os import path
@@ -18,11 +15,14 @@ import tempfile
 import glob
 import logging
 
-# Todo: replace with ttk(or Tix) NoteBook
+# TODO: replace with ttk(or Tix) NoteBook
 from tabs import Notebook as NoteBook
 
 from codefile import CodeFile
 from codegroup import ExamplesGroup
+
+from simulation_canvas import SimulationCanvas
+
 
 logging.basicConfig( level=logging.DEBUG )
 logging.info( "GUI module loaded, logging enabled" )
@@ -35,139 +35,6 @@ EXAMPLES_DIRECTORY = os.path.split( PATH_TO_SCRIPT )[0]
 logging.info( "Script address is '%s'" % PATH_TO_SCRIPT )
 logging.info( "Example path is %s" % ( EXAMPLES_DIRECTORY ) )
 
-
-def get_models_and_actors():
-    """Return dictionaries with the names and paths of each model and actor to display."""
-    # The models and actors are loaded from the models/actors directory.
-    # TODO: Parse the directory tree for both actors and models. (os.walk)
-
-
-    model_filenames = [( path.split( a )[1], path.abspath( a ) ) for a in glob.glob( EXAMPLES_DIRECTORY + "/models/[A-z]*.py" ) ]
-    actor_filenames = [( path.split( a )[1], path.abspath( a ) ) for a in glob.glob( EXAMPLES_DIRECTORY + "/actors/[A-z]*.py" )]
-    [logging.debug( a ) for a in ["Models:"] + model_filenames + ["\nActors:"] + actor_filenames]
-
-    models = [CodeFile( a[1] ) for a in model_filenames if not a[0].startswith( "__" )]
-    actors = [CodeFile( a[1] ) for a in actor_filenames if not a[0].startswith( "__" )]
-    logging.info( "%d model files loaded." % len( models ) )
-    logging.info( "%d actor files loaded" % len( actors ) )
-    return ( models, actors )
-
-class ID_Generator:
-    from itertools import count
-    def __init__( self ):
-        self.generator = count()
-
-    def get_unique_id( self ):
-        return self.generator.next()
-
-
-class Simulation_Canvas( object ):
-    """A canvas where blocks can be dragged around and connected up"""
-    # The class attribute colours will hold all the colour info 
-    # Randomly chosen from (visibone.com colour-lab)
-    colours = {
-         "background": "#CCFFCC", # Pale weak green. A weak yellow is FFFFCC
-         "block": "#00FF66", # a lime green
-         "preview": "#0099FF", # a blue
-         "selected": "#FFCCCC" # pale weak red
-         }
-
-    size = ( width, height ) = ( 550, 250 )
-
-    font = ( "Helvetica", 10 )
-
-
-    def __init__( self, frame ):
-        # Create the canvas
-        self.canvas = Canvas( frame,
-                             width=self.width, height=self.height,
-                             relief=RIDGE,
-                             background=self.colours["background"],
-                             borderwidth=1 )
-        # Add event handlers for dragable items
-        self.canvas.tag_bind ( "DRAG", "<ButtonPress-1>", self.mouse_down )
-        #self.canvas.tag_bind ("DRAG", "<ButtonRelease-1>", self.mouse_release)
-        self.canvas.tag_bind ( "DRAG", "<Enter>", self.enter )
-        self.canvas.tag_bind ( "DRAG", "<Leave>", self.leave )
-        self.canvas.pack( side=TOP )
-
-        # Some default locations
-        self.PREVIEW_WIDTH = 80
-        self.PREVIEW_LOCATION = ( self.PREVIEW_X, self.PREVIEW_Y ) = ( 15, 30 )
-        self.BLOCK_SIZE = ( self.BLOCK_WIDTH, self.BLOCK_HEIGHT ) = ( 70, 50 )
-
-        # Draw a "preview" area
-        self.canvas.create_line( self.PREVIEW_WIDTH, 0, self.PREVIEW_WIDTH, 250, dash=True )
-
-    def preview_actor( self, codefile ):
-        """
-        Display a preview of an actor or compisite actor in the canvas,
-        it will be dragable into desired position
-        """
-        logging.debug( "Creating a preview of %(name)s on simulation canvas." % {'name':codefile.name} )
-
-        logging.debug( "Delecting any existing items still tagged 'preview'" )
-        self.canvas.delete( "preview" )
-
-
-        self.canvas.create_rectangle( *self.PREVIEW_LOCATION + self.BLOCK_SIZE,
-                                     fill=self.colours["preview"],
-                                     tags=["DRAG", # Anything moveable will have the "DRAG" tag
-                                            "name:" + codefile.name, # Every blocks name will tagged so we can group bits together
-                                            "type:block", # type: block/text
-                                            "preview"
-                                            ]
-                                     )
-        self.canvas.create_text ( self.PREVIEW_X + ( self.BLOCK_WIDTH / 2 ), self.PREVIEW_Y + 25,
-                                 font=self.font, text=codefile.name,
-                                 tags=["DRAG",
-                                        "name:" + codefile.name,
-                                        "type:text",
-                                        "preview"
-                                        ]
-                                 )
-
-    def mouse_down( self, event ):
-        logging.debug( "The mouse was pressed at (%d, %d)" % ( event.x, event.y ) )
-        logging.debug( "The mouse went down on a block. Binding mouse release..." )
-        selected = self.canvas.gettags( "current" )
-        logging.debug( "Currently selected items tags are %s" % selected.__repr__() )
-        self.selected_name = [a for a in selected if a.startswith( "name:" ) ][0]
-        logging.debug( "Block selected was %s" % self.selected_name )
-        self.select_location = ( event.x, event.y )
-        self.canvas.addtag( 'Selected', 'withtag', self.selected_name )
-        event.widget.itemconfigure( "Selected", fill=self.colours["selected"] )
-        self.canvas.bind( "<ButtonRelease-1>", self.mouse_release )
-
-    def mouse_release( self, event ):
-        logging.debug( "The mouse was released at (%d, %d)" % ( event.x, event.y ) )
-        if event.x >= 0 and event.x <= self.canvas.winfo_width() \
-            and event.y >= 0 and event.y <= self.canvas.winfo_height():
-                logging.debug( "Valid move inside canvas. Relocating block." )
-                self.canvas.move( "Selected", event.x - self.select_location[0], event.y - self.select_location[1] )
-                if event.x >= self.PREVIEW_WIDTH:
-                    if "preview" in self.canvas.gettags( "Selected" ):
-                        logging.info( "Moved out of preview zone, adding now component to model" )
-                        self.canvas.dtag( "preview" )
-                        #TODO HERE - add to model compiler or what ever...
-                    event.widget.itemconfigure( "Selected", fill=self.colours["block"] )
-                else:
-                    event.widget.itemconfigure( "Selected", fill=self.colours["preview"] )
-                    self.canvas.addtag_withtag( "preview", "Selected" )
-
-                #block = self.canvas.gettags("Selected")
-                #logging.debug("Block moved was made up of these components: %s" % block.__repr__())
-                self.canvas.dtag( "Selected", "Selected" )
-
-        else:
-            logging.info( "Invalid move." )
-
-
-    def enter( self, event ):
-        logging.debug( "Enter" )
-
-    def leave( self, event ):
-        logging.debug( "Leaving" )
 
 class App:
     """The base application"""
@@ -184,40 +51,24 @@ class App:
         file_frame.pack( side=LEFT, fill=BOTH, expand=1 )
 
         # Get the contents for the models and actors.
-        # Now will be parsed in codegroup.py
-
         ( models, actors ) = [os.path.join( EXAMPLES_DIRECTORY, a ) for a in ["models", "actors"]]
 
         # Create the tree widgets for models, and actors.
         callbacks = ( self.write_to_win, self.set_active_block )
-        #ExamplesGroup("Models", file_frame, models, callbacks)
-        #ExamplesGroup("Actors", file_frame, actors, callbacks)
 
+        logging.debug( "Searching Actors and Models packages and locating scipysim actors" )
+        ExamplesGroup( "Models", file_frame, models, callbacks )
+        ExamplesGroup( "Actors", file_frame, actors, callbacks )
+        logging.info( "Finished locating blocks" )
         # The frame for the main window
         main_frame = Frame( frame )
         main_frame.pack( side=LEFT )
 
-        self.simulation = Simulation_Canvas( main_frame )
+        logging.debug( "Setting up simulation canvas" )
+        self.simulation = SimulationCanvas( main_frame )
 
-        # Frame to hold all the main buttons
-        controls_frame = Frame( main_frame )
-        controls_frame.pack( fill=X )
-
-        run_button = Button( controls_frame, text="Test", fg="green", command=lambda: self.run() if self.componentLoaded else None )
-        run_button.pack( side=LEFT )
-
-        stop_button = Button( controls_frame, text="Stop", fg="red", command=self.stop )
-        stop_button.pack( side=LEFT )
-
-        save_button = Button( controls_frame, text="Save", command=self.save )
-        save_button.pack( side=LEFT )
-
-        help_button = Button( controls_frame, text="Help", command=self.help )
-        help_button.pack( side=LEFT )
-
-        quit_button = Button( controls_frame, text="QUIT", fg="white", command=frame.quit )
-        quit_button.pack( side=LEFT )
-
+        self._create_controls_frame( frame, main_frame )
+        logging.debug( "Done creating buttons. Creating Notebook now." )
         # Create a few tabs (notebook style) for viewing the source code
         # One tab will show the models source
         # the other will show the selected components
@@ -225,10 +76,10 @@ class App:
         source_frame.pack( side=TOP )
         self.notebook = NoteBook( source_frame, TOP )
 
-        # Get the notebooks main frame as the Model src viewer
+        logging.debug( "Getting the notebooks main frame (the Model src viewer)" )
         model_src_frame = Frame( self.notebook() )
 
-        # Model Source Text Editor
+        logging.debug( "Creating Model Source Text Editor" )
         # TODO: decide if this should be read only...
         self.modelSrcEdit = Text( model_src_frame, width=80 )
         self.modelSrcEdit.pack( side=TOP, fill=X )
@@ -236,7 +87,7 @@ class App:
 
         component_src_frame = Frame( self.notebook() )
 
-        # Component Source Text Editor 
+        logging.debug( "Creating component Source Text Editor" )
         self.textEdit = Text( component_src_frame, width=80 )
         self.textEdit.pack( side=TOP, fill=X )
         self.textEdit.insert( END, "Component Editor" )
@@ -249,17 +100,19 @@ class App:
         # An empty frame so the source viewer can be "minimised"
         blank_src_frame = Frame( self.notebook() )
 
-        # Add the screens to the notebook
+        logging.debug( "Adding the screens to the notebook" )
         self.notebook.add_screen( component_src_frame, "Component Source" )
         self.notebook.add_screen( model_src_frame, "Model Source" )
         self.notebook.add_screen( blank_src_frame, "Hide Source Viewer" )
-
-
 
         self.console = Text( main_frame, width=80 )
         self.console.pack( fill=X )
         self.console.insert( END, "Output Console\n \n" )
 
+        self.console = Text( main_frame, width=80 )
+        self.console.pack( fill=X )
+        self.console.insert( END, "Output Console\n \n" )
+        logging.debug( "Finished setting up scipy-simulator gui" )
 
 
     def save( self ):
@@ -318,6 +171,21 @@ class App:
         """Display some helpful message in the output console"""
         self.write_to_console( """Help for SciPy-Simulator""" )
 
+    def _create_controls_frame( self, frame, main_frame ):
+        logging.debug( "Creating and filling controls frame" )
+        controls_frame = Frame( main_frame )
+        controls_frame.pack( fill=X )
+        run_button = Button( controls_frame, text="Test", command=lambda:self.run() if self.componentLoaded else None )
+        run_button.pack( side=LEFT )
+        stop_button = Button( controls_frame, text="Stop", command=self.stop )
+        stop_button.pack( side=LEFT )
+        save_button = Button( controls_frame, text="Save", command=self.save )
+        save_button.pack( side=LEFT )
+        help_button = Button( controls_frame, text="Help", command=self.help )
+        help_button.pack( side=LEFT )
+        quit_button = Button( controls_frame, text="QUIT", command=frame.quit )
+        quit_button.pack( side=LEFT )
+
 
 class PythonRunner:
     def __init__( self ):
@@ -352,5 +220,5 @@ if __name__ == "__main__":
     root.title( "Scipy-Simulator Gui" )
 
     app = App( root )
-
+    logging.debug( "Entering mainloop..." )
     root.mainloop()

@@ -70,7 +70,7 @@ class Actor( threading.Thread ):
         Any other named parameters will be passed on to the Thread constructor.
         '''
         super( Actor, self ).__init__()
-        logging.debug( "Constructing a new Actor thread" )
+
 
         # Every actor will have at least an input thread - even if its just a control
         if input_queue is None:

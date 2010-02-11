@@ -12,6 +12,7 @@ class Model( Actor ):
     then the default run function of a Model will run the simulation.
     '''
 
+    components = []
 
     def __init__( self, *args, **kwargs ):
         '''
@@ -37,7 +38,7 @@ class Model( Actor ):
 
         """
         As this is the "main" thread we will assume control of the GUI
-        untill we enter the TK main loop, then plotters can paint their pictures.
+        until we enter the TK main loop, then plotters can paint their pictures.
         """
         if any( issubclass( a.__class__, DisplayActor ) for a in self.components ):
             from scipysim.actors.display.plotter import GUI_LOCK

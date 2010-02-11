@@ -82,7 +82,6 @@ class Interpolator( Siso ):
         self.output_queue.put(event)        
 
 
-
 class InterpolatorZero( Interpolator ):
     '''zero interpolation - insert zero values.'''
     def interpolate( self, event, tag ):
