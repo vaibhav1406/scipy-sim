@@ -7,33 +7,33 @@ import logging
 from numpy import linspace
 from scipysim.actors import Source
 
-class Constant(Source):
+class Constant( Source ):
     '''
     This actor is a constant value source
     '''
 
-    def __init__(self, out, value=1.0, resolution=10, simulation_time=120, endpoint=False):
+    def __init__( self, out, value=1.0, resolution=10, simulation_time=120, endpoint=False ):
         """
         default parameters creates a constant output of 1.0 for 2 minutes (with 10 values per "second")
 
         """
-        super(Constant, self).__init__(output_queue=out, simulation_time=simulation_time)
+        super( Constant, self ).__init__( output_queue=out, simulation_time=simulation_time )
         self.resolution = resolution
         self.endpoint = endpoint
         self.value = value
-        
 
-    def process(self):
+
+    def process( self ):
         """Create the numbers..."""
-        logging.debug("Running ramp process")
-        tags = linspace(0, self.simulation_time, self.simulation_time * self.resolution, endpoint=self.endpoint)  # for now just compute 2 minutes of values
+        logging.debug( "Running ramp process" )
+        tags = linspace( 0, self.simulation_time, self.simulation_time * self.resolution, endpoint=self.endpoint )  # for now just compute 2 minutes of values
 
         [self.output_queue.put( {
                     "tag": tag,
                     "value": self.value
-                }) for tag in tags]
-            
+                } ) for tag in tags]
+
         #time.sleep(random.random() * 0.001)     # Adding a delay so we can see the async
-        logging.debug("Const process finished adding all data to its output queue")
+        logging.debug( "Const process finished adding all data to its output queue" )
         self.stop = True
-        self.output_queue.put(None)
+        self.output_queue.put( None )
