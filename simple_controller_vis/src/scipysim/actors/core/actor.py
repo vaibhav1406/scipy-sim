@@ -51,7 +51,7 @@ class Actor( threading.Thread ):
     num_inputs - Either None or a integer number of how many channels the block takes.
     num_outputs - Same but for output of a block.
     output_domains - a tuple or list exactly num_outputs long containing information 
-                     about the domain of the output - None, DE, DT or CT
+                     about the domain of the output - None, DE, DT or CT, BIN
     input_domains - Same for inputs.
     
     '''
