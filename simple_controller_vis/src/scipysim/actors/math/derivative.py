@@ -3,8 +3,9 @@ import unittest
 import numpy as np
 
 class BundleDerivative( Actor ):
-#    def __init__(self, input_queue, output_queue):
-#        super(BundleDerivative, self).__init__(input_queue=input_queue, output_queue=output_queue)
+
+    num_inputs = 1
+    num_outputs = 1
 
     def process( self ):
         obj = self.input_queue.get( True )     # this is blocking
@@ -27,7 +28,7 @@ class BundleDerivative( Actor ):
                         )
         x['Tag'] = obj["Tag"][1:]
         x["Value"] = new_values
-        return x
+        self.output_queue.put( x )
 
 
 from scipysim.actors.io import Bundle
@@ -42,7 +43,7 @@ class BundleDerivativeTests( unittest.TestCase ):
         self.q_out2 = Channel()
 
     def test_first_order_diff( self ):
-        '''Test a float valued less than comparison with boolean output.'''
+        '''Test a first order diff'''
         input_values = [0, 1, 2, 3, 3, 3, 3, 1]
         outs = [1, 1, 1, 0, 0, 0, -2]
 
@@ -52,11 +53,15 @@ class BundleDerivativeTests( unittest.TestCase ):
         bundler = Bundle( self.q_in, self.q_out )
         diffblock = BundleDerivative( self.q_out, self.q_out2, threshold=50 )
 
-
-        [block.start() for block in [bundler, diffblock]]
         [self.q_in.put( i ) for i in self.input + [None]]
+        [block.start() for block in [bundler, diffblock]]
+
         [block.join() for block in [bundler, diffblock]]
-        expected_outputs = [{'value': outs[i], 'tag':i + 1} for i in xrange( len( outs ) )]
+        outputs = self.q_out2.get()
+        self.assertNotEqual( outputs, None )
+
+        [self.assertEquals( outs[i], outputs['Value'][i] ) for i in xrange( len( outs ) )]
+        self.assertEquals( self.q_out2.get(), None )
 
 if __name__ == "__main__":
     unittest.main()
