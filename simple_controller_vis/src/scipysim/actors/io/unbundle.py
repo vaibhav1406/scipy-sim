@@ -8,6 +8,9 @@ from scipysim.actors import Actor
 class Unbundle( Actor ):
     '''Given a bundled source, recreate the queue that made it'''
 
+    num_inputs = 1
+    num_outputs = 1
+
     def __init__( self, input_queue, output_queue ):
         super( Unbundle, self ).__init__( input_queue=input_queue, output_queue=output_queue )
 

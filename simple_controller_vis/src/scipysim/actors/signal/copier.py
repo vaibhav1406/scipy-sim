@@ -9,6 +9,11 @@ class Copier( Actor ):
     This actor takes a source and copies it to a number of outputs.
     '''
 
+    num_inputs = 1
+    num_outputs = None
+    input_domains = ( None, )
+    output_domains = ( None, )
+
     def __init__( self, input_queue, outputs ):
         """
         Constructor for a Copier Actor.
