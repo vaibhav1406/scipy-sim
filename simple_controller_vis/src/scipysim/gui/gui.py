@@ -15,7 +15,7 @@ import tempfile
 import glob
 import logging
 
-# TODO: replace with ttk(or Tix) NoteBook
+# TODO: replace with ttk NoteBook
 from tabs import Notebook as NoteBook
 
 from codefile import CodeFile
@@ -205,6 +205,7 @@ class PythonRunner:
 
 
 def writeFile( filepath, content ):
+    '''Save a file to disk.'''
     try:
         if os.path.exists( os.path.split( filepath )[0] ):
             f = open( filepath, 'w' )
