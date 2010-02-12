@@ -13,19 +13,25 @@ from scipysim.actors import Actor, DisplayActor, Channel
 
 import numpy
 import logging
+#logging.basicConfig( level=logging.DEBUG )
 
 import matplotlib
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
+
+from urllib import quote
 
 class BundlePlotter( Actor ):
     '''
     A plot that is NOT dynamic. It takes a packet or bundle of events
     and plots it all at once.
     '''
+    num_inputs = 1
+    num_outputs = 0
+
     def __init__( self, input_queue, title="Scipy Simulation Output", show=False ):
         '''A bundle plotter takes bundled data in the input queue.
-        The individual discrete events must be compressed using the bundler first
+        The individual discrete events must be compressed using the bundler first.
         '''
         super( BundlePlotter, self ).__init__( input_queue=input_queue )
         self.title = title
@@ -37,18 +43,20 @@ class BundlePlotter( Actor ):
         if self.data is None:
             self.stop = True
         else:
+            assert type( self.data ) == numpy.ndarray
             url = self.save_image()
+            url = "file://" + quote( url )
+            logging.info( "URL for image file is: '%s'" % url )
             if self.show:
                 import webbrowser
                 # I don't know why this is breaking things... but it is...
                 webbrowser.open( url )
-
-            logging.info( "Output graph is at '%s'" % url )
+        return
 
     def save_image( self ):
         self.x_axis_data = self.data["Tag"]
         self.y_axis_data = self.data["Value"]
-        logging.info( "Creating static plot of %d items" % len( self.data ) )
+        logging.debug( "Creating static plot of %d items" % len( self.data ) )
 
         f = Figure()    # Could give the figure a size and dpi here
         canvas = FigureCanvas( f )
@@ -60,8 +68,8 @@ class BundlePlotter( Actor ):
 
         # This creates a png image in the current directory
         canvas.print_figure( filename=self.title, dpi=150 )
-        logging.info( "Saved output png image." )
+        logging.debug( "Saved output png image." )
         import os
-        url = "file://" + os.getcwd() + "/" + self.title + ".png"
-        logging.info( "Image was saved at %s" % url )
+        url = os.path.join( os.getcwd() , self.title ) + ".png"
+        logging.debug( "Image was saved at %s" % url )
         return url
