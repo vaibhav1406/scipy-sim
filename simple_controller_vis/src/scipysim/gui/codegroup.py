@@ -116,8 +116,8 @@ def fill_tree( tree, directory ):
             tree.insert( current_node, 'end', node, text=file, tags=( 'node' ) )
 
             logging.debug( "Inserted '%s' node under '%s' with ID: '%s'" % ( file, current_node, node ) )
-            #tree.set(plotterID, 'ins', 1)
-            #tree.set(plotterID, 'outs', 0)
+            tree.set( node, 'ins', codefiles[node].num_inputs )
+            tree.set( node, 'outs', codefiles[node].num_outputs )
 
 
         # Must add the (sub)directories to the tree as nodes under the current node.

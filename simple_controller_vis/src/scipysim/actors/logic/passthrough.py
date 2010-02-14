@@ -20,6 +20,11 @@ class PassThrough( Actor ):
     @note: For now this has to be used with discrete signals, or at least aligned continuous signals.
     '''
 
+    num_inputs = 2
+    num_outputs = 2
+    input_domains = ( "BIN", None, )
+    output_domains = ( None, None, )
+
     def __init__( self, bool_input, data_input, output_queue, else_data_input=None ):
         """
         Constructor for a PassThrough block

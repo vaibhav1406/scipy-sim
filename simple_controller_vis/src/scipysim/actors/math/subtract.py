@@ -20,6 +20,11 @@ class Subtractor( Actor ):
     This has to be used with discrete signals, or at least aligned continuous signals.
     '''
 
+    num_inputs = 2
+    num_outputs = 1
+    input_domains = ( None, None, )
+    output_domains = ( None, )
+
     def __init__( self, input_1, input_2, output_queue, discard_incomplete_sets=True ):
         """
         Constructor for a subtraction block

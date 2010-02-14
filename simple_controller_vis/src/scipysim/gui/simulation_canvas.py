@@ -6,7 +6,85 @@ Created on Feb 10, 2010
 from Tkconstants import RIDGE, TOP
 from Tkinter import Canvas
 import logging
+import itertools
 
+class CanvasBlock ( object ):
+    '''An instance of an Actor drawn on a Simulation Canvas'''
+
+    # To create a unique ID number for every block.
+    # functools to map to str
+    counter = itertools.count()
+
+    # Settings for all blocks.
+    font = ( "Helvetica", 10 )
+    BLOCK_SIZE = ( BLOCK_WIDTH, BLOCK_HEIGHT ) = ( 70, 50 )
+
+
+    def __init__( self, canvas, codefile, x, y, colour ):
+        self.canvas = canvas
+        self.codefile = codefile
+        self.x, self.y = x, y
+        self.colour = colour
+        self.id = str( self.counter.next() )
+
+        preview_tags = [
+                        # Anything moveable will have the "DRAG" tag
+                        "DRAG",
+                        # Every blocks name will tagged so we can group bits together
+                        "name:" + codefile.name,
+                        "id:%s" % self.id,
+                        # type: block/text
+                        "preview"
+                        ]
+
+
+        self.canvas.create_rectangle( *( x, y ) + self.BLOCK_SIZE,
+                                     fill=colour,
+                                     tags=preview_tags + ["type:block"]
+                                     )
+
+        self.canvas.create_text ( x + ( self.BLOCK_WIDTH / 4 ), y + ( self.BLOCK_HEIGHT / 2 ),
+                                 font=self.font, text=codefile.name,
+                                 tags=preview_tags + ["type:text"]
+                                 )
+        num_inputs, num_outputs = codefile.num_inputs, codefile.num_outputs
+        x_, y_ = x, y
+        logging.debug( "Block has %d inputs, and %d outputs." % ( num_inputs, num_outputs ) )
+        # Draw on input and output ports
+        gap = 5
+        if num_inputs is None:
+            # Will default to drawing one connector, and when it is used we will draw another
+            num_inputs = 1
+        elif num_inputs == 0:
+            pass
+        else:
+            for input in xrange( num_inputs ):
+                self.canvas.create_polygon( x, y_ + gap , x - gap, y_ + gap * 3 / 2 , x , y_ + 2 * gap,
+                                            tags=preview_tags + ["type:input-%d" % input],
+                                            fill="#000000" )
+                y_ = y_ + gap
+        x_, y_ = x + 50 + gap, y
+        if num_outputs is None:
+            num_outputs = 1
+        elif num_outputs == 0:
+            pass
+        else:
+            for output in xrange( num_outputs ):
+                self.canvas.create_polygon( x_, y_ + gap , x_ + gap, y_ + gap * 3 / 2 , x_ , y_ + 2 * gap,
+                                            tags=preview_tags + ["type:output-%d" % input],
+                                            fill="#000000" )
+
+
+    def move_to( self, x, y ):
+        '''Move this block to blah'''
+        pass
+
+    def set_colour( self, colour ):
+        '''Set the main colour of this block to "colour" but keep
+        the text and outline etc black.
+        '''
+        # TODO filter out all but the block
+        self.canvas.itemconfigure( "id:%s" % self.id, fill=colour )
 
 class SimulationCanvas( object ):
     """A canvas where blocks can be dragged around and connected up"""
@@ -16,13 +94,10 @@ class SimulationCanvas( object ):
          "background": "#CCFFCC", # Pale weak green. A weak yellow is FFFFCC
          "block": "#00FF66", # a lime green
          "preview": "#0099FF", # a blue
-         "selected": "#FFCCCC" # pale weak red
+         "selected": "#FF6600" # orangne - red
          }
 
     size = ( width, height ) = ( 550, 250 )
-
-    font = ( "Helvetica", 10 )
-
 
     def __init__( self, frame ):
         # Create the canvas
@@ -41,10 +116,13 @@ class SimulationCanvas( object ):
         # Some default locations
         self.PREVIEW_WIDTH = 80
         self.PREVIEW_LOCATION = ( self.PREVIEW_X, self.PREVIEW_Y ) = ( 15, 30 )
-        self.BLOCK_SIZE = ( self.BLOCK_WIDTH, self.BLOCK_HEIGHT ) = ( 70, 50 )
+
 
         # Draw a "preview" area
         self.canvas.create_line( self.PREVIEW_WIDTH, 0, self.PREVIEW_WIDTH, 250, dash=True )
+
+        # A dict indexed by unique ID of elements in the canvas.
+        self.blocks = {}
 
     def preview_actor( self, codefile ):
         """
@@ -53,40 +131,32 @@ class SimulationCanvas( object ):
         """
         logging.debug( "Creating a preview of %(name)s on simulation canvas." % {'name':codefile.name} )
 
-        logging.debug( "Delecting any existing items still tagged 'preview'" )
+        logging.debug( "Deleting any existing items still tagged 'preview'" )
         self.canvas.delete( "preview" )
 
+        block = CanvasBlock( self.canvas, codefile, *self.PREVIEW_LOCATION, colour=self.colours["preview"] )
+        self.blocks[block.id] = block
 
-        self.canvas.create_rectangle( *self.PREVIEW_LOCATION + self.BLOCK_SIZE,
-                                     fill=self.colours["preview"],
-                                     tags=["DRAG", # Anything moveable will have the "DRAG" tag
-                                            "name:" + codefile.name, # Every blocks name will tagged so we can group bits together
-                                            "type:block", # type: block/text
-                                            "preview"
-                                            ]
-                                     )
-        self.canvas.create_text ( self.PREVIEW_X + ( self.BLOCK_WIDTH / 2 ), self.PREVIEW_Y + 25,
-                                 font=self.font, text=codefile.name,
-                                 tags=["DRAG",
-                                        "name:" + codefile.name,
-                                        "type:text",
-                                        "preview"
-                                        ]
-                                 )
+
 
     def mouse_down( self, event ):
+        self.select_location = ( event.x, event.y )
         logging.debug( "The mouse was pressed at (%d, %d)" % ( event.x, event.y ) )
         logging.debug( "The mouse went down on a block. Binding mouse release..." )
         selected = self.canvas.gettags( "current" )
         logging.debug( "Currently selected items tags are %s" % selected.__repr__() )
         self.selected_name = [a for a in selected if a.startswith( "name:" ) ][0]
-        logging.debug( "Block selected was %s" % self.selected_name )
-        self.select_location = ( event.x, event.y )
-        self.canvas.addtag( 'Selected', 'withtag', self.selected_name )
-        event.widget.itemconfigure( "Selected", fill=self.colours["selected"] )
-        self.canvas.bind( "<ButtonRelease-1>", self.mouse_release )
+        self.selected_id = [tag for tag in selected if tag.startswith( "id:" ) ][0]
+        logging.debug( "Block selected was %s with %s" % ( self.selected_name, self.selected_id ) )
+        block_id = self.selected_id[3:]
 
-    def mouse_release( self, event ):
+        self.canvas.addtag( 'Selected', 'withtag', self.selected_id )
+        logging.debug( "Current blocks are: %s" % self.blocks )
+        self.blocks[block_id].set_colour( self.colours['selected'] )
+
+        self.canvas.bind( "<ButtonRelease-1>", self.block_move_mouse_release )
+
+    def block_move_mouse_release( self, event ):
         logging.debug( "The mouse was released at (%d, %d)" % ( event.x, event.y ) )
         if event.x >= 0 and event.x <= self.canvas.winfo_width() \
             and event.y >= 0 and event.y <= self.canvas.winfo_height():
@@ -98,6 +168,7 @@ class SimulationCanvas( object ):
                         self.canvas.dtag( "preview" )
                         #TODO HERE - add to model compiler or what ever...
                     event.widget.itemconfigure( "Selected", fill=self.colours["block"] )
+                    event.widget.itemconfigure( "type:text", fill="#000000" )
                 else:
                     event.widget.itemconfigure( "Selected", fill=self.colours["preview"] )
                     self.canvas.addtag_withtag( "preview", "Selected" )

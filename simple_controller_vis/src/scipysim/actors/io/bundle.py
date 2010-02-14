@@ -15,6 +15,9 @@ class Bundle( Actor ):
     They get passed on as a special condensed packet.
     '''
 
+    num_inputs = 1
+    num_outputs = 1
+
     def __init__( self, input_queue, output_queue, bundle_size=None ):
         """
         Constructor for a bundle block.
