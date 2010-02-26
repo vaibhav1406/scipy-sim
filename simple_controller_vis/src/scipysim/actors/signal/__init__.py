@@ -8,3 +8,4 @@ from interpolator import InterpolatorLinear
 from ramp import Ramp
 from random_signal import RandomSource
 from sampler import Sampler
+from step import Step
