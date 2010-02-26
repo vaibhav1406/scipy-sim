@@ -22,7 +22,7 @@ class CTIntegratorDE1(Siso):
     input_domains = ("CT",)
     output_domains = ("CT",)
 
-    def __init__(self, xdot, x, init=0.0, delta=0.1, maxstep=10.0):
+    def __init__(self, xdot, x, init=0.0, delta=0.1, k=10.0):
         '''
         Construct a SISO CT integrator.
         
@@ -30,16 +30,16 @@ class CTIntegratorDE1(Siso):
         @param x: output integral
         @param init: the initial state of the integral
         @param delta: the state quantization step-size
-        @param maxstep: maximum allowable timestep
+        @param k: coefficent for the maximum allowable timestep (k*delta)
         '''
         super(CTIntegratorDE1, self).__init__(input_queue=xdot,
                                      output_queue=x)
         self.state = init
         self.delta = delta
-        self.maxstep = maxstep
+        self.maxstep = k*delta
 
         # Generate an initial output
-        x.put({'value':init, 'tag':0.0})
+        x.put({'tag':0.0, 'value':init})
 
 
     def siso_process(self, event):
@@ -58,10 +58,9 @@ class CTIntegratorDE1(Siso):
         self.state += self.delta * np.sign(xdot)
 
         # Generate output event
-        event['tag'] += timestep
-        event['value'] = self.state
+        out_event = {'tag':event['tag'] + timestep, 'value':self.state}
 
-        return event
+        return out_event
 
 
 import unittest

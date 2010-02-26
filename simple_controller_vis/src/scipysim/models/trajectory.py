@@ -31,9 +31,9 @@ class ThrownBall(Model):
             Integrator(wires[0], wires[1], initial_position),
             Copier(wires[1], [wires[2], wires[3]]),
             Plotter(wires[2], title="Velocity", own_fig=False),
-            #Integrator(wires[3], wires[4], initial_velocity),
-            #Copier(wires[4], [wires[5], wires[6]]),
-            #Plotter(wires[4], title="Displacement", own_fig=True),
+            Integrator(wires[3], wires[4], initial_velocity),
+            Copier(wires[4], [wires[5], wires[6]]),
+            Plotter(wires[5], title="Displacement", own_fig=True),
 
         ]
 
