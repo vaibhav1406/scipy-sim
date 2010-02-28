@@ -8,7 +8,7 @@ to "monitor" a variable - http://simpy.sourceforge.net/_build/Recipes/Recipe002.
 from scipysim.actors import DisplayActor
 
 import matplotlib
-matplotlib.use( 'TkAgg' )
+matplotlib.use('TkAgg')
 #from matplotlib.backends.backend_tkagg import FigureCanvasAgg as FigureCanvas
 #from matplotlib.figure import Figure
 
@@ -21,7 +21,7 @@ GUI_LOCK = threading.Condition()
 
 import time
 
-class Plotter( DisplayActor ):
+class Plotter(DisplayActor):
     '''
     This actor shows a signal dynamically as it comes off the buffer with matplotlib.
     The max refresh rate is an optional input - default is 2Hz
@@ -35,12 +35,16 @@ class Plotter( DisplayActor ):
     fig = plt.figure()
     #canvas = FigureCanvas(fig)
 
-    def __init__( self,
+    # A class attribute to store whether we have already made plots
+    # If so we call the matplotlib api slightly differently
+    firstPlot = True
+
+    def __init__(self,
                  input_queue,
                  refresh_rate=2,
                  title='Scipy Simulator Dynamic Plot',
-                 own_fig=False ):
-        super( Plotter, self ).__init__( input_queue=input_queue )
+                 own_fig=False):
+        super(Plotter, self).__init__(input_queue=input_queue)
         self.x_axis_data = []
         self.y_axis_data = []
         assert refresh_rate != 0
@@ -51,33 +55,34 @@ class Plotter( DisplayActor ):
         assert plt.isinteractive() == False
 
         self.fig_num = self.additional_figures
-        if own_fig:
+        if own_fig and not self.firstPlot:
             Plotter.additional_figures += 1
             with GUI_LOCK:
                 fig = self.myfig = plt.figure()
         else:
             fig = self.fig
 
-        self.ax = fig.add_subplot( 1, 1, 1 )
-        self.title = self.ax.set_title( title )
-        self.line, = self.ax.plot( self.x_axis_data, self.y_axis_data )
+        self.ax = fig.add_subplot(1, 1, 1)
+        self.title = self.ax.set_title(title)
+        self.line, = self.ax.plot(self.x_axis_data, self.y_axis_data)
         self.refreshs = 0
 
         self.last_update = 0
+        self.__class__.firstPlot = False
 
-    def process( self ):
+    def process(self):
         '''
         plot any values in the buffer
         '''
-        obj = self.input_queue.get( True )     # this is blocking
+        obj = self.input_queue.get(True)     # this is blocking
         if obj is None:
-            logging.info( "We have finished processing the queue of data to be displayed" )
+            logging.info("We have finished processing the queue of data to be displayed")
             self.update_plot()
             self.stop = True
             return
 
-        self.x_axis_data.append( obj['tag'] )
-        self.y_axis_data.append( obj['value'] )
+        self.x_axis_data.append(obj['tag'])
+        self.y_axis_data.append(obj['value'])
         #logging.debug("Plotter received values ( %e,%e ) Now have %i values." % (self.y_axis_data[-1], self.x_axis_data[-1], len(self.x_axis_data)))
         obj = None
 
@@ -85,22 +90,22 @@ class Plotter( DisplayActor ):
             self.update_plot()
 
 
-    def update_plot( self ):
+    def update_plot(self):
         '''
         Update the internal data stored by matplotlib and cause a redraw.
         If this has been called more than 1000 times -> quit.
         '''
-        logging.debug( "Updating plot (refresh: %i)" % self.refreshs )
+        logging.debug("Updating plot (refresh: %i)" % self.refreshs)
         self.last_update = time.time()
 
         # This is a safety check - if we are plotting over a long time period this needs removing
         if self.refreshs >= 1000:
-            logging.warning( "We have updated the plot 1000 times - forcing a stop of the simulation now" )
+            logging.warning("We have updated the plot 1000 times - forcing a stop of the simulation now")
             self.stop = True
             return
         self.refreshs += 1
 
-        self.line.set_data( self.x_axis_data, self.y_axis_data )
+        self.line.set_data(self.x_axis_data, self.y_axis_data)
         axes = self.line.get_axes()
         self.line.recache()
         axes.relim()
