@@ -24,7 +24,7 @@ class MultiSumPlot(Model):
         wires = MakeChans(N + 2)
 
         # Create N random source blocks
-        rndSources = [RandomSource(wires[i], resolution=50) for i in xrange(N)]
+        rndSources = [RandomSource(wires[i], resolution=15) for i in xrange(N)]
 
         # Create Summer Block
         summer = Summer(wires[:N], wires[N])

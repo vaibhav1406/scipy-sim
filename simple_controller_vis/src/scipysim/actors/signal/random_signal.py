@@ -25,10 +25,14 @@ class RandomSource(Source):
 
         @param amplitude: The amplitude of the noise
 
-        @param res: the number of values to output "per second"
-                    res defaults to 10
+        @param resolution: the number of values to output "per second",
+        defaults to 10.
 
-        @param simulation_time: The preset time to generate random numbers over.
+        @param simulation_time: The preset time to generate random numbers over,
+        defaults to 120 seconds.
+        
+        @param endpoint: Whether to include the final point (120th second) 
+        in the simulation.
         '''
         super(RandomSource, self).__init__(output_queue=out, simulation_time=simulation_time)
         self.amplitude = amplitude
