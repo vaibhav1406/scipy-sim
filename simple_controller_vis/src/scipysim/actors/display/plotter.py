@@ -1,5 +1,6 @@
 '''
-This dynamic plotter shows a live signal stream.
+This dynamic plotter shows a live signal stream. To control the access to the non-thread safe matplotlib api this class and
+model.py work together depending on how many instances are created.
 
 An alternative to using the queue infrastructure would be 
 to "monitor" a variable - http://simpy.sourceforge.net/_build/Recipes/Recipe002.html
@@ -43,7 +44,10 @@ class Plotter(DisplayActor):
                  input_queue,
                  refresh_rate=2,
                  title='Scipy Simulator Dynamic Plot',
-                 own_fig=False):
+                 own_fig=False,
+                 xlabel=None,
+                 ylabel=None
+                 ):
         super(Plotter, self).__init__(input_queue=input_queue)
         self.x_axis_data = []
         self.y_axis_data = []
@@ -56,15 +60,17 @@ class Plotter(DisplayActor):
 
         self.fig_num = self.additional_figures
         if own_fig and not self.firstPlot:
-            Plotter.additional_figures += 1
+            self.__class__.additional_figures += 1
             with GUI_LOCK:
                 fig = self.myfig = plt.figure()
         else:
-            fig = self.fig
+            fig = self.__class__.fig
 
         self.ax = fig.add_subplot(1, 1, 1)
         self.title = self.ax.set_title(title)
         self.line, = self.ax.plot(self.x_axis_data, self.y_axis_data)
+        if xlabel is not None: self.ax.set_xlabel(xlabel)
+        if ylabel is not None: self.ax.set_ylabel(ylabel)
         self.refreshs = 0
 
         self.last_update = 0
@@ -87,6 +93,7 @@ class Plotter(DisplayActor):
         obj = None
 
         if time.time() - self.last_update > self.min_refresh_time:
+            self.last_update = time.time()
             self.update_plot()
 
 
@@ -96,10 +103,10 @@ class Plotter(DisplayActor):
         If this has been called more than 1000 times -> quit.
         '''
         logging.debug("Updating plot (refresh: %i)" % self.refreshs)
-        self.last_update = time.time()
 
         # This is a safety check - if we are plotting over a long time period this needs removing
         if self.refreshs >= 1000:
+            print "Error - too many values"
             logging.warning("We have updated the plot 1000 times - forcing a stop of the simulation now")
             self.stop = True
             return
@@ -112,10 +119,13 @@ class Plotter(DisplayActor):
         axes.autoscale_view()
 
         with GUI_LOCK:
+            pass
             # At this point we are 100% sure the main Tk loop has started
-            # but for multiple figures we cannot "draw"???
-            if self.additional_figures == 0:
-                plt.draw()
+            # but for multiple figures we cannot call "draw" from any thread
+            # other than the main thread, so if there are more than one figures
+            # we don't call draw at all.
+            #if self.additional_figures == 0:
+                #plt.draw()
 
         # It might prove to be beneficial just to redraw small bits
         # just redraw the axes rectangle
