@@ -30,13 +30,13 @@ class CTIntegratorDE1(Siso):
         @param x: output integral
         @param init: the initial state of the integral
         @param delta: the state quantization step-size
-        @param k: coefficent for the maximum allowable timestep (k*delta)
+        @param k: coefficient for the maximum allowable timestep (k*delta)
         '''
         super(CTIntegratorDE1, self).__init__(input_queue=xdot,
                                      output_queue=x)
         self.state = init
         self.delta = delta
-        self.maxstep = k*delta
+        self.maxstep = k * delta
 
         # Generate an initial output
         x.put({'tag':0.0, 'value':init})
@@ -92,7 +92,8 @@ class CTintegratorTest(unittest.TestCase):
         expected_output_values = [1.0, 0.85, 0.7, 0.55, 0.4, 0.25, 0.1, -0.05, 0.1, -0.05, 0.0999999]
         expected_outputs = [{'value':val, 'tag':tag} for (val, tag) in zip(expected_output_values, expected_output_tags)]
 
-        block = CTIntegratorDE1(self.q_in, self.q_out, init=1.0, delta=0.15)
+        # k has been set to make maxstep 10.0
+        block = CTIntegratorDE1(self.q_in, self.q_out, init=1.0, delta=0.15, k=10.0 / 0.15)
         SisoCTTestHelper(self, block, inputs, expected_outputs)
 
     def test_simple_integration_2(self):
@@ -116,7 +117,7 @@ class CTintegratorTest(unittest.TestCase):
         q1, q2, q3 = Channel(), Channel(), Channel()
 
         blocks = [
-                    CTIntegratorDE1(self.q_in, self.q_out, init=1.0, delta=0.15),
+                    CTIntegratorDE1(self.q_in, self.q_out, init=1.0, delta=0.15, k=10.0 / 0.15),
                     Copier(self.q_out, [q1, q2]),
                     CTIntegratorDE1(q1, q3, init=1.0, delta=0.15)
                   ]
