@@ -17,7 +17,8 @@ class Abs( Siso ):
                                   output_queue=output_queue )
 
     def siso_process( self, obj ):
-        if obj['value'] < 0:
-            obj['value'] *= -1
-        return obj
+        tag, value = obj['tag'], obj['value']
+        if value < 0:
+            value *= -1
+        return { 'tag':tag, 'value':value }
 

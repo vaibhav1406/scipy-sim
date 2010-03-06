@@ -55,8 +55,9 @@ class DTIntegratorBackwardEuler( DTIntegrator ):
         ''' y[n] = y[n-1] + x[n] '''
         self.y = self.y_old + event['value']
         self.y_old = self.y
-        event['value'] = self.y
-        return event
+        # Generate output event
+        out_event = {'tag':event['tag'], 'value':self.y}
+        return out_event
 
 class DTIntegratorForwardEuler( DTIntegrator ):
     '''Forward Euler (aka Forward Rectangular) discrete-time integration.'''
@@ -64,8 +65,9 @@ class DTIntegratorForwardEuler( DTIntegrator ):
         ''' y[n] = y[n-1] + x[n-1] '''
         self.y = self.y_old
         self.y_old += event['value']
-        event['value'] = self.y
-        return event
+        # Generate output event
+        out_event = {'tag':event['tag'], 'value':self.y}
+        return out_event
 
 
 class DTIntegratorTrapezoidal( DTIntegrator ):
@@ -80,8 +82,9 @@ class DTIntegratorTrapezoidal( DTIntegrator ):
         self.y = self.y_old + 0.5 * ( event['value'] + self.x_old )
         self.x_old = event['value']
         self.y_old = self.y
-        event['value'] = self.y
-        return event
+        # Generate output event
+        out_event = {'tag':event['tag'], 'value':self.y}
+        return out_event
 
 
 

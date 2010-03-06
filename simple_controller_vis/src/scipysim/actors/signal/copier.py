@@ -37,7 +37,7 @@ class Copier( Actor ):
             [q.put( None ) for q in self.output_queues]
             return
 
-        [q.put( obj ) for q in self.output_queues]
+        [q.put( obj.copy() ) for q in self.output_queues]
         obj = None
 
 import unittest
