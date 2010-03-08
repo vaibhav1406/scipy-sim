@@ -4,7 +4,7 @@ A model based on the bouncing ball example in simulink.
 from scipysim.actors import Model, MakeChans
 from scipysim.actors.signal import Ramp, Copier
 from scipysim.actors.math import Summer, Constant
-from scipysim.actors.math import CTIntegratorDE1 as Integrator
+from scipysim.actors.math import CTIntegratorForwardEuler as Integrator
 from scipysim.actors.display import Plotter
 
 import logging
