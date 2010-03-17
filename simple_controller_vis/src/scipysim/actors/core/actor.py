@@ -4,49 +4,11 @@ Created on 19/11/2009
 @author: brian
 '''
 
-import Queue as queue
+from channel import Channel
 import threading
 import logging
-from copy import deepcopy as copy
 
-class InvalidSimulationInput(TypeError):
-    pass
-
-class Channel(queue.Queue, object):
-    '''
-    A Channel is a derived class of the Python Queue, used for communicating between Actors.
-    
-    A Channel must be created for a specific domain:
-        * CT - Continuous Time
-        * DT - Discrete Time
-        * DE - Discrete Event
-        
-    @param domain: The two letter domain code as a string
-    '''
-
-    def __init__(self, domain="CT"):
-        '''Construct a queue with type information.
-        '''
-        #queue.Queue.__init__(self)
-        super(Channel, self).__init__()
-        self.domain = domain
-
-    def put(self, new_item, *args, **kwargs):
-        '''
-        Put an item into this channel, ensures immutable by copying.
-        '''
-        if new_item is not None:
-            item = copy(new_item)
-        else:
-            item = None
-        super(Channel, self).put(item, args, kwargs)
-
-def MakeChans(num):
-    '''Make a list of channels.
-    @param num of channels to create
-    '''
-    return [Channel() for i in xrange(num)]
-
+from errors import NoProcessFunctionDefined
 
 class Actor(threading.Thread):
     '''
@@ -56,7 +18,7 @@ class Actor(threading.Thread):
     
     Attributes that are used in the GUI for connecting components include the
     domain and number of an Actors inputs and outputs. As a convention 
-    None means any number or any domain is allowed.
+    None means any number or any domain events are allowed.
     
     Class Attributes:
     
@@ -72,25 +34,26 @@ class Actor(threading.Thread):
     output_domains = (None,)
     input_domains = (None,)
 
-    def __init__(self, input_queue=None, output_queue=None, *args, **kwargs):
+    def __init__(self, input_channel=None, output_channel=None, *args, **kwargs):
         '''Constructor for a generic base actor.
         
-        @param input_queue: If an input queue is not passed in, one will be created.
+        @param input_channel: If an input queue is not passed in, one will be created.
+                            This enables scipysim to stop the thread by passing it a
+                            message.
         
-        @param output_queue: Optional queue for output to be put into.
+        @param output_channel: Optional channel for output from this actor to be put into.
         
         Any other named parameters will be passed on to the Thread constructor.
         '''
         super(Actor, self).__init__()
 
-
         # Every actor will have at least an input thread - even if its just a control
-        if input_queue is None:
-            input_queue = queue.Queue(0)
-        self.input_queue = input_queue
+        if input_channel is None:
+            input_channel = Channel()
+        self.input_channel = input_channel
 
         # A sink doesn't require an output queue so this could be None
-        self.output_queue = output_queue
+        self.output_channel = output_channel
 
         self.stop = False
         self.setDaemon(True)
@@ -102,7 +65,6 @@ class Actor(threading.Thread):
         '''
         logging.debug("Started running an actor thread")
         while not self.stop:
-            #logging.debug("Some actor is processing now")
             self.process()
 
     def process(self):
@@ -111,7 +73,7 @@ class Actor(threading.Thread):
         or multitasking library. No guarantees are made about timing, or that
         anything will have changed for the input queue(s)
         '''
-        raise NotImplementedError()
+        raise NoProcessFunctionDefined()
 
 class DisplayActor(Actor):
     '''A display actor is a sink. It also draws to the screen'''
@@ -120,18 +82,19 @@ class DisplayActor(Actor):
 
 class Source(Actor):
     '''
-    A Source is an abstract interface for a signal source.
-    Requires an output queue.
+    A Source is an abstract interface for some signal source.
+    
+    @requires: an output channel.
     '''
     num_inputs = 0
     num_outputs = 1
 
-    def __init__(self, output_queue, simulation_time=None):
-        super(Source, self).__init__(output_queue=output_queue)
+    def __init__(self, output_channel, simulation_time=None):
+        super(Source, self).__init__(output_channel=output_channel)
         self.simulation_time = simulation_time
 
     def process(self):
         '''
-        This abstract method gets called in a loop untill the actor sets its stop variable to true
+        This abstract method gets called in a loop until the actor sets its "stop" variable to true
         '''
-        raise NotImplementedError()
+        raise NoProcessFunctionDefined()

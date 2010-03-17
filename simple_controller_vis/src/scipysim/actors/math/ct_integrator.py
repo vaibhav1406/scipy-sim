@@ -14,12 +14,12 @@ class CTIntegrator(Siso):
     input_domains = ("CT",)
     output_domains = ("CT",)
 
-    def __init__(self, input_queue, output_queue, init=0.0, init_time=0.0):
+    def __init__(self, input_channel, output_channel, init=0.0, init_time=0.0):
         '''
         Constructor for the discrete-time integrator actor. 
         '''
-        super(CTIntegrator, self).__init__(input_queue=input_queue,
-                                           output_queue=output_queue)
+        super(CTIntegrator, self).__init__(input_channel=input_channel,
+                                           output_channel=output_channel)
 
         self.y_old = init  # y[n-1] : the last output
         self.y = init      # y[n] : the output

@@ -41,14 +41,14 @@ class Plotter(DisplayActor):
     firstPlot = True
 
     def __init__(self,
-                 input_queue,
+                 input_channel,
                  refresh_rate=2,
                  title='Scipy Simulator Dynamic Plot',
                  own_fig=False,
                  xlabel=None,
                  ylabel=None
                  ):
-        super(Plotter, self).__init__(input_queue=input_queue)
+        super(Plotter, self).__init__(input_channel=input_channel)
         self.x_axis_data = []
         self.y_axis_data = []
         assert refresh_rate != 0
@@ -80,9 +80,9 @@ class Plotter(DisplayActor):
         '''
         plot any values in the buffer
         '''
-        obj = self.input_queue.get(True)     # this is blocking
+        obj = self.input_channel.get(True)     # this is blocking
         if obj is None:
-            logging.info("We have finished processing the queue of data to be displayed")
+            logging.info("We have finished processing the channel of data to be displayed")
             self.update_plot()
             self.stop = True
             return
