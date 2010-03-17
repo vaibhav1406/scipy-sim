@@ -32,36 +32,129 @@ class CTIntegratorDE1(Siso):
         @param delta: the state quantization step-size
         @param k: coefficient for the maximum allowable timestep (k*delta)
         '''
-        super(CTIntegratorDE1, self).__init__(input_channel=xdot,
-                                     output_channel=x)
-        self.state = init
+        super(CTIntegratorDE1, self).__init__(input_queue=xdot,
+                                              output_queue=x,
+                                              child_handles_output=True)
+        self.x = init
+        self.xdot = 0.0
+        self.dx = 0.0
+        self.next_t = 0.0     # TODO: should probably make this settable
+        self.last_t = self.next_t
         self.delta = delta
         self.maxstep = k * delta
+        
+        self.count = 0
 
         # Generate an initial output
-        x.put({'tag':0.0, 'value':init})
+        self.__internal_transition()
 
+    def __timestep(self):
+        '''
+        The size of the time step is either the amount of
+        time it takes to reach the next quantization level given
+        the current value of the derivative (assuming a linear projection
+        forward in time), or the maximum step size, whichever is smaller.   
+        '''
+        step = abs(self.dx / self.xdot) if self.xdot != 0.0 else np.inf 
+        return min(step, self.maxstep)    
+            
+
+    def __internal_transition(self):
+        '''
+        DEVS-style 'internal transition' occurs when time has advanced
+        to the next output instant. They generate both an output
+        and a state change.
+        '''
+        self.x += self.dx 
+        self.last_t = self.next_t        
+        out_event = {'tag':self.last_t, 'value':self.x}
+        print " Out: ",
+        print out_event
+        
+        # Project time to reach next quantization level based on current 
+        # derivative. 
+        self.dx = self.delta * np.sign(self.xdot)  # Next state increment 
+        self.next_t += self.__timestep()           # Next output time
+        # print self        
+        self.output_queue.put( out_event )
+        self.count += 1
+        
+        
+    def __external_transition(self, tag, xdot):
+        '''
+        DEVS-style external transitions occur in response to 
+        received events. They do not generate an output, only
+        a state change (which may trigger an output on the next
+        internal transition)
+        
+        @param tag: tag of the triggering event
+        @param xdot: value of the triggering event
+        '''
+        elapsed = tag - self.last_t
+        # The new value of x must be between quantization levels, since 
+        # since tag < self.next_t, and self.next_t indicates the time
+        # at which the next quantization level would be reached given
+        # a derivative of self.xdot.
+        new_x = self.x + self.xdot * elapsed
+        
+        # Find the direction of movement
+        # dir = 1 implies moving to the next higher quantization level
+        # dir = -1 implies moving to the next lower quantization level
+        # dir = 0 implies moving back to the last quantization level
+        dir = np.sign(np.sign(self.xdot) + np.sign(xdot))
+
+        # Distance to next quantized state given the direction of movement
+        self.dx = (self.x - new_x) + dir*self.delta 
+
+        # Update the state
+        self.xdot = xdot          
+        self.last_t += elapsed  
+        self.next_t = self.last_t + self.__timestep()  # Next output time
+        self.x = new_x
+        
+        # print self
+        
+    def __str__(self):
+        s = "["
+        s += "last_t:" + str(self.last_t) + ", "        
+        s += "next_t:" + str(self.next_t) + ", "        
+        s += "x:" + str(self.x) + ", "
+        s += "xdot:" + str(self.xdot) + ", "
+        s += "dx:" + str(self.dx)        
+        s += "]"
+        return s 
 
     def siso_process(self, event):
-        xdot = event['value']
+        '''
+        React to the newest received event.
+        
+        @param event: event from the input channel 
+        '''
+        #print "In: ",
+        #print event
+        
+        silent = True
+        tag, xdot = event['tag'], event['value']
 
-        # The size of the time step is either the amount of
-        # time it takes to cover one state quantization step given
-        # the current value of the derivative (assuming a linear projection
-        # forward in time), or the maximum step size, whichever is smaller.
-        if (abs(xdot) * self.maxstep) < self.delta:
-            timestep = self.maxstep
-        else:
-            timestep = self.delta / abs(xdot)
-
-        # State update done this way ensures that we move in steps of exactly delta
-        self.state += self.delta * np.sign(xdot)
-
-        # Generate output event
-        out_event = {'tag':event['tag'] + timestep, 'value':self.state}
-
-        return out_event
-
+        # External time has moved past the internal time, so first
+        # process 'internal transition' (DEVS terminology)
+        print "tag: %f, self.next_t: %f" % (tag, self.next_t)
+        while tag >= self.next_t:
+            silent = False
+            self.__internal_transition()
+            
+        # Process 'external transition' (DEVS terminology) caused by
+        # reception of an input event
+        if not xdot is None:
+            self.__external_transition(tag, xdot)
+            
+        if silent:
+            print "Absent event"
+            out_event = { 'tag': self.next_t, 'value': None }
+            self.output_queue.put( out_event )
+            
+        if self.count > 20:
+            self.output_queue.put( None )
 
 import unittest
 from scipysim.actors import SisoCTTestHelper, Channel
@@ -134,6 +227,25 @@ class CTintegratorTest(unittest.TestCase):
 
         self.assertEquals(q2.get(), None)
 
+def quickTest():
+    from scipysim.actors.math import Proportional
+    from scipysim.actors.signal import Copier
+
+    c1, c2, c3, c4 = Channel(), Channel(), Channel(), Channel()
+    
+    blocks = [
+                CTIntegratorDE1(c1, c2, init=1.0, delta=0.15, k=10/0.15),
+                Copier(c2, [c3, c4]),
+                Proportional(c3, c1, -1.0),
+             ]
+    
+    [b.start() for b in blocks]
+    [b.join() for b in blocks]
+    out = c4.get()
+    while not out is None :
+        out = c4.get()
+
 if __name__ == '__main__':
-    unittest.main()
+    #unittest.main()
+    quickTest()
 
