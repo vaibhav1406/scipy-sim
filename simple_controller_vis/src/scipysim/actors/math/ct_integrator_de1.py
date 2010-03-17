@@ -32,8 +32,8 @@ class CTIntegratorDE1(Siso):
         @param delta: the state quantization step-size
         @param k: coefficient for the maximum allowable timestep (k*delta)
         '''
-        super(CTIntegratorDE1, self).__init__(input_queue=xdot,
-                                     output_queue=x)
+        super(CTIntegratorDE1, self).__init__(input_channel=xdot,
+                                     output_channel=x)
         self.state = init
         self.delta = delta
         self.maxstep = k * delta

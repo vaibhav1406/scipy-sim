@@ -1,5 +1,5 @@
 '''
-This Sum actor takes any number of input queues and adds up the data points
+This Sum actor takes any number of input channels and adds up the data points
 where the tags coincide, if there are missing tags it can discard the data point
 or alternatively sum the remaining inputs.
 
@@ -25,19 +25,19 @@ class Summer(Actor):
     num_outputs = 1
     num_inputs = None
 
-    def __init__(self, inputs, output_queue, discard_incomplete_sets=True):
+    def __init__(self, inputs, output_channel, discard_incomplete_sets=True):
         """
         Constructor for a summation block
 
-        @param inputs: A Python list of input queues for summing.
+        @param inputs: A Python list of input channels for summing.
 
-        @param output_queue: A single queue where the output will be put.
+        @param output_channel: A single channel where the output will be put.
 
         @param discard_incomplete_sets: Boolean for either outputting incomplete
         data sets, or discarding.
 
         """
-        super(Summer, self).__init__(output_queue=output_queue)
+        super(Summer, self).__init__(output_channel=output_channel)
         self.inputs = list(inputs)
         self.num_inputs = len(self.inputs)
         self.discard_incomplete = discard_incomplete_sets
@@ -46,11 +46,11 @@ class Summer(Actor):
 
 
     def process(self):
-        """Wait for data from both (all) input queues"""
+        """Wait for data from both (all) input channels"""
         logging.debug("Running summer process")
 
-        # this is blocking on each queue in sequence
-        objects = [in_queue.get(True) for in_queue in self.inputs]
+        # this is blocking on each channel in sequence
+        objects = [in_channel.get(True) for in_channel in self.inputs]
 
         # We are finished iff all the input objects are None, but we still have to process the future data
         if objects.count(None) == len(objects):
@@ -60,7 +60,7 @@ class Summer(Actor):
                 if len(current_data) == len(self.inputs) or not self.discard_incomplete:
                     logging.debug("We are summing up what we have and outputting")
                     the_sum = sum([obj['value'] for obj in current_data])
-                    self.output_queue.put(
+                    self.output_channel.put(
                         {
                             'tag':oldest_tag,
                             'value': the_sum
@@ -72,7 +72,7 @@ class Summer(Actor):
 
             logging.info("We have finished summing the data")
             self.stop = True
-            self.output_queue.put(None)
+            self.output_channel.put(None)
             return
         tags = [obj['tag'] for obj in objects]
         values = [obj['value'] for obj in objects]
@@ -84,7 +84,7 @@ class Summer(Actor):
                     "tag": tags[0],
                     "value": new_value
                     }
-            self.output_queue.put(data)
+            self.output_channel.put(data)
         else:
             logging.debug("Tags were not all equal... First two tags: %.5e, %.5e" % (tags[0], tags[1]))
             # Since they are not equal, and the tags are always sequential, the oldest timed tags are NEVER
@@ -96,7 +96,7 @@ class Summer(Actor):
 
             # With the 0th option there is a major problem when one signal isn't creating the same rate of signals
             # because the current actor (without director) model only processes after receiving an input from
-            # EVERY input queue. So this would be sub optimal also...
+            # EVERY input channel. So this would be sub optimal also...
 
             # need oldest tag out of stored and new
             oldest_tag = min(tags + [a['tag'] for a in self.future_data])
@@ -116,7 +116,7 @@ class Summer(Actor):
             if num_points == len(self.inputs) or not self.discard_incomplete:
                 logging.debug("We are summing up what we have and outputting")
                 the_sum = values = sum([obj['value'] for obj in current_data])
-                self.output_queue.put(
+                self.output_channel.put(
                     {
                         'tag':oldest_tag,
                         'value': the_sum
@@ -138,7 +138,7 @@ import unittest
 
 class SummerTests(unittest.TestCase):
     def test_basic_summer(self):
-        '''Test adding two queues of complete pairs together'''
+        '''Test adding two channels of complete pairs together'''
         q_in_1 = Channel()
         q_in_2 = Channel()
         q_out = Channel()
@@ -161,7 +161,7 @@ class SummerTests(unittest.TestCase):
 
     def test_delayed_summer(self):
         '''
-        Test adding two queues where one is delayed by ONE time step difference
+        Test adding two channels where one is delayed by ONE time step difference
         Summer is set up to discard incomplete sets
         '''
         q_in_1 = Channel()
@@ -186,7 +186,7 @@ class SummerTests(unittest.TestCase):
 
     def test_delayed_summer2(self):
         '''
-        Test adding two queues where one is delayed by an arbitrary
+        Test adding two channels where one is delayed by an arbitrary
         time step difference. Summer is set up to discard incomplete sets
         '''
         DELAY = 2
@@ -214,7 +214,7 @@ class SummerTests(unittest.TestCase):
 
     def test_delayed_summer3(self):
         '''
-        Test adding two queues where one is delayed by ONE time step difference
+        Test adding two channels where one is delayed by ONE time step difference
         Summer is set up to SUM incomplete sets
         '''
         q_in_1 = Channel()
@@ -247,7 +247,7 @@ class SummerTests(unittest.TestCase):
         data = q_out.get()
         self.assertEquals(data['value'], 2)
         self.assertEquals(data['tag'], 100)
-        # lastly the queue should contain a 'None'
+        # lastly the channel should contain a 'None'
         self.assertEquals(q_out.get(), None)
 
     def test_multi_summer(self):
@@ -255,24 +255,24 @@ class SummerTests(unittest.TestCase):
         Test adding multiple (50) input signals
         where all signals contain every tag.
         '''
-        num_input_queues, num_data_points = 50, 100
+        num_input_channels, num_data_points = 50, 100
 
-        input_queues = [Channel() for i in xrange(num_input_queues)]
-        output_queue = Channel()
+        input_channels = [Channel() for i in xrange(num_input_channels)]
+        output_channel = Channel()
 
-        # Fill each queue with num_data_points of its own index
-        # So queue 5 will be full of the value 4, then a None
-        for i, input_queue in enumerate(input_queues):
-            _ = [input_queue.put({'value':i, 'tag':j}) for j in xrange(num_data_points)]
-        _ = [input_queue.put(None) for input_queue in input_queues]
+        # Fill each channel with num_data_points of its own index
+        # So channel 5 will be full of the value 4, then a None
+        for i, input_channel in enumerate(input_channels):
+            _ = [input_channel.put({'value':i, 'tag':j}) for j in xrange(num_data_points)]
+        _ = [input_channel.put(None) for input_channel in input_channels]
 
-        summer = Summer(input_queues, output_queue)
+        summer = Summer(input_channels, output_channel)
         summer.start()
         summer.join()
-        s = sum(xrange(num_input_queues))
+        s = sum(xrange(num_input_channels))
         for i in xrange(num_data_points):
-            self.assertEquals(output_queue.get()['value'], s)
-        self.assertEquals(output_queue.get(), None)
+            self.assertEquals(output_channel.get()['value'], s)
+        self.assertEquals(output_channel.get(), None)
 
     def test_multi_delayed_summer(self):
         '''
@@ -280,25 +280,25 @@ class SummerTests(unittest.TestCase):
 
         '''
         DELAY = 20
-        num_input_queues, num_data_points = 50, 100
+        num_input_channels, num_data_points = 50, 100
 
-        input_queues = [Channel() for i in xrange(num_input_queues)]
-        output_queue = Channel()
+        input_channels = [Channel() for i in xrange(num_input_channels)]
+        output_channel = Channel()
 
-        # Fill each queue with num_data_points of its own index
-        # So queue 5 will be full of the value 4, then a None
-        for i, input_queue in enumerate(input_queues):
-            _ = [input_queue.put({'value':i, 'tag':j}) for j in xrange(num_data_points) if i is not 0]
-        _ = [input_queues[0].put({'value':0, 'tag':j + DELAY}) for j in xrange(num_data_points)]
-        _ = [input_queue.put(None) for input_queue in input_queues]
+        # Fill each channel with num_data_points of its own index
+        # So channel 5 will be full of the value 4, then a None
+        for i, input_channel in enumerate(input_channels):
+            _ = [input_channel.put({'value':i, 'tag':j}) for j in xrange(num_data_points) if i is not 0]
+        _ = [input_channels[0].put({'value':0, 'tag':j + DELAY}) for j in xrange(num_data_points)]
+        _ = [input_channel.put(None) for input_channel in input_channels]
 
-        summer = Summer(input_queues, output_queue)
+        summer = Summer(input_channels, output_channel)
         summer.start()
         summer.join()
-        s = sum(xrange(num_input_queues))
+        s = sum(xrange(num_input_channels))
         for i in xrange(num_data_points - DELAY):
-            self.assertEquals(output_queue.get()['value'], s)
-        self.assertEquals(output_queue.get(), None)
+            self.assertEquals(output_channel.get()['value'], s)
+        self.assertEquals(output_channel.get(), None)
 
 
 if __name__ == "__main__":

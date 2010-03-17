@@ -29,18 +29,18 @@ class BundleHistPlotter(Actor):
     num_inputs = 1
     num_outputs = 0
 
-    def __init__(self, input_queue, bins=100, title="Scipy Simulation Histogram", show=False):
-        '''A bundle plotter takes bundled data in the input queue.
+    def __init__(self, input_channel, bins=100, title="Scipy Simulation Histogram", show=False):
+        '''A bundle plotter takes bundled data in the input channel.
         The individual discrete events must be compressed using the bundler first.
         '''
-        super(BundleHistPlotter, self).__init__(input_queue=input_queue)
+        super(BundleHistPlotter, self).__init__(input_channel=input_channel)
         self.title = title
         self.show = show
         self.bins = bins
 
     def process(self):
-        '''Collect the data in one lot from the queue and create an image'''
-        self.data = self.input_queue.get(True)     # this is blocking
+        '''Collect the data in one lot from the channel and create an image'''
+        self.data = self.input_channel.get(True)     # this is blocking
         if self.data is None:
             self.stop = True
         else:

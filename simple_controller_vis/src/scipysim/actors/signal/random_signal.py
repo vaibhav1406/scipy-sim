@@ -19,7 +19,7 @@ class RandomSource(Source):
         '''
         Constructor for a RandomSource.
 
-        @param out: The output queue to put the signal in.
+        @param out: The output channel to put the signal in.
 
         Optional Paramaters:
 
@@ -34,7 +34,7 @@ class RandomSource(Source):
         @param endpoint: Whether to include the final point (120th second) 
         in the simulation.
         '''
-        super(RandomSource, self).__init__(output_queue=out, simulation_time=simulation_time)
+        super(RandomSource, self).__init__(output_channel=out, simulation_time=simulation_time)
         self.amplitude = amplitude
         self.resolution = resolution
         self.endpoint = endpoint
@@ -51,9 +51,9 @@ class RandomSource(Source):
                     "tag": tag,
                     "value": value
                     }
-            self.output_queue.put(data)
+            self.output_channel.put(data)
             logging.debug("Random process added data: (tag: %2.e, value: %.2e)" % (tag, value))
             #time.sleep(random.random() * 0.01)     # Adding a delay so we can see the async
-        logging.debug("Random process finished adding all data to queue")
+        logging.debug("Random process finished adding all data to channel")
         self.stop = True
-        self.output_queue.put(None)
+        self.output_channel.put(None)
