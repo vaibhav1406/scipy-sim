@@ -45,7 +45,7 @@ class CTIntegratorDE1(Siso):
         self.last_t = self.next_t
         self.delta = delta
         self.maxstep = k * delta
-
+        
         # Generate an initial output
         self.__internal_transition()
 
@@ -76,6 +76,7 @@ class CTIntegratorDE1(Siso):
         self.next_t += self.__timestep()           # Next output time
         
         self.output_channel.put( out_event )
+
         
         
     def __external_transition(self, tag, xdot):
@@ -110,6 +111,7 @@ class CTIntegratorDE1(Siso):
         self.next_t = self.last_t + self.__timestep()  # Next output time
         self.x = new_x
         
+
     def __str__(self):
         '''
         Converts the current integrator state to a string.
@@ -139,6 +141,7 @@ class CTIntegratorDE1(Siso):
         # Process 'external transition' (DEVS terminology) caused by
         # reception of an input event
         self.__external_transition(tag, xdot)
+
 
 
 
@@ -215,6 +218,25 @@ class CTintegratorTest(unittest.TestCase):
 
         self.assertEquals(q2.get(), None)
 
+def quickTest():
+    from scipysim.actors.math import Proportional
+    from scipysim.actors.signal import Copier
+
+    c1, c2, c3, c4 = Channel(), Channel(), Channel(), Channel()
+    
+    blocks = [
+                CTIntegratorDE1(c1, c2, init=1.0, delta=0.15, k=10/0.15),
+                Copier(c2, [c3, c4]),
+                Proportional(c3, c1, -1.0),
+             ]
+    
+    [b.start() for b in blocks]
+    [b.join() for b in blocks]
+    out = c4.get()
+    while not out is None :
+        out = c4.get()
+
 if __name__ == '__main__':
     unittest.main()
+    #quickTest()
 
