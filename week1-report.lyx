@@ -1,0 +1,684 @@
+#LyX 1.6.4 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage{color}
+\lstset{% Set some listing parameters.
+  numbers=left,
+  numberstyle=\sffamily\scriptsize,
+  numberblanklines=false,
+  basicstyle=\ttfamily\footnotesize,
+  showstringspaces=false,
+  backgroundcolor=\color[rgb]{0.9,0.9,0.9},
+  %frame=tb,
+  %xleftmargin=4.3ex,
+  language=Python,
+  breaklines=true,
+  breakindent=10pt,
+  prebreak=\mbox{
+    {\color{blue}
+      \tiny$\searrow$
+    }
+  },
+  postbreak=\mbox{
+    {\color{blue}
+      \tiny$\rightarrow$
+    }
+  }
+}
+\end_preamble
+\use_default_options true
+\language british
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Simulation in SciPy Project - Week One
+\end_layout
+
+\begin_layout Section*
+GUI Overview
+\end_layout
+
+\begin_layout Itemize
+TK - included in Python by default.
+ Can embed matplotlib plots, including dynamic plots.
+ Plain matplotlib plots use TK backend by default.
+\end_layout
+
+\begin_layout Itemize
+QT/WX/GTK - Wrapped C/C++.
+ Cross platform, nice tools, nice look.
+ Works with matplotlib.
+ Overkill for what we need.
+ High initial cost of installing (especially on windows)
+\end_layout
+
+\begin_layout Itemize
+Enthoughts TraitsGUI/Chaco etc...
+ Not widely used, not many examples
+\end_layout
+
+\begin_layout Standard
+For now TK seems like the plan.
+\end_layout
+
+\begin_layout Section*
+Project Management
+\end_layout
+
+\begin_layout Standard
+I have set up a google code site: 
+\begin_inset CommandInset href
+LatexCommand href
+target "http://code.google.com/p/scipy-sim/"
+
+\end_inset
+
+ Uses mecurial for version control.
+\end_layout
+
+\begin_layout Standard
+At the moment I put down the software license as GPLv3 but I imagine it
+ should be LGPL or BSD instead?
+\end_layout
+
+\begin_layout Section*
+Early Prototype
+\end_layout
+
+\begin_layout Standard
+A very early scriptable prototype has been created.
+ It uses a thread per block (or actor) and python queues for all communication.
+ At the moment it has a ramp source, a proportional gain, and a dynamic
+ plotter actor.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Connecting Actors
+\end_layout
+
+\begin_layout Standard
+After all the imports are done this is how it is connected up:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+    ramp2gain = queue.Queue(0)
+\end_layout
+
+\begin_layout Plain Layout
+
+    gain2plot = queue.Queue(0)
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+    src = Ramp(ramp2gain)
+\end_layout
+
+\begin_layout Plain Layout
+
+    filt = Proportional(ramp2gain, gain2plot)
+\end_layout
+
+\begin_layout Plain Layout
+
+    dst = Plotter(gain2plot)
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+    components = [src, filt, dst]
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+    logging.info("Starting simulation with Ramp input, proportional gain,
+ and dynamic plotter output")
+\end_layout
+
+\begin_layout Plain Layout
+
+    for component in components:
+\end_layout
+
+\begin_layout Plain Layout
+
+        component.start()
+\end_layout
+
+\begin_layout Plain Layout
+
+    logging.debug("Finished starting actors")
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    plt.show()   # The program will stay "running" while this plot is open
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+    src.join()
+\end_layout
+
+\begin_layout Plain Layout
+
+    filt.join()
+\end_layout
+
+\begin_layout Plain Layout
+
+    dst.join()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Model of Computation
+\end_layout
+
+\begin_layout Standard
+A kahn process network (PN in ptolemy parlance).
+ All actors inherit from the following base class:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+class Actor(threading.Thread):
+\end_layout
+
+\begin_layout Plain Layout
+
+    '''
+\end_layout
+
+\begin_layout Plain Layout
+
+    This is a base Actor class for use in a simulation
+\end_layout
+
+\begin_layout Plain Layout
+
+    '''  
+\end_layout
+
+\begin_layout Plain Layout
+
+    def __init__(self, input_queue=None, output_queue=None):
+\end_layout
+
+\begin_layout Plain Layout
+
+        '''
+\end_layout
+
+\begin_layout Plain Layout
+
+        Constructor for an actor
+\end_layout
+
+\begin_layout Plain Layout
+
+        '''
+\end_layout
+
+\begin_layout Plain Layout
+
+        threading.Thread.__init__(self)
+\end_layout
+
+\begin_layout Plain Layout
+
+        logging.debug("Constructing a new Actor thread")
+\end_layout
+
+\begin_layout Plain Layout
+
+        
+\end_layout
+
+\begin_layout Plain Layout
+
+        # Every actor will have an input thread - even if its just a control
+\end_layout
+
+\begin_layout Plain Layout
+
+        if input_queue is None:
+\end_layout
+
+\begin_layout Plain Layout
+
+            input_queue = queue.Queue(0)
+\end_layout
+
+\begin_layout Plain Layout
+
+        self.input_queue = input_queue
+\end_layout
+
+\begin_layout Plain Layout
+
+        
+\end_layout
+
+\begin_layout Plain Layout
+
+        # Don't require an output queue
+\end_layout
+
+\begin_layout Plain Layout
+
+        self.output_queue = output_queue
+\end_layout
+
+\begin_layout Plain Layout
+
+        
+\end_layout
+
+\begin_layout Plain Layout
+
+        self.stop = False
+\end_layout
+
+\begin_layout Plain Layout
+
+        self.setDaemon(True)
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+        
+\end_layout
+
+\begin_layout Plain Layout
+
+    def run(self):
+\end_layout
+
+\begin_layout Plain Layout
+
+        '''
+\end_layout
+
+\begin_layout Plain Layout
+
+        Run this actor objects thread
+\end_layout
+
+\begin_layout Plain Layout
+
+        '''
+\end_layout
+
+\begin_layout Plain Layout
+
+        logging.debug("Started running an actor thread")
+\end_layout
+
+\begin_layout Plain Layout
+
+        while not self.stop:
+\end_layout
+
+\begin_layout Plain Layout
+
+            #logging.debug("Some actor is processing now")
+\end_layout
+
+\begin_layout Plain Layout
+
+            self.process()
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+    def process(self):
+\end_layout
+
+\begin_layout Plain Layout
+
+        raise NotImplementedError("This base class is supposed to be derived
+ from")
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+As can be seen in the example block though it cheats - Timing or execution
+ order of processes must not affect the result and therefore testing input
+ channels for tokens is forbidden.
+ This needs discussed...
+\end_layout
+
+\begin_layout Subsection*
+Example Block
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+class Proportional(Source):
+\end_layout
+
+\begin_layout Plain Layout
+
+    '''
+\end_layout
+
+\begin_layout Plain Layout
+
+    This actor takes a source and multiplies it by some gain P.
+\end_layout
+
+\begin_layout Plain Layout
+
+    '''
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+    def __init__(self, input, out, gain=2.0):
+\end_layout
+
+\begin_layout Plain Layout
+
+        """
+\end_layout
+
+\begin_layout Plain Layout
+
+        default to doubling the signal
+\end_layout
+
+\begin_layout Plain Layout
+
+        """
+\end_layout
+
+\begin_layout Plain Layout
+
+        Actor.__init__(self, input_queue=input, output_queue=out)
+\end_layout
+
+\begin_layout Plain Layout
+
+        
+\end_layout
+
+\begin_layout Plain Layout
+
+        self.gain = gain
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+    def process(self):
+\end_layout
+
+\begin_layout Plain Layout
+
+        """Multiply the numbers..."""
+\end_layout
+
+\begin_layout Plain Layout
+
+        logging.debug("Running proportional process")
+\end_layout
+
+\begin_layout Plain Layout
+
+        
+\end_layout
+
+\begin_layout Plain Layout
+
+        
+\end_layout
+
+\begin_layout Plain Layout
+
+        try:
+\end_layout
+
+\begin_layout Plain Layout
+
+            while(True):    # Really this is until exception gets raised
+ by an empty queue
+\end_layout
+
+\begin_layout Plain Layout
+
+                obj = self.input_queue.get(False)     # this is not blocking
+ - will raise queue.Empty
+\end_layout
+
+\begin_layout Plain Layout
+
+                if obj is None:
+\end_layout
+
+\begin_layout Plain Layout
+
+                    logging.info("We have finished multiplying the data")
+\end_layout
+
+\begin_layout Plain Layout
+
+                    self.stop = True
+\end_layout
+
+\begin_layout Plain Layout
+
+                    self.output_queue.put(None)
+\end_layout
+
+\begin_layout Plain Layout
+
+                    return
+\end_layout
+
+\begin_layout Plain Layout
+
+                tag =  obj['tag']
+\end_layout
+
+\begin_layout Plain Layout
+
+                value = obj['value']
+\end_layout
+
+\begin_layout Plain Layout
+
+                new_value = value * self.gain
+\end_layout
+
+\begin_layout Plain Layout
+
+                logging.debug("Proportional actor received data (tag: %2.e,
+ value: %2.e ), multiplied and sent out: (tag: %2.e, value: %2.e)" % (tag,
+ value, tag, new_value ))
+\end_layout
+
+\begin_layout Plain Layout
+
+                data = {
+\end_layout
+
+\begin_layout Plain Layout
+
+                    "tag": tag,
+\end_layout
+
+\begin_layout Plain Layout
+
+                    "value": new_value
+\end_layout
+
+\begin_layout Plain Layout
+
+                    }
+\end_layout
+
+\begin_layout Plain Layout
+
+                self.output_queue.put(data)
+\end_layout
+
+\begin_layout Plain Layout
+
+                obj = None
+\end_layout
+
+\begin_layout Plain Layout
+
+        except queue.Empty:
+\end_layout
+
+\begin_layout Plain Layout
+
+            pass
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Notes
+\end_layout
+
+\begin_layout Standard
+Need to change to using numpy packets instead of python dict.
+ Need to consider buffering of numpy arrays etc.
+ Need to discuss timing...
+ and timing...
+ and timing.
+ Tags also.
+\end_layout
+
+\begin_layout Subsubsection*
+Future Extensions
+\end_layout
+
+\begin_layout Standard
+MoML - modelling language based on xml
+\end_layout
+
+\end_body
+\end_document
