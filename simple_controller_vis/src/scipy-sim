@@ -1,0 +1,13 @@
+#!/bin/sh
+
+export PYTHONPATH=`pwd`
+
+if [ $# -ne 1 ]; then
+    # default to running the GUI
+    echo "Starting the SciPy-Sim GUI..."
+    python -m scipysim.gui.gui
+else
+    # Run the specified model
+    python $1
+fi
+

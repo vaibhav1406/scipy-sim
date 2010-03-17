@@ -1,0 +1,48 @@
+Requirements
+ - Python 2.6
+ - Scipy
+ - Numpy
+ - matplotlib
+ - pyttk
+
+Notes for future work
+
+NAME
+
+Posidonius - From Rhodes thought to have contributed to the antikythera machine - the earliest
+known example of "computing"
+
+
+GUI
+
+A model can be created in pure Python code - see all the early examples.
+Alternatively a simulation can be created with an xml model - this version can 
+be displayed with the GUI program which follows simple rules to make the model python file
+and then run it.
+The Python standard library has an XML module. The Ptolemy project has created a markup language
+that MAY be useful. Although this means parsing and writing xml code for just some models?
+I would still like the system to work independent of how the model is created.
+
+
+Another approach (or at least a complimentary approach) would be to use code introspection, so a python
+file exists for any actor (weather it is composed of others or not) and the GUI program 
+determines when the model is being created (component connection time) if it allowed to 
+connect to another component based on the actual code. It then creates a real python 
+file containing the model (temporary until saved).
+
+Syntax Highlighter - If pygments is available we could use that.
+
+Backend System
+
+- A model system that automatically adds all connected components into a Model which can be "Run"
+ 
+ Actors
+ 
+- A few string processing blocks:
+     open file (outputs a stream)
+     read line from stream (outputs a string)
+     split line into string tokens
+     parse a string token into a number
+     
+Other Simulators...     
+http://www.idsia.ch/~andrea/sim/simtools.html
