@@ -1,7 +1,7 @@
 '''
 Created on 21/12/2009
 
-@author: allan
+@author: Allan McInnes
 '''
 from scipysim.actors import Siso
 import numpy as np  # Only here for the sign() function at this stage
@@ -15,8 +15,11 @@ class CTIntegratorDE1(Siso):
     value of time, and consequently take variable-sized time steps that are 
     matched to the rate of change of the integrated function.
     
-    See James Nutaro, "Discrete-Event Simulation of Continuous Systems", in
+    See:
+    James Nutaro, "Discrete-Event Simulation of Continuous Systems", in
     Handbook of Dynamic System Modeling (Paul Fishwick Ed.)
+    Francois Cellier and Ernesto Kofman "Continuous System Simulation", 
+    Chapter 11: "Discrete-Event Simulation".
     '''
 
     input_domains = ("CT",)
@@ -33,34 +36,110 @@ class CTIntegratorDE1(Siso):
         @param k: coefficient for the maximum allowable timestep (k*delta)
         '''
         super(CTIntegratorDE1, self).__init__(input_channel=xdot,
-                                     output_channel=x)
-        self.state = init
+                                              output_channel=x,
+                                              child_handles_output=True)
+        self.x = init
+        self.xdot = 0.0
+        self.dx = 0.0
+        self.next_t = 0.0     # TODO: should probably make this settable
+        self.last_t = self.next_t
         self.delta = delta
         self.maxstep = k * delta
 
         # Generate an initial output
-        x.put({'tag':0.0, 'value':init})
+        self.__internal_transition()
 
+    def __timestep(self):
+        '''
+        The size of the time step is either the amount of
+        time it takes to reach the next quantization level given
+        the current value of the derivative (assuming a linear projection
+        forward in time), or the maximum step size, whichever is smaller.   
+        '''
+        step = abs(self.dx / self.xdot) if self.xdot != 0.0 else np.inf 
+        return min(step, self.maxstep)    
+            
+
+    def __internal_transition(self):
+        '''
+        DEVS-style 'internal transition' occurs when time has advanced
+        to the next output instant. They generate both an output
+        and a state change.
+        '''
+        self.x += self.dx 
+        self.last_t = self.next_t        
+        out_event = {'tag':self.last_t, 'value':self.x}
+        
+        # Project time to reach next quantization level based on current 
+        # derivative. 
+        self.dx = self.delta * np.sign(self.xdot)  # Next state increment 
+        self.next_t += self.__timestep()           # Next output time
+        
+        self.output_channel.put( out_event )
+        
+        
+    def __external_transition(self, tag, xdot):
+        '''
+        DEVS-style external transitions occur in response to 
+        received events. They do not generate an output, only
+        a state change (which may trigger an output on the next
+        internal transition)
+        
+        @param tag: tag of the triggering event
+        @param xdot: value of the triggering event
+        '''
+        elapsed = tag - self.last_t
+        # The new value of x must be between quantization levels, since 
+        # since tag < self.next_t, and self.next_t indicates the time
+        # at which the next quantization level would be reached given
+        # a derivative of self.xdot.
+        new_x = self.x + self.xdot * elapsed
+        
+        # Find the direction of movement
+        # dir = 1 implies moving to the next higher quantization level
+        # dir = -1 implies moving to the next lower quantization level
+        # dir = 0 implies moving back to the last quantization level
+        dir = np.sign(np.sign(self.xdot) + np.sign(xdot))
+
+        # Distance to next quantized state given the direction of movement
+        self.dx = (self.x - new_x) + dir*self.delta 
+
+        # Update the state
+        self.xdot = xdot          
+        self.last_t += elapsed  
+        self.next_t = self.last_t + self.__timestep()  # Next output time
+        self.x = new_x
+        
+    def __str__(self):
+        '''
+        Converts the current integrator state to a string.
+        '''
+        s = "["
+        s += "last_t:" + str(self.last_t) + ", "        
+        s += "next_t:" + str(self.next_t) + ", "        
+        s += "x:" + str(self.x) + ", "
+        s += "xdot:" + str(self.xdot) + ", "
+        s += "dx:" + str(self.dx)        
+        s += "]"
+        return s 
 
     def siso_process(self, event):
-        xdot = event['value']
+        '''
+        React to the newest received event.
+        
+        @param event: event from the input channel 
+        '''
+        tag, xdot = event['tag'], event['value']
 
-        # The size of the time step is either the amount of
-        # time it takes to cover one state quantization step given
-        # the current value of the derivative (assuming a linear projection
-        # forward in time), or the maximum step size, whichever is smaller.
-        if (abs(xdot) * self.maxstep) < self.delta:
-            timestep = self.maxstep
-        else:
-            timestep = self.delta / abs(xdot)
+        # External time has moved past the internal time, so first
+        # process 'internal transition' (DEVS terminology)
+        while tag >= self.next_t:
+            self.__internal_transition()
+            
+        # Process 'external transition' (DEVS terminology) caused by
+        # reception of an input event
+        self.__external_transition(tag, xdot)
 
-        # State update done this way ensures that we move in steps of exactly delta
-        self.state += self.delta * np.sign(xdot)
-
-        # Generate output event
-        out_event = {'tag':event['tag'] + timestep, 'value':self.state}
-
-        return out_event
 
 
 import unittest
@@ -97,8 +176,10 @@ class CTintegratorTest(unittest.TestCase):
         SisoCTTestHelper(self, block, inputs, expected_outputs)
 
     def test_simple_integration_2(self):
-        '''Test two simultaneous integrations. 
-        Testing using same values as above, but also clones output for second integration.
+        '''
+        Test two simultaneous integrations. 
+        Testing using same values as above, but also clones output for 
+        second integration.
         '''
         from scipysim.actors.signal import Copier
         # These tags and values taken from Table 1 of Nutaro's paper. Note that here instead of
