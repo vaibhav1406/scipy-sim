@@ -1,7 +1,9 @@
-'''IO module for scipy-simulator.
+'''IO module for scipysim.
 
-Bundle and Unbundle buffer a channel into a numpy record.
-Reader and Writer read and write data channels into a file.
+The Bundle and Unbundle actors buffer a channel into a numpy record for saving/sending in a 
+memory efficient form.
+
+The Reader and Writer actors read and write data channels into a file.
 '''
 from bundle import Bundle
 from unbundle import Unbundle

@@ -21,7 +21,7 @@ from matplotlib.figure import Figure
 
 from urllib import quote
 
-class BundlePlotter(Actor):
+class BundleHistPlotter(Actor):
     '''
     A plot that is NOT dynamic. It takes a packet or bundle of events
     and plots it all at once.
@@ -29,13 +29,14 @@ class BundlePlotter(Actor):
     num_inputs = 1
     num_outputs = 0
 
-    def __init__(self, input_channel, title="Scipy Simulation Output", show=False):
+    def __init__(self, input_channel, bins=100, title="Scipy Simulation Histogram", show=False):
         '''A bundle plotter takes bundled data in the input channel.
         The individual discrete events must be compressed using the bundler first.
         '''
-        super(BundlePlotter, self).__init__(input_channel=input_channel)
+        super(BundleHistPlotter, self).__init__(input_channel=input_channel)
         self.title = title
         self.show = show
+        self.bins = bins
 
     def process(self):
         '''Collect the data in one lot from the channel and create an image'''
@@ -62,7 +63,7 @@ class BundlePlotter(Actor):
         canvas = FigureCanvas(f)
 
         a = f.add_subplot(111)
-        a.plot(self.x_axis_data, self.y_axis_data)
+        a.hist(self.y_axis_data, self.bins)
         a.set_title(self.title)
         a.grid(True)
 
