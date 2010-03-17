@@ -31,7 +31,7 @@ and ``monospace`` look like this.
 Contributors
 ============
 
-This project has been started by the Electrical Engineering Department of Canterbury University by:
+This project was initiated in the Department of Electrical & Computer Engineering at the University of Canterbury (http://www.elec.canterbury.ac.nz/) by:
 
 * Brian Thorne
 
@@ -41,3 +41,4 @@ This project has been started by the Electrical Engineering Department of Canter
 Project Site
 ============
 The main development occurs on Google Code at http://scipy-sim.googlecode.com
+
