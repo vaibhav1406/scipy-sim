@@ -85,11 +85,11 @@ Similarly a source distribution can be created with:
 Contributors
 ============
 
-This project has been started by the Electrical Engineering Department of Canterbury University by:
+This project was initiated in the Department of Electrical & Computer Engineering at the University of Canterbury (http://www.elec.canterbury.ac.nz/) by:
 
 * Brian Thorne
 
-* Allan McInnes
+* Allan McInnes (mailto: allan.mcinnes@canterbury.ac.nz)
 
 
 Project Site
@@ -105,3 +105,4 @@ First get the source code with mercurial:
 	hg clone https://scipy-sim.googlecode.com/hg/ scipy-sim
 	
 And send us a patch by creating a new issue http://code.google.com/p/scipy-sim/issues/entry
+
