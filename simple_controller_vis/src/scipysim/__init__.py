@@ -1,4 +1,6 @@
 '''The scipy-simulator'''
 
-from actors import Channel, Actor, Source
+from core import Event, Channel, Actor, Source, InvalidSimulationInput, NoProcessFunctionDefined
 import models
+
+

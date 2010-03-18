@@ -4,10 +4,11 @@ Created on 19/11/2009
 @author: brian
 '''
 
-from channel import Channel
+
 import threading
 import logging
 
+from channel import Channel
 from errors import NoProcessFunctionDefined
 
 class Actor(threading.Thread):

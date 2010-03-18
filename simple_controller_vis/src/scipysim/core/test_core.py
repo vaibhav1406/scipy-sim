@@ -1,6 +1,6 @@
 import unittest
 from actor import Actor
-from errors import NoProcessFunctionDefined
+from scipysim import NoProcessFunctionDefined
 
 
 class TestActor(unittest.TestCase):
