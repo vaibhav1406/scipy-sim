@@ -22,6 +22,7 @@ setup(
     # Project uses reStructuredText, so ensure that the docutils get
     # installed or upgraded on the target machine
     install_requires=['distribute',
+                      'nose',
                       'docutils>=0.3',
                       'pyttk',
                       'numpy>=1.3.0',
