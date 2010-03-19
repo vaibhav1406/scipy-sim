@@ -2,10 +2,11 @@
 Scipy Simulator
 ===============
 
-Scipy Simulator provides a concurrent way of modelling systems in Python using
-scipy. You might find it most useful for tasks involving 'embedded systems' and
-'signal processing'. A model can be created in pure Python code - see all the 
-examples in the models directory. Typical usage often looks like this::
+Scipy Simulator provides a **concurrent** way of modelling and simulating 
+heterogeneoussystems in Python using scipy. You might find it most useful 
+for tasks involving *embedded systems* and *signal processing*. A model 
+can be created in pure Python code - see all the examples in the models 
+directory. Typical usage often looks like this::
 
     #!/usr/bin/env python
 
@@ -23,62 +24,73 @@ examples in the models directory. Typical usage often looks like this::
 
     RampPlot().run()
 
-
+The project is inspired by the Ptolemy project, but we are taking a slightly
+different approach to implementing the simulation engine. Our approach is 
+based on implementing the simulator as a Kahn network of actors that 
+communicate via tagged-signals.Each of these actors run in their own thread 
+and communicate via dedicated Channels - which are based on the thread safe 
+fifo queue implementation in the Python standard library. These base level 
+actors can be composed together to create models, which are also actors in 
+their own right - running in their own thread with all communication 
+occurring through input and output channels.
 
 Testing Scipy Simulator
 =======================
 
 Scipy Simulator comes with a large collection of unit tests.
-Before installing the library the tests can be run with setuptools:
-
-	python setup.py test 
-
-The tests can also be found in the module hierarchy and run individually:
-
-	python ./scipysim/actors/io/test_io.py
-	
-Or as a whole suite using nosetests:
+All the tests can be run as a suite using nosetests::
 
 	nosetests
 	
 A helper script called test_scipysim.py has been placed in the scipysim module
-to launch nosetests:
+to launch nosetests::
 
 	./scipysim/test_scipysim.py
-	
+
+If you downloaded from the repository the tests can be run with setuptools::
+
+	python setup.py test 
+
+The tests can also be found in the module hierarchy and run individually::
+
+	python ./scipysim/actors/io/test_io.py
+
 
 Installing Scipy Simulator
 ==========================
 
-You can install scipysim to your main site-packages folder with:
+You can install scipysim to your main site-packages folder with::
 
 	sudo python setup.py install
 	
-on linux; and:
+on linux; and::
 	
 	python setup.py install
 	
 on windows. To install in a more sandboxed "development" environment
-substitute develop for install, eg:
+substitute develop for install, eg::
 
 	sudo python setup.py develop
 
+This installs an egg at the current directory and links to the package 
+in your site-packages folder.
+ 
 Creating Binary Installers
 ==========================
 
-Firstly to clean the obsolete .pyc or .pyo files use:
+Firstly to clean the obsolete .pyc or .pyo files use::
 
 	python setup.py clean --all
 
-Generate a built distribution like so:
+Generate a built distribution like so::
 
 	python setup.py bdist
 	
-On windows to make a nice pretty GUI installer:
+On windows to make a nice pretty GUI installer::
 
 	python setup.py bdist --format wininst
 
-Similarly a source distribution can be created with:
+Similarly a source distribution can be created with::
 
 	python setup.py sdist
 
