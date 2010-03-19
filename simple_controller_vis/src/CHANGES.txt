@@ -1,3 +1,5 @@
+v0.1.2, 19/3/2010 -- Potentially a release that can be installed.
+
 v0.1.1, 17/3/2010 -- Alpha release to PiPi.
 
 v0.1.0, 18/2/2010 -- Initial (pre)release.

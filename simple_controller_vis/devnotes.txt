@@ -5,6 +5,11 @@ Requirements
  - matplotlib
  - pyttk
 
+Creating a source distribution:
+Change the version number in setup.py and changes.txt
+
+python setup.py register sdist bdist_egg upload
+
 Notes for future work
 
 NAME
