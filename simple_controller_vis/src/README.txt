@@ -3,10 +3,13 @@ Scipy Simulator
 ===============
 
 Scipy Simulator provides a **concurrent** way of modelling and simulating 
-heterogeneoussystems in Python using scipy. You might find it most useful 
-for tasks involving *embedded systems* and *signal processing*. A model 
-can be created in pure Python code - see all the examples in the models 
-directory. Typical usage often looks like this::
+heterogeneous systems in Python using scipy. You might find it most useful 
+for tasks involving *embedded systems* or *signal processing*. 
+
+Scipysim models are created in pure Python code, by instantiating various
+actors representing different components of a systems, and connecting 
+the actors to each other through channels. Here's a simple example of what
+a model looks like::
 
     #!/usr/bin/env python
 
@@ -24,15 +27,20 @@ directory. Typical usage often looks like this::
 
     RampPlot().run()
 
-The project is inspired by the Ptolemy project, but we are taking a slightly
-different approach to implementing the simulation engine. Our approach is 
-based on implementing the simulator as a Kahn network of actors that 
-communicate via tagged-signals.Each of these actors run in their own thread 
-and communicate via dedicated Channels - which are based on the thread safe 
-fifo queue implementation in the Python standard library. These base level 
-actors can be composed together to create models, which are also actors in 
-their own right - running in their own thread with all communication 
-occurring through input and output channels.
+You can find a number of other examples of models in the 'models' directory.
+
+The scipysim project is inspired by the UC Berkeley Ptolemy project, but 
+we are taking a slightly different approach to implementing the 
+simulation engine. Our approach is based on implementing the simulator 
+as a Kahn network of actors that communicate via tagged-signals. Each of 
+these actors run in their own thread, and communicate via dedicated 
+Channels - which are based on the thread safe FIFO queue implementation 
+in the Python standard library. These base level actors can be composed 
+together to create models, which are also actors in their own right - 
+running in their own thread with all communication occurring through 
+input and output channels.
+
+Scipysim is still very much under active development, and contains a number of experimental or prototype components. The structure of the simulator is in a state of flux, so there are no guarantees that models developed to work with a particular release will still work with the next release.
 
 Testing Scipy Simulator
 =======================
@@ -63,12 +71,12 @@ You can install scipysim to your main site-packages folder with::
 
 	sudo python setup.py install
 	
-on linux; and::
+on Linux or Mac OS X; and::
 	
 	python setup.py install
 	
-on windows. To install in a more sandboxed "development" environment
-substitute develop for install, eg::
+on Windows. To install in a more sandboxed "development" environment
+substitute develop for install, e.g.::
 
 	sudo python setup.py develop
 
@@ -86,7 +94,7 @@ Generate a built distribution like so::
 
 	python setup.py bdist
 	
-On windows to make a nice pretty GUI installer::
+On Windows, to make a nice pretty GUI installer::
 
 	python setup.py bdist --format wininst
 
@@ -101,7 +109,7 @@ This project was initiated in the Department of Electrical & Computer Engineerin
 
 * Brian Thorne
 
-* Allan McInnes (mailto: allan.mcinnes@canterbury.ac.nz)
+* Allan McInnes (allan dot mcinnes at canterbury dot ac dot nz)
 
 
 Project Site
