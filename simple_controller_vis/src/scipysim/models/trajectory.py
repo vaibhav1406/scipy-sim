@@ -5,6 +5,7 @@ from scipysim.actors import Model, MakeChans
 from scipysim.actors.signal import Ramp, Copier
 from scipysim.actors.math import Summer, Constant
 from scipysim.actors.math import CTIntegratorForwardEuler as Integrator
+#from scipysim.actors.math import CTIntegratorDE1 as Integrator
 from scipysim.actors.display import Plotter
 
 import logging
@@ -30,7 +31,7 @@ class ThrownBall(Model):
             Constant(wires[0], value=gravity, resolution=100, simulation_time=4),
             Integrator(wires[0], wires[1], initial_position),
             Copier(wires[1], [wires[2], wires[3]]),
-            Plotter(wires[2], title="Velocity", xlabel="Time (s)", ylabel="(m/s)"),
+            Plotter(wires[2], title="Velocity", own_fig=True, xlabel="Time (s)", ylabel="(m/s)"),
             Integrator(wires[3], wires[4], initial_velocity),
             Copier(wires[4], [wires[5], wires[6]]),
             Plotter(wires[5], title="Displacement", own_fig=True, xlabel="Time (s)", ylabel="(m)"),

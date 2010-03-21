@@ -3,6 +3,7 @@ This dynamic stemmer shows a live signal stream.
 '''
 
 from scipysim.actors import DisplayActor
+
 import matplotlib.pyplot as plt
 import matplotlib.lines as lines
 import logging
@@ -22,25 +23,60 @@ class Stemmer(DisplayActor):
     # Perhaps it would make more sense to do this after we've added
     # type tags to the signals.
 
-    def __init__(self, input_channel, refresh_rate=2):
+    additional_figures = 0
+
+    # This was a class attrib is broken on tk8.5/matplotlib.99?
+    # Works on osx tk8.4
+    #fig = Figure()
+    fig = plt.figure()
+    #canvas = FigureCanvas(fig)
+
+    # A class attribute to store whether we have already made plots
+    # If so we call the matplotlib api slightly differently
+    firstPlot = True    
+
+    def __init__(self,
+                 input_channel,
+                 refresh_rate=2,
+                 title='Scipy Simulator Dynamic Plot',
+                 own_fig=False,
+                 xlabel=None,
+                 ylabel=None
+                 ):
         super(Stemmer, self).__init__(input_channel=input_channel)
         self.x_axis_data = []
         self.y_axis_data = []
         assert refresh_rate != 0
         self.refresh_rate = refresh_rate
-        #plt.ion()
+        self.min_refresh_time = 1.0 / self.refresh_rate
+       
+        plt.ioff() # Only draw when we say
+        assert plt.isinteractive() == False
 
         # stem() doesn't seem to like empty datasets, so we'll defer creating
         # the plot until there's actually data. For now just create an
         # empty canvas
-        plt.draw()
+        
+        self.fig_num = self.additional_figures
+        if own_fig and not self.firstPlot:
+            self.__class__.additional_figures += 1
+            with GUI_LOCK:
+                fig = self.myfig = plt.figure()
+        else:
+            fig = self.__class__.fig
+
+        self.ax = fig.add_subplot(1, 1, 1)
+        self.title = self.ax.set_title(title)   
         self.markerline = None
         self.stemlines = None
-        self.baseline = None
-
+        self.baseline = None        
+        if xlabel is not None: self.ax.set_xlabel(xlabel)
+        if ylabel is not None: self.ax.set_ylabel(ylabel)        
+        
         self.refreshs = 0
-
         self.last_update = 0
+        self.__class__.firstPlot = False
+
 
     def process(self):
         '''
@@ -78,8 +114,8 @@ class Stemmer(DisplayActor):
         self.refreshs += 1
 
         with GUI_LOCK:
-            if not self.markerline:
-                self.markerline, self.stemlines, self.baseline = plt.stem(self.x_axis_data, self.y_axis_data)
+            if not self.markerline: 
+                self.markerline, self.stemlines, self.baseline = self.ax.stem(self.x_axis_data, self.y_axis_data)           
             else:
                 axes = self.markerline.get_axes()
 
@@ -90,7 +126,8 @@ class Stemmer(DisplayActor):
                 # The baseline should be built from the start and end points of
                 # the x axis
                 _ , baseline_y = self.baseline.get_data()
-                self.baseline.set_data([min(self.x_axis_data), max(self.x_axis_data)], baseline_y.tolist())
+                self.baseline.set_data([min(self.x_axis_data), 
+                    max(self.x_axis_data)], baseline_y.tolist())
                 self.baseline.recache()
 
                 # Construct new stemlines and add them to the current plot
@@ -104,4 +141,4 @@ class Stemmer(DisplayActor):
 
                 axes.relim()
                 axes.autoscale_view()
-                plt.draw() # redraw the canvas
+                #plt.draw() # redraw the canvas
