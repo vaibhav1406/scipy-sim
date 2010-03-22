@@ -4,7 +4,7 @@ Created on 21/12/2009
 @author: Allan McInnes
 '''
 from scipysim.actors import Siso
-import numpy as np  # Only here for the sign() function at this stage
+import numpy as np  
 
 
 class CTIntegratorDE1(Siso):
@@ -56,6 +56,7 @@ class CTIntegratorDE1(Siso):
     def __statestep(self, x, xdot):
         qx = self.__quantize(x)
         dist = (x - qx) if abs(x - qx) > 1e-15 else 0  # Enforce a minimum step - is this like Kofman's hysteresis?
+        dist = dist if abs(self.delta - dist) > 1e-15 else 0  # Enforce a minimum step - is this like Kofman's hysteresis?
         if xdot > 0:
             step = self.delta - dist
         elif xdot < 0:
@@ -71,11 +72,11 @@ class CTIntegratorDE1(Siso):
         the current value of the derivative (assuming a linear projection
         forward in time), or the maximum step size, whichever is smaller.   
         '''
-        if self.xdot != 0.0 and self.dx != 0:
+        if self.xdot != 0.0 and self.dx != 0.0:
             step = abs(self.dx / self.xdot)
         else:
             step = np.inf 
-        return min(step, self.maxstep)    
+        return min(step, self.maxstep)   
             
 
     def __internal_transition(self):
