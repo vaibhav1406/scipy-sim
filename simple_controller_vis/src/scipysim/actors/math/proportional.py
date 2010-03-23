@@ -27,8 +27,8 @@ class Proportional(Siso):
         logging.debug("Running proportional process")
         tag, value = obj['tag'], obj['value']
 
-        new_value = value * self.gain if not value is None else value
-        #logging.debug( "Proportional actor received data (tag: %2.e, value: %2.e ), multiplied and sent out: (tag: %2.e, value: %2.e)" % ( tag, value, tag, new_value ) )
+        new_value = value * self.gain
+        logging.debug( "Proportional actor received data (tag: %2.e, value: %2.e ), multiplied and sent out: (tag: %2.e, value: %2.e)" % ( tag, value, tag, new_value ) )
 
         data = {
             "tag": tag,
