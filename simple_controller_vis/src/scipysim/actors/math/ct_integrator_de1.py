@@ -128,7 +128,7 @@ class CTIntegratorDE1(Siso):
         self.last_t += elapsed  
         self.next_t = self.last_t + self.__timestep()  # Next output time
         self.x = new_x
-        
+
 
     def __str__(self):
         '''
@@ -151,11 +151,11 @@ class CTIntegratorDE1(Siso):
         '''
         tag, xdot = event['tag'], event['value']
 
-
         if abs(tag - self.last_t) < 1e-15:
             # We assume that a nearly identical time to the previous event
             # indicates that the only thing advancing time is the integrator
-            # itself.
+            # itself. Note that this will fail if there's a delay in the
+            # loop
             self.__external_transition(tag, xdot)                    
             self.__internal_transition()
         else:
