@@ -1,6 +1,6 @@
 import unittest
 from actor import Actor
-from scipysim import NoProcessFunctionDefined
+from errors import NoProcessFunctionDefined
 
 
 class TestActor(unittest.TestCase):
@@ -15,7 +15,7 @@ class TestActor(unittest.TestCase):
         self.block.input_channel.put("Something")
         self.assertEquals("Something", self.block.input_channel.get())
 
-    def test_actor_has_defualt_port_nums(self):
+    def test_actor_has_default_port_nums(self):
         '''Test by loading a siso actor from a hardcoded path'''
         my_actor = Actor()
         self.assertEqual(my_actor.num_inputs, None)
