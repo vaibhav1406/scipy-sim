@@ -97,7 +97,7 @@ class SimulationCanvas( object ):
          "selected": "#FF6600" # orangne - red
          }
 
-    size = ( width, height ) = ( 550, 250 )
+    size = ( width, height ) = ( 550, 300 )
 
     def __init__( self, frame ):
         # Create the canvas

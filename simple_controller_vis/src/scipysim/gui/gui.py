@@ -105,13 +105,10 @@ class App:
         self.notebook.add_screen( model_src_frame, "Model Source" )
         self.notebook.add_screen( blank_src_frame, "Hide Source Viewer" )
 
-        self.console = Text( main_frame, width=80 )
+        self.console = Text( main_frame, height=10, width=80 )
         self.console.pack( fill=X )
         self.console.insert( END, "Output Console\n \n" )
 
-        self.console = Text( main_frame, width=80 )
-        self.console.pack( fill=X )
-        self.console.insert( END, "Output Console\n \n" )
         logging.debug( "Finished setting up scipy-simulator gui" )
 
 
