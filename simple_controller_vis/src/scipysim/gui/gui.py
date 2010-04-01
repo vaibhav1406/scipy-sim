@@ -30,8 +30,8 @@ logging.info( "GUI module loaded, logging enabled" )
 WELCOME_MESSAGE = "Select an actor or model on the left to preview here."
 
 # Find the path to this file
-PATH_TO_SCRIPT = os.path.dirname( os.path.realpath( __file__ ) )
-EXAMPLES_DIRECTORY = os.path.split( PATH_TO_SCRIPT )[0]
+PATH_TO_SCRIPT = path.dirname( path.realpath( __file__ ) )
+EXAMPLES_DIRECTORY = path.split( PATH_TO_SCRIPT )[0]
 logging.info( "Script address is '%s'" % PATH_TO_SCRIPT )
 logging.info( "Example path is %s" % ( EXAMPLES_DIRECTORY ) )
 
@@ -51,7 +51,7 @@ class App:
         file_frame.pack( side=LEFT, fill=BOTH, expand=1 )
 
         # Get the contents for the models and actors.
-        ( models, actors ) = [os.path.join( EXAMPLES_DIRECTORY, a ) for a in ["models", "actors"]]
+        ( models, actors ) = [path.join( EXAMPLES_DIRECTORY, a ) for a in ["models", "actors"]]
 
         # Create the tree widgets for models, and actors.
         callbacks = ( self.write_to_win, self.set_active_block )
@@ -143,10 +143,10 @@ class App:
         run the tempfile with python.
         
         """
-        logging.info( "Runing simulation" )
+        logging.info( "Running simulation" )
         text = self.textEdit.get( 1.0, END )
         #temp = os.path.join(os.path.split(PATH_TO_SCRIPT)[0], 'local', 'temp.py')
-        temp = tempfile.NamedTemporaryFile( 'w', dir="./../models" )
+        temp = tempfile.NamedTemporaryFile( 'w', dir=path.join( EXAMPLES_DIRECTORY, 'models' ) )
         writeFile( temp.name, text )
         pr = PythonRunner()
         output = pr.runFile( temp.name )
@@ -192,11 +192,15 @@ class PythonRunner:
         # FIX: This seems to work from the command line, but not when launched from
         # eclipse... ?
         try:
-            retcode = subprocess.call( 'python2.6 "' + file + '"', shell=True )
+            proc = subprocess.Popen( 'python2.6 "' + file + '"', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
+            output, err = proc.communicate()
+            retcode = proc.wait()
             if retcode < 0:
                 logging.error( "Child Python process was terminated by signal: %d" % retcode )
+                return output + err
             else:
                 logging.debug( "Child Python process returned: %d" % retcode )
+                return output + err
         except OSError, e:
             logging.error( "Execution failed: %s" % e )
 
