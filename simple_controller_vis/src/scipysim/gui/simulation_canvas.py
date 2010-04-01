@@ -71,7 +71,7 @@ class CanvasBlock ( object ):
         else:
             for output in xrange( num_outputs ):
                 self.canvas.create_polygon( x_, y_ + gap , x_ + gap, y_ + gap * 3 / 2 , x_ , y_ + 2 * gap,
-                                            tags=preview_tags + ["type:output-%d" % input],
+                                            tags=preview_tags + ["type:output-%d" % output],
                                             fill="#000000" )
 
 
@@ -119,7 +119,7 @@ class SimulationCanvas( object ):
 
 
         # Draw a "preview" area
-        self.canvas.create_line( self.PREVIEW_WIDTH, 0, self.PREVIEW_WIDTH, 250, dash=True )
+        self.canvas.create_line( self.PREVIEW_WIDTH, 0, self.PREVIEW_WIDTH, self.height, dash=True )
 
         # A dict indexed by unique ID of elements in the canvas.
         self.blocks = {}
