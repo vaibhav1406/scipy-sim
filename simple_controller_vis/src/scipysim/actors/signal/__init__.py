@@ -5,6 +5,7 @@ from delay import Delay
 from interpolator import InterpolatorZero
 from interpolator import InterpolatorStep
 from interpolator import InterpolatorLinear
+from quantizer import Quantizer
 from ramp import Ramp
 from random_signal import RandomSource
 from sampler import Sampler
