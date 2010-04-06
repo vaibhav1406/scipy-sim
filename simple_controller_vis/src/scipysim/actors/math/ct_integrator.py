@@ -23,7 +23,7 @@ class CTIntegrator(Siso):
 
         self.y_old = init  # y[n-1] : the last output
         self.y = init      # y[n] : the output
-        self.x_old = init_time
+        self.t_old = init_time
 
     def siso_process(self, event):
         event = self.integrate(event)
@@ -39,11 +39,11 @@ class CTIntegrator(Siso):
 class CTIntegratorForwardEuler(CTIntegrator):
 
     def integrate(self, event):
-        ''' y[n] = y[n-1] + y[n]*x[n]-x[n-1]'''
+        ''' y[n] = y[n-1] + x[n]*(t[n]-t[n-1])'''
         self.y = self.y_old
-        self.y_old += event['value'] * (event['tag'] - self.x_old)
+        self.y_old += event['value'] * (event['tag'] - self.t_old)
 
-        self.x_old = event['tag']
+        self.t_old = event['tag']
 
         # Generate output event
         out_event = {'tag':event['tag'], 'value':self.y_old}
@@ -115,3 +115,7 @@ class CTIntegratorTests(unittest.TestCase):
                 out = q_out2.get()
                 self.assertAlmostEquals(out['value'], expected_output)
             self.assertEquals(q_out2.get(), None)
+
+if __name__ == '__main__':
+    unittest.main()
+    
