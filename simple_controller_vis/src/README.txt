@@ -40,7 +40,10 @@ together to create models, which are also actors in their own right -
 running in their own thread with all communication occurring through 
 input and output channels.
 
-Scipysim is still very much under active development, and contains a number of experimental or prototype components. The structure of the simulator is in a state of flux, so there are no guarantees that models developed to work with a particular release will still work with the next release.
+Scipysim is still very much under active development, and contains a 
+number of experimental or prototype components. The structure of the 
+simulator is in a state of flux, so there are no guarantees that models
+developed to work with a particular release will still work with the next release.
 
 Testing Scipy Simulator
 =======================
@@ -50,14 +53,14 @@ All the tests can be run as a suite using nosetests::
 
 	nosetests
 	
-A helper script called test_scipysim.py has been placed in the scipysim module
-to launch nosetests::
+A helper script called test_scipysim.py has been placed in the scipysim 
+module to launch nosetests::
 
 	./scipysim/test_scipysim.py
 
 If you downloaded from the repository the tests can be run with setuptools::
 
-	python setup.py test 
+	python setup.py test
 
 The tests can also be found in the module hierarchy and run individually::
 
@@ -105,9 +108,10 @@ Similarly a source distribution can be created with::
 Contributors
 ============
 
-This project was initiated in the Department of Electrical & Computer Engineering at the University of Canterbury (http://www.elec.canterbury.ac.nz/) by:
+This project was initiated in the Department of Electrical & Computer 
+Engineering at the University of Canterbury (http://www.elec.canterbury.ac.nz/) by:
 
-* Brian Thorne
+* Brian Thorne (brian dot thorne at canterbury dot ac dot nz)
 
 * Allan McInnes (allan dot mcinnes at canterbury dot ac dot nz)
 
@@ -125,4 +129,3 @@ First get the source code with mercurial:
 	hg clone https://scipy-sim.googlecode.com/hg/ scipy-sim
 	
 And send us a patch by creating a new issue http://code.google.com/p/scipy-sim/issues/entry
-
