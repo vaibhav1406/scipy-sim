@@ -36,7 +36,7 @@ setup(
     packages=find_packages(), #['scipysim','scipysim.models','scipysim.actors'],
 
     # Scripts get installed in the /usr/local/bin folder on the target machine
-    scripts=['scipy-sim', ],
+    scripts=['run_scipysim', ],
 
     test_suite="nose.collector",
 
