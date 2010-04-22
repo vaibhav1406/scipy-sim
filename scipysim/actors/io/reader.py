@@ -13,12 +13,12 @@ class Reader(Source):
     The data must have been saved with the WriteFile Actor NOT CSV.
     
     The numpy structured record array is as follows: 
-                            dtype=
-                            {
-                                'names': ["Tag", "Value"],
-                                'formats': ['f8','f8'],
-                                'titles': ['Domain', 'Name']
-                             }
+        dtype=
+        {
+            'names': ["Tag", "Value"],
+            'formats': ['f8','f8'],
+            'titles': ['Domain', 'Name']
+         }
     Note the titles may be used to store domain and signal name information.
     
     The data can be recovered as seperate arrays with data['Tag'] and data['Value']

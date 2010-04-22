@@ -25,7 +25,7 @@ class Compare(Siso):
         the value is put onto the output channel, else discarded.
         Or if boolean_output is true, a boolean is substituted for the 'value'
         
-        @return Boolean value
+        @return a boolean value
         '''
         raise NotImplementedError
 

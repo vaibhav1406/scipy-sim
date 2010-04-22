@@ -2,7 +2,8 @@
 This plotting actor creates an output image (png) and optionally opens it.
 Since static images don't animate very well it gets all the input at once in a "bundle".
 
-@see multiple_summation_r... for a model which uses both dynamic and static plots.
+@see scipysim.models.multiple_delayed_sum_ramp_plot for a model which 
+uses both dynamic and static plots.
 @see noisy_ramp_plot for a model which uses just this static plot.
 
 @author: brianthorne

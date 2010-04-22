@@ -33,9 +33,9 @@ class PassThrough(Actor):
         
         @param data_input: The data to be passed through if control was True.
         
-        @param else_input: Optional alternative data to be passed on.
-
         @param output_channel: A single channel where the output will be put.
+
+        @param else_data_input: Optional alternative data to be passed on.
         """
         super(PassThrough, self).__init__(output_channel=output_channel)
         self.bool_input = bool_input
