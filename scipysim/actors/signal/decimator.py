@@ -16,7 +16,7 @@ class Decimator(Siso):
         This actor is designed for even spaced inputs, 
         although it could "thin" a discrete events system.
         
-        @param reduction: Keep every Nth sample, reduces the signal by factor passed in.
+        @param reduction_factor: Keep every Nth sample, reduces the signal by factor passed in.
         '''
         super(Decimator, self).__init__(input_channel=input_channel,
                                         output_channel=output_channel,

@@ -39,7 +39,7 @@ if havePygame:
             """
             Constructor for a VideoSnapshot source.
     
-            @param input_channel: A channel that will pass a message when an output
+            @param input_signal: A channel that will pass a message when an output
             is desired.
     
             @param output_channel: The channel that will be passed a tagged image signal.

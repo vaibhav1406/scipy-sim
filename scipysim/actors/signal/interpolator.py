@@ -2,9 +2,9 @@
 Interpolation actors. Inserts additional events between each pair of events, using
 a selected interpolation scheme.The interpolation schemes are:
     
- * zero interpolation - insert zero values
- * step interpolation - holds the last value
- * linear interpolation - places values on a straight line between successive events
+* zero interpolation - insert zero values
+* step interpolation - holds the last value
+* linear interpolation - places values on a straight line between successive events
 
 @author: Brian Thorne
 @author: Allan McInnes
@@ -43,7 +43,7 @@ class Interpolator(Siso):
     def interpolate(self, event, tag):
         '''This method must be overridden. It implements the interpolation algorithm
         based on the current and previous events.
-        @return Event
+        @return an event
         '''
         raise NotImplementedError
 

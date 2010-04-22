@@ -32,7 +32,8 @@ class CTIntegrator(Siso):
     def integrate(self, event):
         '''This method must be overridden. It implements the integration algorithm
         based on the current and previous events.
-        @return Event
+        
+        @return an event
         '''
         raise NotImplementedError
 

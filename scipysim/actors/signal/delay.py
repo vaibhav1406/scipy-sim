@@ -19,9 +19,9 @@ class Delay(Siso):
         """
         Constructor for a delay block.
 
-        @param input: The input channel to be delayed
+        @param input_channel: The input channel to be delayed
 
-        @param out: The output channel that has been delayed
+        @param output_channel: The output channel that has been delayed
 
         @param wait: The delay time in seconds. Defaults to delaying
                      the signal by one tenth of a second.
