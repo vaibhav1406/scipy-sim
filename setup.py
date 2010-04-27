@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ScipySim',
-    version='0.1.2',
+    version='0.1.6',
     author='Brian Thorne, Allan McInnes',
     author_email='hardbyte@gmail.com',
 
@@ -18,7 +18,8 @@ setup(
       "Operating System :: OS Independent",
       "Topic :: Scientific/Engineering"
                  ],
-
+                 
+    # Distribute can take care of the dependancies (or try)
     # Project uses reStructuredText, so ensure that the docutils get
     # installed or upgraded on the target machine
     install_requires=['distribute',
@@ -36,7 +37,7 @@ setup(
     packages=find_packages(), #['scipysim','scipysim.models','scipysim.actors'],
 
     # Scripts get installed in the /usr/local/bin folder on the target machine
-    scripts=['run_scipysim', ],
+    scripts=['run_scipysim', 'distribute_setup.py'],
 
     test_suite="nose.collector",
 

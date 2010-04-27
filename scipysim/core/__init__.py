@@ -8,3 +8,7 @@ from errors import InvalidSimulationInput, NoProcessFunctionDefined
 from event import Event
 from model import Model
 from siso import Siso, SisoCTTestHelper, SisoTestHelper
+
+
+from parser import fill_tree
+from codefile import CodeFile
