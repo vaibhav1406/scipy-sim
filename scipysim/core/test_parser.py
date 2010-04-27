@@ -4,10 +4,12 @@ Created on 9/02/2010
 @author: brian
 '''
 import unittest
-from codegroup import make_tree, fill_tree
-
 import os
 from Tkinter import Tk
+
+from parser import fill_tree
+from scipysim.gui.codegroup import make_tree
+
 
 class TestCodeGroup( unittest.TestCase ):
 
