@@ -60,7 +60,7 @@ class Test_Code_File_Num_Input_Output_Parsing( unittest.TestCase ):
 
     def test_composite_model( self ):
         '''Test a composite_actor for num of inputs and output channels'''
-        c = CodeFile( self.src_dir + './scipysim/actors/math/trig/DTSinGenerator.py' )
+        c = CodeFile( self.src_dir + '/scipysim/actors/math/trig/DTSinGenerator.py' )
         self.assertEqual( c.num_outputs, 1 )
         self.assertEqual( c.num_inputs, 0 )
 
