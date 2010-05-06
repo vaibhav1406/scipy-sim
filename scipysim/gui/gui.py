@@ -18,7 +18,7 @@ import logging
 # TODO: replace with ttk NoteBook
 from tabs import Notebook as NoteBook
 
-from codefile import CodeFile
+from scipysim.core.codefile import CodeFile
 from codegroup import ExamplesGroup
 
 from simulation_canvas import SimulationCanvas
