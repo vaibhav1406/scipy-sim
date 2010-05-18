@@ -1,6 +1,6 @@
 import logging
 
-from scipysim.actors import Actor, Channel
+from scipysim.actors import Actor, Channel, Event
 
 
 
@@ -49,7 +49,7 @@ class CopierTests(unittest.TestCase):
         q_out1 = Channel()
         q_out2 = Channel()
 
-        inp = {'value':15, 'tag':1}
+        inp = Event(value=15, tag=1)
 
         cloneQ = Copier(q_in, [q_out1, q_out2])
         cloneQ.start()

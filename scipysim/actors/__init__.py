@@ -4,7 +4,7 @@ From this module there are several submodules containing groups
 of actors.
 """
 # First we import the bits that every block will probably need
-from scipysim.core import Actor, Model, Channel, MakeChans
+from scipysim.core import Actor, Event, Model, Channel, MakeChans
 from scipysim.core import Source, DisplayActor
 from scipysim.core import Siso, SisoCTTestHelper, SisoTestHelper
 from scipysim.core import InvalidSimulationInput
