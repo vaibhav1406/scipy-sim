@@ -10,4 +10,5 @@ from quantizer import Quantizer
 from ramp import Ramp
 from random_signal import RandomSource
 from sampler import Sampler
+from sink import Sink
 from step import Step

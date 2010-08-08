@@ -5,7 +5,7 @@ Contains the Channel class and helper functions for creating multiple channels.
 from Queue import Queue
 
 '''
-At present the scipy-sim ensures that events are immutable by copying as they enter a channel.
+At present scipysim ensures that events are immutable by copying as they enter a channel.
 In future this will change as events will become objects in their own right.
 '''
 from copy import deepcopy as copy
@@ -14,7 +14,7 @@ class Channel(Queue, object):
     '''
     A Channel is based on the Python Queue, used for communicating between Actor threads.
     
-    A Channel must be created for a specific domain:
+    A Channel must be created for a specific domain, e.g.:
         * CT - Continuous Time
         * DT - Discrete Time
         * DE - Discrete Event
@@ -41,9 +41,12 @@ class Channel(Queue, object):
             item = None
         super(Channel, self).put(item, args, kwargs)
 
-def MakeChans(num):
+
+def MakeChans(num, domain="CT"):
     '''Return a list of n channels.
     
     @param num of channels to create.
+    @param domain: The specific domain of events that this channel will carry.
+                        - defaults to "CT" domain.    
     '''
-    return [Channel() for i in xrange(num)]
+    return [Channel(domain) for i in xrange(num)]
