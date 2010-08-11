@@ -1,18 +1,18 @@
 '''
 Created on Feb 7, 2010
 
-brianthorne
+@author: Brian Thorne
 
 
 '''
 
 import logging
 from numpy import linspace
-from scipysim.actors import Source, Channel, Model
+from scipysim.actors import Source, Channel, Model, Event
 
 
 class Step(Source):
-    '''This models a Heavyside step function'''
+    '''A Heavyside step function'''
 
     def __init__(self, out, switch_time=0, resolution=10, simulation_time=120, endpoint=False):
         '''Create a step actor.
@@ -35,11 +35,7 @@ class Step(Source):
         for tag in tags:
             value = 0 if (tag < self.switch_time) else 1
 
-            data = {
-                    "tag": tag,
-                    "value": value
-                    }
-            self.output_channel.put(data)
+            self.output_channel.put(Event(tag, value))
 
             #time.sleep(random.random() * 0.001)     # Adding a delay so we can see the async
         logging.debug("Step process finished adding all data to channel")
@@ -60,3 +56,4 @@ class StepPlot(Model):
 if __name__ == '__main__':
     block = StepPlot()
     block.run()
+
