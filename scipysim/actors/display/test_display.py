@@ -5,7 +5,7 @@ Created on Feb 5, 2010
 '''
 
 from scipysim.actors.io import Bundle
-from scipysim.actors import Actor, DisplayActor, Channel
+from scipysim.actors import Actor, DisplayActor, Channel, Event
 from bundlePlotter import BundlePlotter
 
 import numpy
@@ -18,7 +18,7 @@ class BundlePlotTests( unittest.TestCase ):
         self.q_in = Channel()
         self.q_out = Channel()
         self.q_out2 = Channel()
-        self.input = [{'value': 1, 'tag': i } for i in xrange( 100 )]
+        self.input = [Event(value=1, tag=i) for i in xrange( 100 )]
         self.title = "test plot"
         
         self.url = os.path.join(os.getcwd() , self.title) + ".png"
