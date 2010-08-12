@@ -3,12 +3,12 @@ Created on Feb 1, 2010
 
 @author: brianthorne
 '''
-from scipysim.actors import Source, Channel
+from scipysim.actors import Source, Channel, Event
 import numpy
 
 class Reader(Source):
     '''
-    This Actor reads a tagged signal from a file - the signal can be any
+    Reads a tagged signal from a file - the signal can be any
     domain - the data for both tags and values are stored as 64bit floats.
     The data must have been saved with the WriteFile Actor NOT CSV.
     
@@ -30,7 +30,7 @@ class Reader(Source):
 
     def process(self):
         x = numpy.load(self.filename)
-        [self.output_channel.put({"tag": tag, 'value': value}) for (tag, value) in x]
+        [self.output_channel.put(Event(tag, value)) for (tag, value) in x]
         self.output_channel.put(None)
         self.stop = True
 
@@ -51,9 +51,9 @@ class TextReader(Source):
     def process(self):
         for i, line in enumerate(self.file):
             if self.send_as_words:
-                [self.output_channel.put({"tag": i, 'value': word.strip()}) for j, word in enumerate(line.split())]
+                [self.output_channel.put(Event(tag=i, value=word.strip())) for j, word in enumerate(line.split())]
             else:
-                self.output_channel.put({"tag": i, 'value': line.strip()})
+                self.output_channel.put(Event(tag=i, value=line.strip()))
         self.output_channel.put(None)
         self.stop = True
 
