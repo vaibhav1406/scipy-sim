@@ -31,7 +31,7 @@ class ThrownBall(Model):
         self.components = [
             Constant(wires[0], value=gravity, resolution=100, simulation_time=4),
             # Split into fixed-step and DE streams
-            Copier(wires[0], [wires[1], wires[2]]),
+            Split(wires[0], [wires[1], wires[2]]),
             # Integrate to get velocity
             Integrator(wires[1], wires[3], initial_velocity),
             DEIntegrator(wires[2], wires[4], initial_velocity),

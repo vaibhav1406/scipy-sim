@@ -3,7 +3,7 @@ Created on 9/12/2009
 
 @author: brian
 '''
-from scipysim.actors import Siso
+from scipysim.actors import Siso, Event
 
 class Abs(Siso):
     '''
@@ -16,9 +16,9 @@ class Abs(Siso):
         super(Abs, self).__init__(input_channel=input_channel,
                                   output_channel=output_channel)
 
-    def siso_process(self, obj):
-        tag, value = obj['tag'], obj['value']
+    def siso_process(self, event):
+        tag, value = event.tag, event.value
         if value < 0:
             value *= -1
-        return { 'tag':tag, 'value':value }
+        return Event(tag, value)
 
