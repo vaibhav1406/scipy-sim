@@ -5,7 +5,7 @@ Created on 13/12/2009
 '''
 from scipysim.actors import MakeChans, Model
 from scipysim.actors.display import Plotter
-from scipysim.actors.signal import Ramp, Copier
+from scipysim.actors.signal import Ramp, Split
 from scipysim.actors.logic import GreaterThan, PassThrough
 from scipysim.actors.math.trig import CTSinGenerator
 from scipysim.actors.math import Subtractor, Summer, Constant

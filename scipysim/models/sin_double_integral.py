@@ -13,8 +13,8 @@ Created on 2010-03-22
 @author: Allan McInnes
 '''
 from scipysim.actors import Model, MakeChans
-from scipysim.actors.display import Plotter, Stemmer
-from scipysim.actors.signal import Copier
+from scipysim.actors.display import Plotter
+from scipysim.actors.signal import Split
 from scipysim.actors.math import CTIntegratorDE1
 from scipysim.actors.math.trig import CTSinGenerator
 

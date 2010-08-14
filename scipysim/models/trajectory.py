@@ -2,7 +2,7 @@
 A model based on the bouncing ball example in simulink.
 """
 from scipysim.actors import Model, MakeChans
-from scipysim.actors.signal import Copier
+from scipysim.actors.signal import Split
 from scipysim.actors.math import Constant
 from scipysim.actors.math import CTIntegratorForwardEuler as Integrator
 from scipysim.actors.display import Plotter
