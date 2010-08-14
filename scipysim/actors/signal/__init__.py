@@ -1,5 +1,5 @@
 """Signal Blocks"""
-from copier import Copier
+from split import Split
 from decimator import Decimator
 from delay import Delay
 from eventfilter import EventFilter
