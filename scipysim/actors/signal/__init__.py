@@ -6,6 +6,7 @@ from eventfilter import EventFilter
 from interpolator import InterpolatorZero
 from interpolator import InterpolatorStep
 from interpolator import InterpolatorLinear
+from merge import Merge
 from quantizer import Quantizer
 from ramp import Ramp
 from random_signal import RandomSource
