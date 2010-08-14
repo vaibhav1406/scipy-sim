@@ -29,10 +29,10 @@ class ThrownBall(Model):
         self.components = [
             Constant(wires[0], value=gravity, resolution=100, simulation_time=4),
             Integrator(wires[0], wires[1], initial_velocity),
-            Copier(wires[1], [wires[2], wires[3]]),
+            Split(wires[1], [wires[2], wires[3]]),
             Plotter(wires[2], title="Velocity", own_fig=True, xlabel="Time (s)", ylabel="(m/s)"),
             Integrator(wires[3], wires[4], initial_position),
-            Copier(wires[4], [wires[5], wires[6]]),
+            Split(wires[4], [wires[5], wires[6]]),
             Plotter(wires[5], title="Displacement", own_fig=True, xlabel="Time (s)", ylabel="(m)"),
         ]
 

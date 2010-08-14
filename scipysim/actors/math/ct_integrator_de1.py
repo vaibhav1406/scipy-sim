@@ -212,7 +212,7 @@ class CTintegratorTest(unittest.TestCase):
         Testing using same values as above, but also clones output for 
         second integration.
         '''
-        from scipysim.actors.signal import Copier
+        from scipysim.actors.signal import Split
         # Note that here instead of actually closing the loop around the 
         # integrator we're simply feeding in a sequence of values corresponding 
         # to the function f(x) = -x, and then later checking that the outputs we 
@@ -230,7 +230,7 @@ class CTintegratorTest(unittest.TestCase):
 
         blocks = [
                     CTIntegratorDE1(self.q_in, self.q_out, init=1.0, delta=0.1, k=10.0 / 0.1),
-                    Copier(self.q_out, [q1, q2]),
+                    Split(self.q_out, [q1, q2]),
                     CTIntegratorDE1(q1, q3, init=1.0, delta=0.1, k=10.0 / 0.1)
                   ]
 
@@ -247,13 +247,13 @@ class CTintegratorTest(unittest.TestCase):
 
 def quickTest():
     from scipysim.actors.math import Proportional
-    from scipysim.actors.signal import Copier
+    from scipysim.actors.signal import Split
 
     c1, c2, c3, c4 = Channel(), Channel(), Channel(), Channel()
     
     blocks = [
                 CTIntegratorDE1(c1, c2, init=1.0, delta=0.1, k=10/0.1),
-                Copier(c2, [c3, c4]),
+                Split(c2, [c3, c4]),
                 Proportional(c3, c1, -1.0),
              ]
     
