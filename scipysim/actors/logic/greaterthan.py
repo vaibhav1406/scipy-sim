@@ -10,6 +10,6 @@ class GreaterThan(Compare):
     This actor takes a source and passes on the value if it is equal or over 
     a specified threshold. Or boolean output is available (@see Compare).
     '''
-    def compare(self, obj):
+    def compare(self, event):
         '''Return true if value is above preset threshold'''
-        return obj['value'] >= self.threshold
+        return event.value >= self.threshold

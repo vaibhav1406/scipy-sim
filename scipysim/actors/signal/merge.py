@@ -3,7 +3,7 @@ The merge actor takes any number of input channels and merges the signals. The
 resulting output signal maintains time ordering of tags. Events with identical
 tags are placed in the output channel in an order that corresponds to the
 ordering of the input channels from which the events are received. This makes
-the merge deterministic.
+the merge deterministic. It also implicitly introduces "super-dense" time.
 
 @author: Allan McInnes
 '''
