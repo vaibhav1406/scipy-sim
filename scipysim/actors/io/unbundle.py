@@ -4,7 +4,7 @@ Created on Feb 2, 2010
 @author: brianthorne
 '''
 
-from scipysim.actors import Actor
+from scipysim.actors import Actor, Event
 class Unbundle(Actor):
     '''Given a bundled source, recreate the channel that made it'''
 
@@ -17,7 +17,7 @@ class Unbundle(Actor):
     def process(self):
         x = self.input_channel.get(True)
         if x is not None:
-            [self.output_channel.put({"tag": tag, 'value': value}) for (tag, value) in x]
+            [self.output_channel.put(Event(tag, value)) for (tag, value) in x]
         else:
             self.output_channel.put(None)
             self.stop = True

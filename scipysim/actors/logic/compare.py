@@ -1,4 +1,4 @@
-from scipysim.actors import Siso
+from scipysim.actors import Siso, Event
 
 class Compare(Siso):
     '''This abstract base class is for any actor which carries out a comparison.
@@ -20,7 +20,7 @@ class Compare(Siso):
         self.bool_out = boolean_output
         self.threshold = threshold
 
-    def compare(self, obj):
+    def compare(self, event):
         '''This method must be overridden. If it returns True
         the value is put onto the output channel, else discarded.
         Or if boolean_output is true, a boolean is substituted for the 'value'
@@ -29,13 +29,13 @@ class Compare(Siso):
         '''
         raise NotImplementedError
 
-    def siso_process(self, obj):
+    def siso_process(self, event):
         '''Carry out the comparison using the compare method.'''
-        if self.compare(obj):
+        if self.compare(event):
             if self.bool_out:
-                obj['value'] = True
-            self.output_channel.put(obj)
+                self.output_channel.put(Event(event.tag, True))
+            else:
+                self.output_channel.put(event)
         elif self.bool_out:
-            obj['value'] = False
-            self.output_channel.put(obj)
+            self.output_channel.put(Event(event.tag, False))
 
