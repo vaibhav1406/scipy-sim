@@ -4,7 +4,7 @@ Created on 8/03/2010
 @author: Brian Thorne
 '''
 
-from scipysim.actors import Actor, Channel, Siso
+from scipysim.actors import Actor, Channel, Siso, Event
 
 class CTIntegrator(Siso):
     '''
@@ -42,13 +42,12 @@ class CTIntegratorForwardEuler(CTIntegrator):
     def integrate(self, event):
         ''' y[n] = y[n-1] + x[n]*(t[n]-t[n-1])'''
         self.y = self.y_old
-        self.y_old += event['value'] * (event['tag'] - self.t_old)
+        self.y_old += event.value * (event.tag - self.t_old)
 
-        self.t_old = event['tag']
+        self.t_old = event.tag
 
         # Generate output event
-        out_event = {'tag':event['tag'], 'value':self.y_old}
-        return out_event
+        return Event(event.tag, self.y_old)
 
 
 import unittest
@@ -65,7 +64,7 @@ class CTIntegratorTests(unittest.TestCase):
     def test_forward_euler(self):
         '''Test forward Euler integration of a simple positive integer signal.
         '''
-        inp = [{'value':i, 'tag':i} for i in xrange(0, 10, 1)]
+        inp = [Event(value = i, tag = i) for i in xrange(0, 10, 1)]
 
         expected_output_values = [sum(range(i)) for i in xrange(1, 11)]
 
@@ -78,15 +77,15 @@ class CTIntegratorTests(unittest.TestCase):
 
         for expected_output in expected_output_values:
             out = self.q_out.get()
-            self.assertEquals(out['value'], expected_output)
+            self.assertEquals(out.value, expected_output)
         self.assertEquals(self.q_out.get(), None)
 
     def test_different_rate(self):
         '''Test that integration of a simple positive constant signal doesn't change with samplerate.
         '''
         from scipy import arange
-        inp_1 = [{'value':10, 'tag':i} for i in arange(0, 10, 1)]
-        inp_2 = [{'value':10, 'tag':i} for i in arange(0, 10, 0.1)]
+        inp_1 = [Event(value = 10, tag = i) for i in arange(0, 10, 1)]
+        inp_2 = [Event(value = 10, tag = i) for i in arange(0, 10, 0.1)]
 
         expected_output_values_1 = [10 * i for i in arange(0, 10, 1)]
         expected_output_values_2 = [10 * i for i in arange(0, 10, 0.1)]
@@ -106,7 +105,7 @@ class CTIntegratorTests(unittest.TestCase):
             for expected_output in expected_output_values_1:
                 out.append(q_out1.get())
 
-            out = [item['value'] for item in out]
+            out = [item.value for item in out]
             self.assertEquals(len(out), len(expected_output_values_1))
 
             #[self.assertEquals(out[i], expected_output[i]) for i, _ in enumerate(expected_output_values_1)]
@@ -114,7 +113,7 @@ class CTIntegratorTests(unittest.TestCase):
 
             for expected_output in expected_output_values_2:
                 out = q_out2.get()
-                self.assertAlmostEquals(out['value'], expected_output)
+                self.assertAlmostEquals(out.value, expected_output)
             self.assertEquals(q_out2.get(), None)
 
 if __name__ == '__main__':
