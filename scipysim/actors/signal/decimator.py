@@ -3,7 +3,7 @@ Created on 1/12/2009
 
 @author: brian
 '''
-from scipysim.actors import Siso, Channel
+from scipysim.actors import Siso, Channel, Event
 import unittest
 
 class Decimator(Siso):
@@ -25,10 +25,10 @@ class Decimator(Siso):
         self.reduction_factor = int(reduction_factor)
         self.sample = 0
 
-    def siso_process(self, obj):
+    def siso_process(self, event):
 
         if self.sample % self.reduction_factor == 0:
-            self.output_channel.put(obj)
+            self.output_channel.put(event)
         self.sample += 1
 
 class DecimatorTests(unittest.TestCase):
@@ -47,9 +47,9 @@ class DecimatorTests(unittest.TestCase):
         Create a discrete time signal with a 1hz frequency 
         down-sample to 0.5hz by a factor 2 reduction
         '''
-        inp = [{'value':1, 'tag':i} for i in xrange(0, 100, 1)]
+        inp = [Event(value=1, tag=i) for i in xrange(0, 100, 1)]
 
-        expected_outputs = [{'value':1, 'tag':i} for i in xrange(0, 100, 2)]
+        expected_outputs = [Event(value=1, tag=i) for i in xrange(0, 100, 2)]
 
         down_sampler = Decimator(self.q_in, self.q_out, 2)
         down_sampler.start()
@@ -59,8 +59,8 @@ class DecimatorTests(unittest.TestCase):
 
         for expected_output in expected_outputs:
             out = self.q_out.get()
-            self.assertEquals(out['value'], expected_output['value'])
-            self.assertEquals(out['tag'], expected_output['tag'])
+            self.assertEquals(out.value, expected_output.value)
+            self.assertEquals(out.tag, expected_output.tag)
         self.assertEquals(self.q_out.get(), None)
 
 if __name__ == "__main__":
