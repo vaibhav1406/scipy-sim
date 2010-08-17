@@ -1,0 +1,23 @@
+#!/bin/sh
+# 
+# Runs scipysim, either by executing a specified
+# model, or in the absence of a model by starting
+# the scipysim GUI.
+#
+# Also sets up the PYTHONPATH environment variable to
+# allow scipysim to run properly (assuming the script
+# is run from a directory from which the scipysim tree
+# is a subdirectory).
+#
+
+export PYTHONPATH=`pwd`
+
+if [ $# -ne 1 ]; then
+    # Default to running the GUI
+    echo "Starting the SciPySim GUI..."
+    python -m scipysim.gui.gui
+else
+    # Run the specified model
+    python $1
+fi
+
