@@ -1,136 +1,204 @@
+#!/usr/bin/env python
+
 '''
-This dynamic plotter shows a live signal stream. To control the access to the non-thread safe matplotlib api this class and
-model.py work together depending on how many instances are created.
+This file defines a Plotter actor. The plotting uses a Tkinter GUI and 
+runs in a seperate process. 
+The "actor" is composited of:
+    * a decorating actor *New_Process_Actor* which allows a class to run
+      in a seperate process. It has an additional actor:
+    * Channel2Process which takes objects off the Channel and puts them 
+      on a multiprocessing queue.
+    * a BasePlotter instance which runs entirely in a seperate process
+      doing the actual plotting.
 
-An alternative to using the queue infrastructure would be 
-to "monitor" a variable - http://simpy.sourceforge.net/_build/Recipes/Recipe002.html
+TODO: This version no longer does live plotting. 
+
+Note: There is a process safe Queue in the multiprocessing module. It 
+MUST be used to communicate between processes.
+
+@author: Brian Thorne 2010
 '''
+from multiprocessing import Process, Condition
+from multiprocessing import Queue as MQueue
 
-from scipysim.actors import DisplayActor
+import sys, os
 
-import matplotlib
-matplotlib.use('TkAgg')
-#from matplotlib.backends.backend_tkagg import FigureCanvasAgg as FigureCanvas
-#from matplotlib.figure import Figure
+from scipysim import Actor, Channel, Event
+from scipysim.core.actor import DisplayActor
 
-from matplotlib import pyplot as plt
+def target(cls, args, kwargs):
+    '''This is the function that gets run in a new process'''
+    run_gui_loop = issubclass(cls, DisplayActor)
+    if run_gui_loop:
+        import Tkinter as Tk
+        import matplotlib
+        matplotlib.use('TkAgg')
+        
+        # Create new Tkinter window for the plot
+        root = Tk.Tk()
+        root.wm_title('Scipy Sim')
+        kwargs['root'] = root
+    
+    # Create the Actor that we are wrapping
+    block = cls(**kwargs)
+    
+    block.start()
+    
+    if run_gui_loop:
+        Tk.mainloop()
 
-import logging
-import threading
+    block.join()
 
-GUI_LOCK = threading.Condition()
 
-import time
-
-class Plotter(DisplayActor):
+class New_Process_Actor(Actor):
+    '''Create an Actor in a new process. Connected as usual with scipysim 
+    channels. When this Actor is started, it launches a new process, creates
+    an instance of the Actor class passed to it in a second thread, and starts
+    that actor.
     '''
-    This actor shows a signal dynamically as it comes off the buffer with matplotlib.
-    The max refresh rate is an optional input - default is 2Hz
+    def __init__(self, cls, *args, **kwargs):
+        super(New_Process_Actor, self).__init__()
+        self.cls = cls
+        self.args = list(args)
+        self.kwargs = kwargs
+        self.mqueue = MQueue()
+        
+        if 'input_channel' not in kwargs:
+            kwargs['input_channel'] = self.args[0]
+        
+        chan = kwargs['input_channel']
+        kwargs['input_channel'] = self.mqueue
+        
+        
+        print 'chan: ', chan
+        self.c2p = Channel2Process(chan, self.mqueue)
+        
+        self.c2p.start()
+
+
+    def run(self):
+        self.t = Process(target=target, args=(self.cls, self.args, self.kwargs))
+        self.t.start()
+        self.c2p.join()
+        self.t.join()
+        
+class Channel2Process(Actor):
     '''
+    Gets objects off a Channel and puts them in a multiprocessing.Queue
+    
+    This Actor (thread) must be called from the side which has the channel.
+    '''
+    def __init__(self, channel, queue):
+        super(Channel2Process, self).__init__()
+        self.channel = channel
+        self.queue = queue
+    
+    def process(self):
+        obj = self.channel.get(True)
+        if obj is not None:
+            self.queue.put(obj)
+        else:
+            
+            self.queue.put(None)
+            # Indicate that nothing else from this process will be put in queue
+            self.queue.close()
+            # Block on flushing the data to the pipe. Must be called after close
+            self.queue.join_thread()
+            self.stop = True
+    
 
-    additional_figures = 0
+class BasePlotter(DisplayActor):
+    def __init__(self, 
+            root,
+            input_channel,
+            refresh_rate=2,
+            title='Scipy Simulator Plot',
+            own_fig=True,
+            xlabel=None,
+            ylabel=None,
+            ):
+        '''An Actor that creates a figure, canvas and axis and plots data from
+        a queue.
+        
+        '''
+        super(BasePlotter, self).__init__(input_channel)
 
-    # This was a class attrib is broken on tk8.5/matplotlib.99?
-    # Works on osx tk8.4
-    #fig = Figure()
-    fig = plt.figure()
-    #canvas = FigureCanvas(fig)
-
-    # A class attribute to store whether we have already made plots
-    # If so we call the matplotlib api slightly differently
-    firstPlot = True
-
-    def __init__(self,
-                 input_channel,
-                 refresh_rate=2,
-                 title='Scipy Simulator Dynamic Plot',
-                 own_fig=False,
-                 xlabel=None,
-                 ylabel=None
-                 ):
-        super(Plotter, self).__init__(input_channel=input_channel)
+        # Data arrays
         self.x_axis_data = []
         self.y_axis_data = []
-        assert refresh_rate != 0
-        self.refresh_rate = refresh_rate
-        self.min_refresh_time = 1.0 / self.refresh_rate
 
-        plt.ioff() # Only draw when we say
-        assert plt.isinteractive() == False
+        # Doing imports here to keep in local scope (and so its in the correct process)  
+        from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg as FigureCanvas
+        from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg
+        from matplotlib.figure import Figure
+        
+        # Save a reference to the main Tk window
+        self.root = root
+        
+        # Creating the plot
+        self.fig = Figure(figsize=(5,4), dpi=120)
+        self.axis = self.fig.add_subplot(1, 1, 1)
+        self.title = self.axis.set_title(title)
+        
+        if xlabel is not None: self.axis.set_xlabel(xlabel)
+        if ylabel is not None: self.axis.set_ylabel(ylabel)
+        
+        # Instantiate canvas
+        self.canvas = FigureCanvas(self.fig, master=self.root)
 
-        self.fig_num = self.additional_figures
-        if own_fig and not self.firstPlot:
-            self.__class__.additional_figures += 1
-            with GUI_LOCK:
-                fig = self.myfig = plt.figure()
-        else:
-            fig = self.__class__.fig
+        # Pack canvas into root window
+        self.canvas.get_tk_widget().pack(expand=1)
 
-        self.ax = fig.add_subplot(1, 1, 1)
-        self.title = self.ax.set_title(title)
-        self.line, = self.ax.plot(self.x_axis_data, self.y_axis_data)
-        if xlabel is not None: self.ax.set_xlabel(xlabel)
-        if ylabel is not None: self.ax.set_ylabel(ylabel)
-        self.refreshs = 0
-
-        self.last_update = 0
-        self.__class__.firstPlot = False
+        # Put the graph navigation toolbar in the window
+        toolbar = NavigationToolbar2TkAgg( self.canvas, self.root )
+        # We can have our own buttons etc here:
+        #Tk.Button(master=toolbar, text='Quit', command=sys.exit).pack()
 
     def process(self):
-        '''
-        plot any values in the buffer
-        '''
-        obj = self.input_channel.get(True)     # this is blocking
+        obj = self.input_channel.get()     # this is actually blocking
         if obj is None:
-            logging.info("We have finished processing the channel of data to be displayed")
-            self.update_plot()
             self.stop = True
+
+            self.input_channel.close()
+            self.input_channel.join_thread()
+            self.plot()
+
             return
 
         self.x_axis_data.append(obj['tag'])
         self.y_axis_data.append(obj['value'])
-        #logging.debug("Plotter received values ( %e,%e ) Now have %i values." % (self.y_axis_data[-1], self.x_axis_data[-1], len(self.x_axis_data)))
         obj = None
+        
+    def plot(self):
+        self.axis.plot(self.x_axis_data, self.y_axis_data)
+        self.canvas.show()
 
-        if time.time() - self.last_update > self.min_refresh_time:
-            self.last_update = time.time()
-            self.update_plot()
+class Plotter(Actor):
+    def __init__(self, *args, **kwargs):
+        super(Plotter, self).__init__()
+        self.npa = New_Process_Actor(BasePlotter, *args, **kwargs)
+        
+    def run(self):
+        self.npa.start()
+        self.npa.join()
 
+def test_NPA():
+    data = [Event(i, i**2) for i in xrange( 10 )]
+    q1 = Channel()
+    npa = New_Process_Actor(BasePlotter, input_channel=q1) 
+    import time, random
+    print 'starting other process actor...'
+    npa.start()
+    time.sleep(random.random() * 0.01)
+    print 'Adding data to queue.', q1
+    [q1.put(d) for d in data + [None]]
 
-    def update_plot(self):
-        '''
-        Update the internal data stored by matplotlib and cause a redraw.
-        If this has been called more than 1000 times -> quit.
-        '''
-        logging.debug("Updating plot (refresh: %i)" % self.refreshs)
+    print 'other calculations keep going...'
+    npa.join()
+    print 'NPA is done'
 
-        # This is a safety check - if we are plotting over a long time period this needs removing
-        if self.refreshs >= 1000:
-            print "Error - too many values"
-            logging.warning("We have updated the plot 1000 times - forcing a stop of the simulation now")
-            self.stop = True
-            return
-        self.refreshs += 1
+if __name__ == "__main__":
+    print 'testing npa...'
 
-        self.line.set_data(self.x_axis_data, self.y_axis_data)
-        axes = self.line.get_axes()
-        self.line.recache()
-        axes.relim()
-        axes.autoscale_view()
-
-        with GUI_LOCK:
-            pass
-            # At this point we are 100% sure the main Tk loop has started
-            # but for multiple figures we cannot call "draw" from any thread
-            # other than the main thread, so if there are more than one figures
-            # we don't call draw at all.
-            #if self.additional_figures == 0:
-                #plt.draw()
-
-        # It might prove to be beneficial just to redraw small bits
-        # just redraw the axes rectangle
-        #self.fig.canvas.blit(self.ax.bbox)
-        #self.fig.canvas.draw()
-        #self.fig.canvas.manager.window.after(100, self.update_plot)
-
-
+    test_NPA()
+    
