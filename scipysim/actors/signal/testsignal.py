@@ -5,7 +5,7 @@ Created on Feb 3, 2010
 '''
 import unittest
 
-from copier import CopierTests
+from split import SplitTests
 from decimator import DecimatorTests
 from delay import DelayTests
 from interpolator import InterpolateTests
