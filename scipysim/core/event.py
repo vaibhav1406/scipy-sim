@@ -61,6 +61,15 @@ class Event(Mapping):
         super(Event, self).__setattr__('_Event__event', 
                                        { 'tag': tag, 'value': value })
     
+    def __repr__(self):
+        return 'Event(%s, %s)' % (self.tag, self.value)
+    
+    def __reduce__(self):
+        '''
+        Allow an Event to be pickled for cross process communication.
+        '''
+        return (Event, (self.tag, self.value))    
+    
     def __iter__(self):
         '''
         Implement Mapping interface to allow Events to behave as dicts
