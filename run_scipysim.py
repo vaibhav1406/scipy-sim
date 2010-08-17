@@ -15,10 +15,10 @@ import scipysim
 def main(modelname=None):
     if modelname is None:
         print "Starting scipysim GUI"
-        run_module('scipysim.gui.gui')
+        run_module('scipysim.gui.gui', run_name="__main__")
     else:
         # TODO: Check if modelname is valid
-        run_module('scipysim.models.' + modelname)
+        run_module('scipysim.models.' + modelname, run_name="__main__")
 
 def test(verbose=False):
     print "Running tests (requires nose)"
