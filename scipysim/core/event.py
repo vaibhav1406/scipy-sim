@@ -97,7 +97,25 @@ class Event(Mapping):
     def __delattr__(self, name):
         '''Disable deletion of attributes.'''
         self.__mutation_error()
-    
+
+    def __getstate__(self):
+        '''Support for pickling.
+
+        The scheme we use for immutability seems to interfere with
+        the pickling protocol. To get around this, we define the __getstate__
+        method, and have it return the internal object state.'''
+        return self.__event
+
+    def __setstate__(self, state):
+        '''Support for unpickling.
+
+        The scheme we use for immutability seems to interfere with
+        the pickling protocol. The __setstate__ method, using a state
+        assumed to have been returned by Event.__getstate__, ensures that
+        the Event internal state is properly reconstructed during unpickling.
+        '''
+        super(Event, self).__setattr__('_Event__event', state)
+
     def __mutation_error(self):
         raise TypeError("Events are immutable")
         
