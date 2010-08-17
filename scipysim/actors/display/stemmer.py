@@ -4,8 +4,6 @@ This dynamic stemmer shows a live signal stream.
 
 from scipysim.actors import DisplayActor
 
-import matplotlib.pyplot as plt
-import matplotlib.lines as lines
 import logging
 import threading
 
@@ -28,7 +26,7 @@ class Stemmer(DisplayActor):
     # This was a class attrib is broken on tk8.5/matplotlib.99?
     # Works on osx tk8.4
     #fig = Figure()
-    fig = plt.figure()
+    #fig = plt.figure()
     #canvas = FigureCanvas(fig)
 
     # A class attribute to store whether we have already made plots
@@ -44,6 +42,10 @@ class Stemmer(DisplayActor):
                  ylabel=None
                  ):
         super(Stemmer, self).__init__(input_channel=input_channel)
+        
+        import matplotlib.pyplot as plt
+        import matplotlib.lines as lines
+        
         self.x_axis_data = []
         self.y_axis_data = []
         assert refresh_rate != 0
@@ -58,12 +60,11 @@ class Stemmer(DisplayActor):
         # empty canvas
         
         self.fig_num = self.additional_figures
-        if own_fig and not self.firstPlot:
-            self.__class__.additional_figures += 1
-            with GUI_LOCK:
-                fig = self.myfig = plt.figure()
-        else:
-            fig = self.__class__.fig
+        
+        self.__class__.additional_figures += 1
+        with GUI_LOCK:
+            fig = self.myfig = plt.figure()
+        
 
         self.ax = fig.add_subplot(1, 1, 1)
         self.title = self.ax.set_title(title)   

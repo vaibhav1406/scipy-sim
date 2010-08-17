@@ -16,9 +16,7 @@ import numpy
 import logging
 #logging.basicConfig( level=logging.DEBUG )
 
-import matplotlib
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
+
 
 from urllib import quote
 
@@ -56,6 +54,10 @@ class BundleHistPlotter(Actor):
         return
 
     def save_image(self):
+        import matplotlib
+        from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+        from matplotlib.figure import Figure
+        
         self.x_axis_data = self.data["Tag"]
         self.y_axis_data = self.data["Value"]
         logging.debug("Creating static plot of %d items" % len(self.data))

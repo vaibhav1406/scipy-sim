@@ -8,10 +8,10 @@ and a 'None' object gets treated like a dictionary... same in subtract.py
 
 Created on 24/11/2009
 
-@author: brian
+@author: Brian Thorne
 '''
 import logging
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
 import numpy as np
 from scipysim.actors import Actor, Channel
 
@@ -262,8 +262,8 @@ class SummerTests(unittest.TestCase):
         # Fill each channel with num_data_points of its own index
         # So channel 5 will be full of the value 4, then a None
         for i, input_channel in enumerate(input_channels):
-            _ = [input_channel.put({'value':i, 'tag':j}) for j in xrange(num_data_points)]
-        _ = [input_channel.put(None) for input_channel in input_channels]
+            [input_channel.put({'value':i, 'tag':j}) for j in xrange(num_data_points)]
+        [input_channel.put(None) for input_channel in input_channels]
 
         summer = Summer(input_channels, output_channel)
         summer.start()
@@ -287,9 +287,9 @@ class SummerTests(unittest.TestCase):
         # Fill each channel with num_data_points of its own index
         # So channel 5 will be full of the value 4, then a None
         for i, input_channel in enumerate(input_channels):
-            _ = [input_channel.put({'value':i, 'tag':j}) for j in xrange(num_data_points) if i is not 0]
-        _ = [input_channels[0].put({'value':0, 'tag':j + DELAY}) for j in xrange(num_data_points)]
-        _ = [input_channel.put(None) for input_channel in input_channels]
+            [input_channel.put({'value':i, 'tag':j}) for j in xrange(num_data_points) if i is not 0]
+        [input_channels[0].put({'value':0, 'tag':j + DELAY}) for j in xrange(num_data_points)]
+        [input_channel.put(None) for input_channel in input_channels]
 
         summer = Summer(input_channels, output_channel)
         summer.start()
