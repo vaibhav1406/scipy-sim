@@ -41,7 +41,7 @@ class Model(Actor):
         until we enter the TK main loop, then plotters can paint their pictures.
         """
         need_plot_magic = any(issubclass(a.__class__, DisplayActor) for a in self.components)
-        if need_plot_magic:
+        if False and need_plot_magic:
             from scipysim.actors.display.plotter import GUI_LOCK
             GUI_LOCK.acquire(blocking=True)
 
@@ -49,7 +49,7 @@ class Model(Actor):
         [component.start() for component in self.components]
         logging.debug("Finished starting actors")
 
-        if need_plot_magic:
+        if False and need_plot_magic:
             import matplotlib.pyplot as plt
             logging.info('The program will stay "running" while the plot is open')
 
@@ -58,7 +58,7 @@ class Model(Actor):
 
         [component.join() for component in self.components]
 
-        if need_plot_magic:
+        if False and need_plot_magic:
             plt.show()
 
         logging.debug("Finished running simulation")
