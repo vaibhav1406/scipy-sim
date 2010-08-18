@@ -5,7 +5,7 @@ Created on 13/12/2009
 '''
 from scipysim.actors import MakeChans, Model
 from scipysim.actors.display import Plotter
-from scipysim.actors.signal import Ramp, Copier
+from scipysim.actors.signal import Ramp, Split
 from scipysim.actors.logic import GreaterThan, PassThrough
 from scipysim.actors.math.trig import CTSinGenerator
 from scipysim.actors.math import Subtractor, Summer, Constant
@@ -53,10 +53,10 @@ class Pulse_Width_Modulator( Model ):
 
         offset_sin_sum = Summer( [wires['sin'], wires['const_offset'] ], wires['offset_sin_probe'] )
 
-        ramp_cloning_probe = Copier( wires['ramp_probe'], [wires['ramp'], wires['ramp_plot']] )
+        ramp_cloning_probe = Split( wires['ramp_probe'], [wires['ramp'], wires['ramp_plot']] )
         ramp_plotter = Plotter( wires['ramp_plot'] )
 
-        sin_cloning_probe = Copier( wires['offset_sin_probe'], [wires['offset_sin'], wires['sin_plot']] )
+        sin_cloning_probe = Split( wires['offset_sin_probe'], [wires['offset_sin'], wires['sin_plot']] )
         sin_plotter = Plotter( wires['sin_plot'] )
 
         # Output = sin - ramp

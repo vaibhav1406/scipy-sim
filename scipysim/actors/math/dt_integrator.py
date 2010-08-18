@@ -16,15 +16,15 @@ input time tags.
 Created on 9/12/2009
 Additional integration algorithms added 08/02/2010
 '''
-from scipysim.actors import Actor, Channel, Siso
+from scipysim.actors import Actor, Channel, Event, Siso
 
 class DTIntegrator(Siso):
     '''
     Abstract base class for discrete-time integrator blocks.
    '''
 
-    input_domains = ("DT",)
-    output_domains = ("DT",)
+    input_domains = ('DT',)
+    output_domains = ('DT',)
 
     def __init__(self, input_channel, output_channel, init=0.0):
         '''
@@ -52,10 +52,10 @@ class DTIntegratorBackwardEuler(DTIntegrator):
     '''Backward Euler (aka Backward Rectangular) discrete-time integration.'''
     def integrate(self, event):
         ''' y[n] = y[n-1] + x[n] '''
-        self.y = self.y_old + event['value']
+        self.y = self.y_old + event.value
         self.y_old = self.y
         # Generate output event
-        out_event = {'tag':event['tag'], 'value':self.y}
+        out_event = Event(event.tag, self.y)
         return out_event
 
 class DTIntegratorForwardEuler(DTIntegrator):
@@ -63,26 +63,27 @@ class DTIntegratorForwardEuler(DTIntegrator):
     def integrate(self, event):
         ''' y[n] = y[n-1] + x[n-1] '''
         self.y = self.y_old
-        self.y_old += event['value']
+        self.y_old += event.value
         # Generate output event
-        out_event = {'tag':event['tag'], 'value':self.y}
+        out_event = Event(event.tag, self.y)
         return out_event
 
 
 class DTIntegratorTrapezoidal(DTIntegrator):
     '''Trapezoidal discrete-time integration.'''
     def __init__(self, input_channel, output_channel, init=0.0):
-        super(DTIntegratorTrapezoidal, self).__init__(input_channel=input_channel,
-                                                      output_channel=output_channel)
+        super(DTIntegratorTrapezoidal, 
+              self).__init__(input_channel=input_channel,
+                             output_channel=output_channel)
         self.x_old = 0.0   # x[n] : the last input    
 
     def integrate(self, event):
         ''' y[n] = y[n-1] + 0.5*(x[n] + x[n-1]) '''
-        self.y = self.y_old + 0.5 * (event['value'] + self.x_old)
-        self.x_old = event['value']
+        self.y = self.y_old + 0.5 * (event.value + self.x_old)
+        self.x_old = event.value
         self.y_old = self.y
         # Generate output event
-        out_event = {'tag':event['tag'], 'value':self.y}
+        out_event = Event(event.tag, self.y)
         return out_event
 
 
@@ -95,13 +96,13 @@ class DTIntegratorTests(unittest.TestCase):
         '''
         Unit test setup code
         '''
-        self.q_in = Channel()
-        self.q_out = Channel()
+        self.q_in = Channel('DT')
+        self.q_out = Channel('DT')
 
     def test_backward_euler(self):
         '''Test backward Euler integration of a simple positive integer signal.
         '''
-        inp = [{'value':i, 'tag':i} for i in xrange(0, 10, 1)]
+        inp = [Event(value=i, tag=i) for i in xrange(0, 10, 1)]
 
         expected_output_values = [sum(range(i)) for i in xrange(1, 11)]
 
@@ -113,13 +114,13 @@ class DTIntegratorTests(unittest.TestCase):
 
         for expected_output in expected_output_values:
             out = self.q_out.get()
-            self.assertEquals(out['value'], expected_output)
+            self.assertEquals(out.value, expected_output)
         self.assertEquals(self.q_out.get(), None)
 
     def test_forward_euler(self):
         '''Test forward Euler integration of a simple positive integer signal.
         '''
-        inp = [{'value':i, 'tag':i} for i in xrange(0, 10, 1)]
+        inp = [Event(value=i, tag=i) for i in xrange(0, 10, 1)]
 
         expected_output_values = [sum(range(i)) for i in xrange(0, 10)]
 
@@ -132,13 +133,13 @@ class DTIntegratorTests(unittest.TestCase):
 
         for expected_output in expected_output_values:
             out = self.q_out.get()
-            self.assertEquals(out['value'], expected_output)
+            self.assertEquals(out.value, expected_output)
         self.assertEquals(self.q_out.get(), None)
 
     def test_trapezoidal(self):
         '''Test trapezoidal integration of a simple positive integer signal.
         '''
-        inp = [{'value':i, 'tag':i} for i in xrange(0, 10, 1)]
+        inp = [Event(value=i, tag=i) for i in xrange(0, 10, 1)]
 
         x_avgs = [0.5 * (x + (x - 1)) for x in xrange(1, 11, 1)]
         expected_output_values = [sum(x_avgs[:i]) for i in range(10)]
@@ -152,7 +153,7 @@ class DTIntegratorTests(unittest.TestCase):
 
         for expected_output in expected_output_values:
             out = self.q_out.get()
-            self.assertEquals(out['value'], expected_output)
+            self.assertEquals(out.value, expected_output)
         self.assertEquals(self.q_out.get(), None)
 
 if __name__ == "__main__":

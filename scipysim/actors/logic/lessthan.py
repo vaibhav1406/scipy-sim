@@ -6,5 +6,5 @@ Created on Feb 2, 2010
 from scipysim.actors.logic import Compare
 
 class LessThan(Compare):
-    def compare(self, obj):
-        return obj['value'] < self.threshold
+    def compare(self, event):
+        return event.value < self.threshold

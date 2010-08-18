@@ -13,8 +13,8 @@ Created on 2010-03-22
 @author: Allan McInnes
 '''
 from scipysim.actors import Model, MakeChans
-from scipysim.actors.display import Plotter, Stemmer
-from scipysim.actors.signal import Copier
+from scipysim.actors.display import Plotter
+from scipysim.actors.signal import Split
 from scipysim.actors.math import CTIntegratorDE1
 from scipysim.actors.math.trig import CTSinGenerator
 
@@ -37,9 +37,9 @@ class SinDoubleIntegral( Model ):
         self.components = [
             # 0.5 Hz, 0 degree phase
             CTSinGenerator( wires[0], 1, 0.5, 0.0 ),
-            Copier(wires[0], [wires[1], wires[2]]),
+            Split(wires[0], [wires[1], wires[2]]),
             CTIntegratorDE1(wires[1], wires[3], init=0.0, delta=0.001, k=10),
-            Copier(wires[3], [wires[4], wires[5]]),
+            Split(wires[3], [wires[4], wires[5]]),
             CTIntegratorDE1(wires[5], wires[6], init=0.0, delta=0.001, k=10),
             Plotter( wires[2], title="Input", own_fig=True), 
             Plotter( wires[4], title="1st Integral", own_fig=True),            

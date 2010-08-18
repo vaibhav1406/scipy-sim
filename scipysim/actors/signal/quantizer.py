@@ -3,7 +3,7 @@ Created on 2010-04-06
 
 @author: Allan McInnes
 '''
-from scipysim.actors import Siso, Actor, Channel
+from scipysim.actors import Siso, Actor, Channel, Event
 import logging
 import unittest
 from numpy import floor
@@ -11,7 +11,7 @@ from numpy import floor
 
 class Quantizer(Siso):
     '''
-    This actor takes an input signal with values at arbitrary levels, and
+    Takes an input signal with values at arbitrary levels, and
     generates an output signal with values at corresponding quantization
     levels.
     This quantizer uses a 'floor' function to make the conversion to 
@@ -29,11 +29,10 @@ class Quantizer(Siso):
         self.delta = delta
         
 
-    def siso_process(self, obj):
-        tag, value = obj['tag'], obj['value']
-        logging.debug("Quantizer received (tag: %2.e, value: %2.e )" % (tag, value))        
-        quantized_value = self.delta * floor(value / self.delta)
-        self.output_channel.put({ 'tag':tag, 'value':quantized_value })
+    def siso_process(self, event):
+        logging.debug("Quantizer received (tag: %2.e, value: %2.e )" % (event.tag, event.value))        
+        quantized_value = self.delta * floor(event.value / self.delta)
+        self.output_channel.put(Event(tag, quantized_value))
 
         return
 
@@ -51,9 +50,9 @@ class QuantizerTests(unittest.TestCase):
         '''
         Test quantizing a simple ramp signal.
         '''
-        inp = [{'tag':i, 'value':i} for i in xrange(-20, 21, 1)]
+        inp = [Event(i, i) for i in xrange(-20, 21, 1)]
         quantizer = Quantizer(self.q_in, self.q_out, 2)
-        expected_outputs = [{'tag':i, 'value':i if i%2==0 else i-1} for i in xrange(-20, 21, 1)]
+        expected_outputs = [Event(i, i if i%2==0 else i-1) for i in xrange(-20, 21, 1)]
                 
         quantizer.start()
         [self.q_in.put(val) for val in inp]
@@ -62,9 +61,10 @@ class QuantizerTests(unittest.TestCase):
 
         for expected_output in expected_outputs:
             out = self.q_out.get()
-            self.assertEquals(out['value'], expected_output['value'])
-            self.assertEquals(out['tag'], expected_output['tag'])
+            self.assertEquals(out.value, expected_output.value)
+            self.assertEquals(out.tag, expected_output.tag)
         self.assertEquals(self.q_out.get(), None)
 
 if __name__ == "__main__":
     unittest.main()
+

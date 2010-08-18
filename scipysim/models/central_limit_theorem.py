@@ -1,11 +1,11 @@
-from scipysim.actors import Channel, Model, MakeChans
-from scipysim.actors.display import Plotter
-from scipysim.actors.signal import Ramp, Copier, RandomSource
-from scipysim.actors.math import Summer
-from scipysim.actors.io import Bundle
-from scipysim.actors.display import BundleHistPlotter
-
 import logging
+from scipysim.actors import MakeChans
+from scipysim.actors import Model
+from scipysim.actors.display import BundleHistPlotter
+from scipysim.actors.io import Bundle
+from scipysim.actors.math import Summer
+from scipysim.actors.signal import RandomSource
+
 logging.basicConfig(level=logging.INFO)
 logging.info("Starting dual ramp + noise sum.")
 

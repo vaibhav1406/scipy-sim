@@ -1,5 +1,5 @@
 import unittest
-from scipysim.actors import SisoTestHelper, Channel
+from scipysim.actors import SisoTestHelper, Channel, Event
 import numpy
 from scipysim.actors.math import Abs
 
@@ -17,7 +17,7 @@ class AbsTests( unittest.TestCase ):
     def test_positive_integers( self ):
         '''Test a simple positive integer signal.
         '''
-        inp = [{'value':i, 'tag':i} for i in xrange( 0, 100, 1 )]
+        inp = [Event(value=i, tag=i) for i in xrange( 0, 100, 1 )]
 
         expected_outputs = inp[:]
 
@@ -29,8 +29,8 @@ class AbsTests( unittest.TestCase ):
 
         for expected_output in expected_outputs:
             out = self.q_out.get()
-            self.assertEquals( out['value'], expected_output['value'] )
-            self.assertEquals( out['tag'], expected_output['tag'] )
+            self.assertEquals( out.value, expected_output.value )
+            self.assertEquals( out.tag, expected_output.tag )
         self.assertEquals( self.q_out.get(), None )
 
 from ct_integrator_de1 import CTintegratorTest

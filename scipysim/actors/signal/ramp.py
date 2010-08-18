@@ -1,22 +1,23 @@
 '''
 Created on 23/11/2009
 
-@author: brian
+@author: Brian Thorne
+@author: Allan McInnes
 '''
 import logging
 from numpy import linspace
-from scipysim.actors import Source, Actor
+from scipysim.actors import Source, Actor, Event
 
 import time, random # These are used to test the async
 
 class Ramp(Source):
     '''
-    This actor is a ramp source
+    A ramp source
     '''
 
     def __init__(self, out, amplitude=2.0, freq=1.0 / 30, resolution=10, simulation_time=120, endpoint=False):
         """
-        default parameters creates a ramp up to 2 that takes 30 seconds with 10 values per "second"
+        Default parameters creates a ramp up to 2 that takes 30 seconds with 10 values per "second"
 
         """
         super(Ramp, self).__init__(output_channel=out, simulation_time=simulation_time)
@@ -37,13 +38,10 @@ class Ramp(Source):
             while value >= self.amplitude:
                 value = value - self.amplitude
 
-            data = {
-                    "tag": tag,
-                    "value": value
-                    }
-            self.output_channel.put(data)
+            self.output_channel.put(Event(tag, value))
             #logging.debug("Ramp process added data: (tag: %2.e, value: %.2e)" % (tag, value))
             #time.sleep(random.random() * 0.001)     # Adding a delay so we can see the async
         logging.debug("Ramp process finished adding all data to channel")
         self.stop = True
         self.output_channel.put(None)
+
