@@ -1,9 +1,9 @@
 '''
 Created on 19/11/2009
 TODO
-@author: brian
+@author: Brian Thorne
 '''
-from scipysim.actors import Source
+from scipysim.actors import Source, Event
 import logging
 from numpy import linspace
 import time
@@ -11,7 +11,7 @@ import random
 
 class RandomSource(Source):
     '''
-    This signal source is just a random noise.
+    A random noise source.
     '''
 
 
@@ -41,17 +41,13 @@ class RandomSource(Source):
 
     def process(self):
         """Create the numbers..."""
-        logging.debug("Running ramp process")
+        logging.debug("Running random process")
         tags = linspace(0, self.simulation_time, self.simulation_time * self.resolution, endpoint=self.endpoint)
 
         for tag in tags:
             value = random.random() * self.amplitude
 
-            data = {
-                    "tag": tag,
-                    "value": value
-                    }
-            self.output_channel.put(data)
+            self.output_channel.put(Event(tag, value))
             logging.debug("Random process added data: (tag: %2.e, value: %.2e)" % (tag, value))
             #time.sleep(random.random() * 0.01)     # Adding a delay so we can see the async
         logging.debug("Random process finished adding all data to channel")

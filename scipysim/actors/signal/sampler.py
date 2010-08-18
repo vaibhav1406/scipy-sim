@@ -8,7 +8,7 @@ Notes
 How do we deal with "weird" input signals... what about random time intervals in DE?
 Incompatible input/output frequencies...?
 '''
-from scipysim.actors import Siso, Actor, Channel, InvalidSimulationInput
+from scipysim.actors import Siso, Actor, Channel, Event, InvalidSimulationInput
 import logging
 import unittest
 from numpy import linspace
@@ -32,16 +32,16 @@ class Sampler(Siso):
         self.has_data = False
         self.last_point = None
 
-    def siso_process(self, obj):
+    def siso_process(self, event):
         logging.debug("Running sampler process")
-        tag, value = obj['tag'], obj['value']
+        tag, value = event.tag, event.value
 
         logging.debug("Sampling received (tag: %2.e, value: %2.e )" % (tag, value))
-        if not self.has_data or self.last_point['tag'] + self.output_period == obj['tag']:
+        if not self.has_data or self.last_point.tag + self.output_period == event.tag:
             # This must be either the first data point or the next data point for given frequency
-            self.last_point = obj
+            self.last_point = event
             self.has_data = True
-            self.output_channel.put(obj)
+            self.output_channel.put(event)
 
         return
 
@@ -53,16 +53,16 @@ class SamplerTests(unittest.TestCase):
         Unit test setup code
         '''
         self.q_in = Channel("DT")
-        self.q_out = Channel("CT")
+        self.q_out = Channel("DT")
 
     def test_basic_integer_tags(self):
         '''Test halving the frequency we sample a simple integer signal.
         
         Create a discrete time signal with a 1hz frequency and down-sample to 0.5hz
         '''
-        inp = [{'value':1, 'tag':i} for i in xrange(0, 100, 1)]
+        inp = [Event(value=1, tag=i) for i in xrange(0, 100, 1)]
 
-        expected_outputs = [{'value':1, 'tag':i} for i in xrange(0, 100, 2)]
+        expected_outputs = [Event(value=1, tag=i) for i in xrange(0, 100, 2)]
 
         down_sampler = Sampler(self.q_in, self.q_out, 0.5)
         down_sampler.start()
@@ -72,8 +72,8 @@ class SamplerTests(unittest.TestCase):
 
         for expected_output in expected_outputs:
             out = self.q_out.get()
-            self.assertEquals(out['value'], expected_output['value'])
-            self.assertEquals(out['tag'], expected_output['tag'])
+            self.assertEquals(out.value, expected_output.value)
+            self.assertEquals(out.tag, expected_output.tag)
         self.assertEquals(self.q_out.get(), None)
 
     def test_compatible_signals(self):
@@ -91,10 +91,10 @@ class SamplerTests(unittest.TestCase):
         tags = linspace(0, simulation_time , (freq) + 1)
 
         # Create 120 seconds of a discrete time signal with a 10hz frequency
-        inp = [{'value':1, 'tag':i} for i in tags]
+        inp = [Event(value=1, tag=i) for i in tags]
 
         step = resolution / desired_resolution
-        expected_output = [ {'value':1, 'tag':i} for i in tags[::step]]
+        expected_output = [ Event(value=1, tag=i) for i in tags[::step]]
 
         down_sampler = Sampler(self.q_in, self.q_out, desired_resolution)
         down_sampler.start()
@@ -104,8 +104,8 @@ class SamplerTests(unittest.TestCase):
 
         for expected_output_element in expected_output:
             out = self.q_out.get()
-            self.assertEquals(out['value'], expected_output_element['value'])
-            self.assertEquals(out['tag'], expected_output_element['tag'])
+            self.assertEquals(out.value, expected_output_element.value)
+            self.assertEquals(out.tag, expected_output_element.tag)
         self.assertEquals(self.q_out.get(), None)
 
     def test_incompatible_signals(self):
@@ -124,7 +124,7 @@ class SamplerTests(unittest.TestCase):
         tags = linspace(0, simulation_time , (freq) + 1)
 
         # Create 120 seconds of a discrete time signal with a 10hz frequency
-        inp = [{'value':1, 'tag':i} for i in tags]
+        inp = [Event(value=1, tag=i) for i in tags]
 
         down_sampler = Sampler(self.q_in, self.q_out, desired_resolution)
         down_sampler.start()
@@ -139,3 +139,4 @@ class SamplerTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

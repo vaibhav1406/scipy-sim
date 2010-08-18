@@ -8,7 +8,7 @@ Created on 13/12/2009
 @author: Brian
 '''
 
-from scipysim.actors import Actor, Channel
+from scipysim.actors import Actor
 import logging
 
 class PassThrough(Actor):
@@ -64,12 +64,12 @@ class PassThrough(Actor):
             self.stop = True
             self.output_channel.put(None)
             return
-        logging.debug("Received a boolean and a data point. Tags = (%e,%e)" % (bool_in['tag'], data_in['tag']))
+        logging.debug("Received a boolean and a data point. Tags = (%e,%e)" % (bool_in.tag, data_in.tag))
 
         # For now we require the signals are in sync
-        assert bool_in['tag'] == data_in['tag']
+        assert bool_in.tag == data_in.tag
 
-        if bool_in['value'] is True:
+        if bool_in.value is True:
             logging.debug("The input was positive, passing data through")
             self.output_channel.put(data_in)
         else:

@@ -4,7 +4,7 @@ Created on Dec 11, 2009
 @author: brianthorne
 '''
 
-from scipysim.actors import Channel
+from scipysim.actors import Channel, Event
 from scipysim.actors.io import Reader, Writer, Bundle, Unbundle
 from scipysim.actors.io import TextReader
 import Queue as queue
@@ -23,8 +23,8 @@ class TestReader(unittest.TestCase):
         reader = TextReader(output, filename, send_as_words=True)
         reader.start()
         reader.join()
-        self.assertEquals("'''", output.get()['value'])
-        self.assertEquals(1, output.get()['tag'])
+        self.assertEquals("'''", output.get().value)
+        self.assertEquals(1, output.get().tag)
 
 
 class FileIOTests(unittest.TestCase):
@@ -32,7 +32,7 @@ class FileIOTests(unittest.TestCase):
 
     def setUp(self):
         self.chan = Channel()
-        self.signal = [{'value':i ** 3, 'tag':i} for i in xrange(100)] + [None]
+        self.signal = [Event(value=i ** 3, tag=i) for i in xrange(100)] + [None]
         [self.chan.put(val) for val in self.signal]
         self.f = tempfile.NamedTemporaryFile()#delete=False)
 
@@ -69,8 +69,8 @@ class FileIOTests(unittest.TestCase):
         for expected in self.signal:
             if expected is not None:
                 received = self.chan.get()
-                self.assertEqual(received['tag'], expected['tag'])
-                self.assertEqual(received['value'], expected['value'])
+                self.assertEqual(received.tag, expected.tag)
+                self.assertEqual(received.value, expected.value)
         self.assertEqual(expected, None)
         os.remove(fileName) # clean up
 
@@ -79,7 +79,7 @@ class BundleTests(unittest.TestCase):
         self.q_in = Channel()
         self.q_out = Channel()
         self.q_out2 = Channel()
-        self.input = [{'value': 1, 'tag': i } for i in xrange(100)]
+        self.input = [Event(value=1, tag=i) for i in xrange(100)]
 
     def tearDown(self):
         del self.q_in
@@ -90,7 +90,7 @@ class BundleTests(unittest.TestCase):
         bundle_size = 1000
 
 
-        #expected_output = [{'value':1, 'tag': i + delay } for i in xrange(100)]
+        #expected_output = [Event(value=1, tag=i + delay) for i in xrange(100)]
 
         block = Bundle(self.q_in, self.q_out, bundle_size)
         block.start()
@@ -106,7 +106,7 @@ class BundleTests(unittest.TestCase):
         bundle_size = 40
 
 
-        #expected_output = [{'value':1, 'tag': i + delay } for i in xrange(100)]
+        #expected_output = [Event(value=1, tag=i + delay) for i in xrange(100)]
 
         block = Bundle(self.q_in, self.q_out, bundle_size)
         block.start()

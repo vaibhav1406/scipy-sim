@@ -3,7 +3,7 @@ Created on 21/12/2009
 
 @author: Allan McInnes
 '''
-from scipysim.actors import Siso
+from scipysim.actors import Siso, Event
 import numpy as np  
 
 
@@ -22,8 +22,8 @@ class CTIntegratorDE1(Siso):
     Chapter 11: "Discrete-Event Simulation".
     '''
 
-    input_domains = ("CT",)
-    output_domains = ("CT",)
+    input_domains = ('CT',)
+    output_domains = ('CT',)
 
     def __init__(self, xdot, x, init=0.0, delta=0.1, k=10.0):
         '''
@@ -55,8 +55,8 @@ class CTIntegratorDE1(Siso):
         
     def __statestep(self, x, xdot):
         qx = self.__quantize(x)
-        dist = (x - qx) if abs(x - qx) > 1e-15 else 0  # Enforce a minimum step - is this like Kofman's hysteresis?
-        dist = dist if abs(self.delta - dist) > 1e-15 else 0  # Enforce a minimum step - is this like Kofman's hysteresis?
+        dist = (x - qx) if abs(x - qx) > 1e-15 else 0  # Enforce a minimum step - seems like Kofman's hysteresis
+        dist = dist if abs(self.delta - dist) > 1e-15 else 0  # Enforce a minimum step - seems like Kofman's hysteresis
         if xdot > 0:
             step = self.delta - dist
         elif xdot < 0:
@@ -90,8 +90,7 @@ class CTIntegratorDE1(Siso):
 
         # Quantize here in case the actual state is the result
         # of taking a max_step, and has left us between quantum levels    
-        out_event = {'tag':self.last_t, 'value':self.__quantize(self.x)}
-        #print out_event
+        out_event = Event(self.last_t, self.__quantize(self.x))
         
         # Project time to reach next quantization level based on current 
         # derivative.         
@@ -149,7 +148,7 @@ class CTIntegratorDE1(Siso):
         
         @param event: event from the input channel 
         '''
-        tag, xdot = event['tag'], event['value']
+        tag, xdot = event.tag, event.value
 
         if abs(tag - self.last_t) < 1e-15:
             # We assume that a nearly identical time to the previous event
@@ -197,11 +196,11 @@ class CTintegratorTest(unittest.TestCase):
         # without relying on other actors.
         intags = [0.0, 0.10000000000000001, 0.21111111111111114, 0.33611111111111114, 0.47896825396825399, 0.64563492063492067, 0.84563492063492074, 1.0956349206349207, 1.428968253968254, 1.928968253968254, 2.9289682539682538, 12.928968253968254]
         invals = [-1, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.0]
-        inputs = [{'value':val, 'tag':tag} for (val, tag) in zip(invals, intags)]
+        inputs = [Event(value=val, tag=tag) for (val, tag) in zip(invals, intags)]
 
         expected_output_tags = [0.0, 0.10000000000000001, 0.21111111111111114, 0.33611111111111114, 0.47896825396825399, 0.64563492063492067, 0.84563492063492074, 1.0956349206349207, 1.428968253968254, 1.928968253968254, 2.9289682539682538, 12.928968253968254, 22.928968253968254]
         expected_output_values = [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0, 0.0, 0.0]
-        expected_outputs = [{'value':val, 'tag':tag} for (val, tag) in zip(expected_output_values, expected_output_tags)]
+        expected_outputs = [Event(value=val, tag=tag) for (val, tag) in zip(expected_output_values, expected_output_tags)]
 
         # k has been set to make maxstep 10.0
         block = CTIntegratorDE1(self.q_in, self.q_out, init=1.0, delta=0.1, k=10.0 / 0.1)
@@ -213,7 +212,7 @@ class CTintegratorTest(unittest.TestCase):
         Testing using same values as above, but also clones output for 
         second integration.
         '''
-        from scipysim.actors.signal import Copier
+        from scipysim.actors.signal import Split
         # Note that here instead of actually closing the loop around the 
         # integrator we're simply feeding in a sequence of values corresponding 
         # to the function f(x) = -x, and then later checking that the outputs we 
@@ -221,17 +220,17 @@ class CTintegratorTest(unittest.TestCase):
         # without relying on other actors.
         intags = [0.0, 0.10000000000000001, 0.21111111111111114, 0.33611111111111114, 0.47896825396825399, 0.64563492063492067, 0.84563492063492074, 1.0956349206349207, 1.428968253968254, 1.928968253968254, 2.9289682539682538, 12.928968253968254]
         invals = [-1, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.0]
-        inputs = [{'value':val, 'tag':tag} for (val, tag) in zip(invals, intags)]
+        inputs = [Event(value=val, tag=tag) for (val, tag) in zip(invals, intags)]
 
         expected_output_tags = [0.0, 0.10000000000000001, 0.21111111111111114, 0.33611111111111114, 0.47896825396825399, 0.64563492063492067, 0.84563492063492074, 1.0956349206349207, 1.428968253968254, 1.928968253968254, 2.9289682539682538, 12.928968253968254, 22.928968253968254]
         expected_output_values = [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0, 0.0, 0.0]
-        expected_outputs = [{'value':val, 'tag':tag} for (val, tag) in zip(expected_output_values, expected_output_tags)]
+        expected_outputs = [Event(value=val, tag=tag) for (val, tag) in zip(expected_output_values, expected_output_tags)]
 
         q1, q2, q3 = Channel(), Channel(), Channel()
 
         blocks = [
                     CTIntegratorDE1(self.q_in, self.q_out, init=1.0, delta=0.1, k=10.0 / 0.1),
-                    Copier(self.q_out, [q1, q2]),
+                    Split(self.q_out, [q1, q2]),
                     CTIntegratorDE1(q1, q3, init=1.0, delta=0.1, k=10.0 / 0.1)
                   ]
 
@@ -241,21 +240,20 @@ class CTintegratorTest(unittest.TestCase):
         [b.join() for b in blocks]
         for expected_output in expected_outputs:
             out = q2.get()
-            #print out
-            self.assertAlmostEqual(out['value'], expected_output['value'], 4)
-            self.assertAlmostEqual(out['tag'], expected_output['tag'], 4)
+            self.assertAlmostEqual(out.value, expected_output.value, 4)
+            self.assertAlmostEqual(out.tag, expected_output.tag, 4)
 
         self.assertEquals(q2.get(), None)
 
 def quickTest():
     from scipysim.actors.math import Proportional
-    from scipysim.actors.signal import Copier
+    from scipysim.actors.signal import Split
 
     c1, c2, c3, c4 = Channel(), Channel(), Channel(), Channel()
     
     blocks = [
                 CTIntegratorDE1(c1, c2, init=1.0, delta=0.1, k=10/0.1),
-                Copier(c2, [c3, c4]),
+                Split(c2, [c3, c4]),
                 Proportional(c3, c1, -1.0),
              ]
     

@@ -5,7 +5,7 @@ Created on 23/11/2009
 '''
 
 import logging
-from scipysim.actors import Siso, Channel
+from scipysim.actors import Siso, Channel, Event
 
 import unittest
 import numpy
@@ -29,17 +29,10 @@ class Delay(Siso):
         super(Delay, self).__init__(input_channel=input_channel, output_channel=output_channel)
         self.delay = wait
 
-    def siso_process(self, obj):
+    def siso_process(self, event):
         """Delay the input values by a set amount of time..."""
         logging.debug("Running delay process")
-
-        tag = obj['tag'] + self.delay
-        value = obj['value']
-        data = {
-            "tag": tag,
-            "value": value
-            }
-        return data
+        return Event(event.tag + self.delay, event.value)
 
 
 from numpy import linspace, arange
@@ -56,8 +49,8 @@ class DelayTests(unittest.TestCase):
         '''Test delaying a basic integer tagged signal by 1'''
         delay = 2
 
-        input1 = [{'value': 1, 'tag': i } for i in xrange(100)]
-        expected_output = [{'value':1, 'tag': i + delay } for i in xrange(100)]
+        input1 = [Event(value=1, tag=i) for i in xrange(100)]
+        expected_output = [Event(value=1, tag=i + delay) for i in xrange(100)]
 
         block = Delay(self.q_in, self.q_out, delay)
         block.start()
@@ -76,8 +69,8 @@ class DelayTests(unittest.TestCase):
 
         tags = linspace(0, simulation_time, simulation_time / resolution)
         values = arange(len(tags))
-        data_in = [{'value':values[i], 'tag':tags[i]} for i in xrange(len(tags))]
-        expected_output = [{'value':values[i], 'tag': tags[i] + delay } for i in xrange(len(tags))]
+        data_in = [Event(value = values[i], tag = tags[i]) for i in xrange(len(tags))]
+        expected_output = [Event(value = values[i], tag = tags[i] + delay) for i in xrange(len(tags))]
 
 
         block = Delay(self.q_in, self.q_out, delay)
