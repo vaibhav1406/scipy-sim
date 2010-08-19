@@ -1,5 +1,7 @@
 '''
 This dynamic stemmer shows a live signal stream.
+
+@deprecated: Superceded by plotter.StemPlotter
 '''
 
 from scipysim.actors import DisplayActor
