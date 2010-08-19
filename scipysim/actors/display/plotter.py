@@ -3,25 +3,24 @@
 '''
 This file defines a Plotter actor. The plotting uses a Tkinter GUI and 
 runs in a seperate process. 
-The "actor" is composited of:
+The "actor" is composed of:
     * a decorating actor *New_Process_Actor* which allows a class to run
-      in a seperate process. It has an additional actor:
+      in a separate process. It has an additional actor:
     * Channel2Process which takes objects off the Channel and puts them 
       on a multiprocessing queue.
     * a BasePlotter instance which runs entirely in a seperate process
       doing the actual plotting.
 
-TODO: This version no longer does live plotting. 
+@todo: This version no longer does live plotting.
 
 Note: There is a process safe Queue in the multiprocessing module. It 
 MUST be used to communicate between processes.
 
-@author: Brian Thorne 2010
+@author: Brian Thorne
+@author: Allan McInnes
 '''
-from multiprocessing import Process, Condition
+from multiprocessing import Process
 from multiprocessing import Queue as MQueue
-
-import sys, os
 
 from scipysim import Actor, Channel, Event
 from scipysim.core.actor import DisplayActor
@@ -36,14 +35,14 @@ def target(cls, args, kwargs):
         
         # Create new Tkinter window for the plot
         root = Tk.Tk()
-        root.wm_title('Scipy Sim')
+        root.wm_title('ScipySim')
         kwargs['root'] = root
     
     # Create the Actor that we are wrapping
     block = cls(**kwargs)
     
     block.start()
-    
+
     if run_gui_loop:
         Tk.mainloop()
 
@@ -81,6 +80,7 @@ class New_Process_Actor(Actor):
         self.t.start()
         self.c2p.join()
         self.t.join()
+
         
 class Channel2Process(Actor):
     '''
@@ -112,13 +112,21 @@ class BasePlotter(DisplayActor):
             root,
             input_channel,
             refresh_rate=2,
-            title='Scipy Simulator Plot',
+            title='ScipySim Plot',
             own_fig=True,
             xlabel=None,
             ylabel=None,
             ):
         '''An Actor that creates a figure, canvas and axis and plots data from
         a queue.
+
+        @param root : a reference to the main Tk window
+        @param input_channel : channel for plot data
+        @param refresh_rate : rate in updates/second of plot updates
+        @param title : title of the plot
+        @param own_fig : True if produces own figure
+        @param xlabel : x-axis label string
+        @param ylabel : y-axis label string
         
         '''
         super(BasePlotter, self).__init__(input_channel)
@@ -131,12 +139,17 @@ class BasePlotter(DisplayActor):
         from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg as FigureCanvas
         from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg
         from matplotlib.figure import Figure
+        from matplotlib import rcParams
         
         # Save a reference to the main Tk window
         self.root = root
         
+        # Set figure characteristcs from Matplotlib style
+        figsize = rcParams['figure.figsize']
+        dpi = rcParams['figure.dpi']
+
         # Creating the plot
-        self.fig = Figure(figsize=(5,4), dpi=120)
+        self.fig = Figure(figsize=figsize, dpi=dpi)
         self.axis = self.fig.add_subplot(1, 1, 1)
         self.title = self.axis.set_title(title)
         
@@ -173,7 +186,41 @@ class BasePlotter(DisplayActor):
         self.axis.plot(self.x_axis_data, self.y_axis_data)
         self.canvas.show()
 
+
+class BaseStemmer(BasePlotter):
+    def __init__(self,
+            root,
+            input_channel,
+            refresh_rate=2,
+            title='ScipySim Stem-Plot',
+            own_fig=True,
+            xlabel=None,
+            ylabel=None,
+            ):
+        '''Actor that creates a figure, canvas and axis, and stem-plots
+        data from a queue.
+
+        @param root : a reference to the main Tk window
+        @param input_channel : channel for plot data
+        @param refresh_rate : rate in updates/second of plot updates
+        @param title : title of the plot
+        @param own_fig : True if produces own figure
+        @param xlabel : x-axis label string
+        @param ylabel : y-axis label string
+
+        '''
+        super(BaseStemmer, self).__init__(root, input_channel, refresh_rate,
+                                          title, own_fig, xlabel, ylabel)
+
+    def plot(self):
+        '''Override base-class plot function to use stemming instead.'''
+        self.axis.stem(self.x_axis_data, self.y_axis_data)
+        self.canvas.show()
+
+
+
 class Plotter(Actor):
+    '''Plot continuous data as a smooth line.'''
     def __init__(self, *args, **kwargs):
         super(Plotter, self).__init__()
         self.npa = New_Process_Actor(BasePlotter, *args, **kwargs)
@@ -182,19 +229,42 @@ class Plotter(Actor):
         self.npa.start()
         self.npa.join()
 
+
+class StemPlotter(Actor):
+    '''Plot discrete data as a sequence of stems.'''
+    def __init__(self, *args, **kwargs):
+        super(StemPlotter, self).__init__()
+        self.npa = New_Process_Actor(BaseStemmer, *args, **kwargs)
+
+    def run(self):
+        self.npa.start()
+        self.npa.join()
+
+
 def test_NPA():
     data = [Event(i, i**2) for i in xrange( 10 )]
     q1 = Channel()
-    npa = New_Process_Actor(BasePlotter, input_channel=q1) 
+    q2 = Channel()
+    npa1 = New_Process_Actor(BasePlotter, input_channel=q1)
+    npa2 = New_Process_Actor(BaseStemmer, input_channel=q2)
+
     import time, random
+
     print 'starting other process actor...'
-    npa.start()
+    npa1.start()
+    npa2.start()
+
     time.sleep(random.random() * 0.01)
+
     print 'Adding data to queue.', q1
     [q1.put(d) for d in data + [None]]
 
+    print 'Adding data to queue.', q2
+    [q2.put(d) for d in data + [None]]
+
     print 'other calculations keep going...'
-    npa.join()
+    npa1.join()
+    npa2.join()
     print 'NPA is done'
 
 if __name__ == "__main__":
