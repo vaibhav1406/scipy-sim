@@ -7,7 +7,7 @@ Created on 29/11/2009
 '''
 import logging
 import numpy
-from scipysim import Source, Actor, Channel
+from scipysim import Source, Actor, Channel, Event
 
 import logging
 verbose = True
@@ -54,7 +54,7 @@ if havePygame:
             @param grey: A boolean indicating if the image should be averaged to one channel
             Example useage:
     
-                >>> msg = {'tag':1,'value':'go'}
+                >>> msg = Event(tag = 1, value = go)
                 >>> in_channel, out_channel = Channel(), Channel()
                 >>> vid_src = VideoSnapshot(in_channel, out_channel)
                 >>> in_channel.put(msg)
@@ -109,12 +109,7 @@ if havePygame:
                     # convert to grayscale numpy array for image processing
                     image = numpy.mean(image, 2)
 
-                data = {
-                        "tag": tag,
-                        "value": image
-                        }
-
-                self.output_channel.put(data)
+                self.output_channel.put(Event(tag, image))
                 logging.debug("Video Snapshot process added data at tag: %s" % tag)
 
     if __name__ == "__main__":
@@ -122,7 +117,7 @@ if havePygame:
 
         input = Channel()
         output = Channel()
-        input.put({'tag':0, 'value':'first'})
+        input.put(Event(tag=0, value=first))
         input.put(None)
         vs = VideoSnapshot(input_signal=input, output_channel=output)
         vs.start()

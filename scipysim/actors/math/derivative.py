@@ -1,4 +1,4 @@
-from scipysim.actors import Actor, Channel
+from scipysim.actors import Actor, Channel, Event
 import unittest
 import numpy as np
 
@@ -48,7 +48,7 @@ class BundleDerivativeTests(unittest.TestCase):
         outs = [1, 1, 1, 0, 0, 0, -2]
 
 
-        self.input = [{'value':input_values[i], 'tag':i} for i in xrange(len(input_values))]
+        self.input = [Event(value=input_values[i], tag=i) for i in xrange(len(input_values))]
 
         bundler = Bundle(self.q_in, self.q_out)
         diffblock = BundleDerivative(self.q_out, self.q_out2, threshold=50)

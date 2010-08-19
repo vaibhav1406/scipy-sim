@@ -9,7 +9,7 @@ Created on 24/11/2009
 '''
 import logging
 import numpy as np
-from scipysim.actors import Actor, Channel
+from scipysim.actors import Actor, Channel, Event
 
 
 class Subtractor(Actor):
@@ -67,11 +67,8 @@ class Subtractor(Actor):
             # If all tags are the same we can subtract the values and output
             new_value = values[0] - values[1]
             logging.debug("Subtractor received all equally tagged inputs, subtracted and sent out: (tag: %2.e, value: %2.e)" % (tags[0], new_value))
-            data = {
-                    "tag": tags[0],
-                    "value": new_value
-                    }
-            self.output_channel.put(data)
+
+            self.output_channel.put(Event(tags[0], new_value))
         else:
             logging.debug("Tags were not all equal... First two tags: %.5e, %.5e" % (tags[0], tags[1]))
             # Since they are not equal, and the tags are always sequential, the oldest timed tags are NEVER
@@ -104,12 +101,7 @@ class Subtractor(Actor):
             if num_points == 2 or not self.discard_incomplete:
                 logging.debug("We are subtracting what we have and outputting")
                 the_value = current_data[0]['value'] - current_data[1]['value']
-                self.output_channel.put(
-                    {
-                        'tag':oldest_tag,
-                        'value': the_value
-                    }
-                )
+                self.output_channel.put(Event(oldest_tag, the_value))
             else:
                 logging.debug("We are throwing away the oldest tag, and storing the rest")
 
@@ -131,8 +123,8 @@ class SubtractionTests(unittest.TestCase):
         q_in_2 = Channel()
         q_out = Channel()
 
-        input1 = [{'value':10, 'tag':i} for i in xrange(100)]
-        input2 = [{'value':2, 'tag':i} for i in xrange(100)]
+        input1 = [Event(value=10, tag=i) for i in xrange(100)]
+        input2 = [Event(value=2, tag=i) for i in xrange(100)]
 
         block = Subtractor(q_in_1, q_in_2, q_out)
         block.start()
