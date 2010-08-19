@@ -5,8 +5,7 @@ Created on 23/11/2009
 '''
 
 import logging
-import numpy
-from scipysim.actors import Siso, Channel
+from scipysim.actors import Siso, Channel, Event
 
 class Proportional(Siso):
     '''
@@ -22,19 +21,15 @@ class Proportional(Siso):
         super(Proportional, self).__init__(input_channel=input, output_channel=out)
         self.gain = gain
 
-    def siso_process(self, obj):
+    def siso_process(self, event):
         """Multiply the input values by a gain..."""
         logging.debug("Running proportional process")
-        tag, value = obj['tag'], obj['value']
+        tag, value = event.tag, event.value
 
         new_value = value * self.gain
         logging.debug( "Proportional actor received data (tag: %2.e, value: %2.e ), multiplied and sent out: (tag: %2.e, value: %2.e)" % ( tag, value, tag, new_value ) )
 
-        data = {
-            "tag": tag,
-            "value": new_value
-            }
-        return data
+        return Event(tag, new_value)
 
 import unittest
 class ProportionalTests(unittest.TestCase):
@@ -44,8 +39,8 @@ class ProportionalTests(unittest.TestCase):
         q_in = Channel()
         q_out = Channel()
 
-        inp = [{'value':1, 'tag':i} for i in xrange(100)]
-        expected_output = [{'value':2, 'tag':i} for i in xrange(100)]
+        inp = [Event(value=1, tag=i) for i in xrange(100)]
+        expected_output = [Event(value=2, tag=i) for i in xrange(100)]
 
         doubler = Proportional(q_in, q_out)
         doubler.start()
@@ -55,8 +50,8 @@ class ProportionalTests(unittest.TestCase):
 
         for i in xrange(100):
             out = q_out.get()
-            self.assertEquals(out['value'], expected_output[i]['value'])
-            self.assertEquals(out['tag'], expected_output[i]['tag'])
+            self.assertEquals(out.value, expected_output[i].value)
+            self.assertEquals(out.tag, expected_output[i].tag)
         self.assertEquals(q_out.get(), None)
 
 if __name__ == "__main__":
