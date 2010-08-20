@@ -7,7 +7,7 @@ from scipysim.actors.signal import Split
 from scipysim.actors.math import Constant
 from scipysim.actors.math import CTIntegratorForwardEuler as Integrator
 from scipysim.actors.math import CTIntegratorDE1 as DEIntegrator
-from scipysim.actors.display import Stemmer
+from scipysim.actors.display import StemPlotter
 
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -39,8 +39,8 @@ class ThrownBall(Model):
             Integrator(wires[3], wires[5], initial_position),
             DEIntegrator(wires[4], wires[6], initial_position),
             # Plot
-            Stemmer(wires[5], title="Displacement (fixed-step integration)", own_fig=True, xlabel="Time (s)", ylabel="(m)"),
-            Stemmer(wires[6], title="Displacement (discrete-event integration)", own_fig=True, xlabel="Time (s)", ylabel="(m)"),            
+            StemPlotter(wires[5], title="Displacement (fixed-step integration)", own_fig=True, xlabel="Time (s)", ylabel="(m)"),
+            StemPlotter(wires[6], title="Displacement (discrete-event integration)", own_fig=True, xlabel="Time (s)", ylabel="(m)"),            
         ]
 
 
