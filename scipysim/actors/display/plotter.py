@@ -110,6 +110,7 @@ class BasePlotter(DisplayActor):
     def __init__(self, 
             root,
             input_channel,
+            live=True,
             refresh_rate=2,
             title='ScipySim Plot',
             own_fig=True,
@@ -121,6 +122,7 @@ class BasePlotter(DisplayActor):
 
         @param root : a reference to the main Tk window
         @param input_channel : channel for plot data
+        @param live : True if the plot should perform live updating
         @param refresh_rate : rate in updates/second of plot updates
         @param title : title of the plot
         @param own_fig : True if produces own figure
@@ -135,10 +137,12 @@ class BasePlotter(DisplayActor):
         self.y_axis_data = []
 
         # Live updating
-        assert refresh_rate > 0
-        self.refresh_rate = refresh_rate
-        self.min_refresh_time = 1.0 / self.refresh_rate
-        self.last_update = time.time()
+        self.live = live
+        if live:
+            assert refresh_rate > 0
+            self.refresh_rate = refresh_rate
+            self.min_refresh_time = 1.0 / self.refresh_rate
+            self.last_update = time.time()
 
         # Doing imports here to keep in local scope (and so its in the correct process)  
         from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg as FigureCanvas
@@ -184,7 +188,8 @@ class BasePlotter(DisplayActor):
         self.y_axis_data.append(obj['value'])
         obj = None
 
-        if time.time() - self.last_update > self.min_refresh_time:
+        if (self.live
+           and (time.time() - self.last_update > self.min_refresh_time)):
             self.last_update = time.time()
             self.plot()
         
@@ -203,6 +208,7 @@ class BaseStemmer(BasePlotter):
     def __init__(self,
             root,
             input_channel,
+            live=True,
             refresh_rate=2,
             title='ScipySim Stem-Plot',
             own_fig=True,
@@ -221,8 +227,9 @@ class BaseStemmer(BasePlotter):
         @param ylabel : y-axis label string
 
         '''
-        super(BaseStemmer, self).__init__(root, input_channel, refresh_rate,
-                                          title, own_fig, xlabel, ylabel)
+        super(BaseStemmer, self).__init__(root, input_channel, live, 
+                                          refresh_rate, title, own_fig,
+                                          xlabel, ylabel)
 
         self.markerline = None
         self.stemlines = None
