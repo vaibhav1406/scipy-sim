@@ -7,11 +7,11 @@ from scipysim.actors import Siso, Event
 import numpy as np  
 
 
-class CTIntegratorDE1(Siso):
+class CTIntegratorQS1(Siso):
     '''
-    A SISO first-order continuous-time integrator that uses a discrete-event
+    A SISO first-order continuous-time integrator that uses a quantized-state
     approach to integration (rather than the traditional discrete-time
-    approach). In this approach we quantize the system state instead of the
+    approach). In this approach we discretize the system state instead of the
     value of time, and consequently take variable-sized time steps that are 
     matched to the rate of change of the integrated function.
     
@@ -35,7 +35,7 @@ class CTIntegratorDE1(Siso):
         @param delta: the state quantization step-size
         @param k: coefficient for the maximum allowable timestep (k*delta)
         '''
-        super(CTIntegratorDE1, self).__init__(input_channel=xdot,
+        super(CTIntegratorQS1, self).__init__(input_channel=xdot,
                                               output_channel=x,
                                               child_handles_output=True)
                                               
@@ -203,7 +203,7 @@ class CTintegratorTest(unittest.TestCase):
         expected_outputs = [Event(value=val, tag=tag) for (val, tag) in zip(expected_output_values, expected_output_tags)]
 
         # k has been set to make maxstep 10.0
-        block = CTIntegratorDE1(self.q_in, self.q_out, init=1.0, delta=0.1, k=10.0 / 0.1)
+        block = CTIntegratorQS1(self.q_in, self.q_out, init=1.0, delta=0.1, k=10.0 / 0.1)
         SisoCTTestHelper(self, block, inputs, expected_outputs)
 
     def test_simple_integration_2(self):
@@ -229,9 +229,9 @@ class CTintegratorTest(unittest.TestCase):
         q1, q2, q3 = Channel(), Channel(), Channel()
 
         blocks = [
-                    CTIntegratorDE1(self.q_in, self.q_out, init=1.0, delta=0.1, k=10.0 / 0.1),
+                    CTIntegratorQS1(self.q_in, self.q_out, init=1.0, delta=0.1, k=10.0 / 0.1),
                     Split(self.q_out, [q1, q2]),
-                    CTIntegratorDE1(q1, q3, init=1.0, delta=0.1, k=10.0 / 0.1)
+                    CTIntegratorQS1(q1, q3, init=1.0, delta=0.1, k=10.0 / 0.1)
                   ]
 
         [self.q_in.put(val) for val in inputs + [None]]
@@ -252,7 +252,7 @@ def quickTest():
     c1, c2, c3, c4 = Channel(), Channel(), Channel(), Channel()
     
     blocks = [
-                CTIntegratorDE1(c1, c2, init=1.0, delta=0.1, k=10/0.1),
+                CTIntegratorQS1(c1, c2, init=1.0, delta=0.1, k=10/0.1),
                 Split(c2, [c3, c4]),
                 Proportional(c3, c1, -1.0),
              ]

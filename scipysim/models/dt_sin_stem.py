@@ -1,5 +1,5 @@
 from scipysim.actors import Channel, Model
-from scipysim.actors.display import Stemmer
+from scipysim.actors.display import StemPlotter
 from scipysim.actors.math.trig import DTSinGenerator
 
 class DT_Sin_Plot( Model ):
@@ -13,7 +13,7 @@ class DT_Sin_Plot( Model ):
 
         chan1 = Channel( "DT" )
         src = DTSinGenerator( chan1 )
-        pltr = Stemmer( chan1 )
+        pltr = StemPlotter( chan1 )
 
         self.components = [src, pltr]
 

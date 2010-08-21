@@ -4,7 +4,7 @@ Created on 2010-04-06
 @author: Allan McInnes
 '''
 from scipysim.actors import Channel, Model
-from scipysim.actors.display import Plotter, Stemmer
+from scipysim.actors.display import Plotter, StemPlotter
 from scipysim.actors.math.trig import CTSinGenerator
 from scipysim.actors.signal import EventFilter
 
@@ -28,7 +28,7 @@ class QSSinPlot( Model ):
         src = CTSinGenerator( connection1, 2.1, 0.2, numpy.pi / 2 )
 
         de = EventFilter( connection1, connection2, 0.2 )
-        dst = Stemmer( connection2, refresh_rate=1.0 / 2 )
+        dst = StemPlotter( connection2, refresh_rate=1.0 / 2 )
 
         self.components = [src, de, dst]
 
