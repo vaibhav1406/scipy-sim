@@ -19,6 +19,7 @@ MUST be used to communicate between processes.
 '''
 from multiprocessing import Process
 from multiprocessing import Queue as MQueue
+from multiprocessing import Event as MEvent
 
 from scipysim import Actor, Channel, Event
 from scipysim.core.actor import DisplayActor
@@ -61,6 +62,7 @@ class New_Process_Actor(Actor):
         self.args = list(args)
         self.kwargs = kwargs
         self.mqueue = MQueue()
+        self.mevent = MEvent()
         
         if 'input_channel' not in kwargs:
             kwargs['input_channel'] = self.args[0]
@@ -70,7 +72,7 @@ class New_Process_Actor(Actor):
         
         
         print 'chan: ', chan
-        self.c2p = Channel2Process(chan, self.mqueue)
+        self.c2p = Channel2Process(chan, self.mevent, self.mqueue)
         
         self.c2p.start()
 
@@ -78,6 +80,7 @@ class New_Process_Actor(Actor):
     def run(self):
         self.t = Process(target=target, args=(self.cls, self.args, self.kwargs))
         self.t.start()
+        self.mevent.set() # signal that process is ready to receive
         self.c2p.join()
         self.t.join()
 
@@ -88,13 +91,23 @@ class Channel2Process(Actor):
     
     This Actor (thread) must be called from the side which has the channel.
     '''
-    def __init__(self, channel, queue):
+    def __init__(self, channel, ready_event, queue):
         super(Channel2Process, self).__init__()
         self.channel = channel
         self.queue = queue
+        self.ready_event = ready_event
+        self.first_time = True
     
     def process(self):
+
+        if self.first_time:
+            # Make sure the other end of the Queue can receive before trying to send
+            # (avoids race conditions on the underlying pipe, and Broken Pipe errors)
+            self.ready_event.wait() 
+            self.first_time = False
+
         obj = self.channel.get(True)
+ 
         if obj is not None:
             self.queue.put(obj)
         else:
