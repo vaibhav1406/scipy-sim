@@ -11,8 +11,6 @@ The "actor" is composed of:
     * a BasePlotter instance which runs entirely in a seperate process
       doing the actual plotting.
 
-@todo: This version no longer does live plotting.
-
 Note: There is a process safe Queue in the multiprocessing module. It 
 MUST be used to communicate between processes.
 
@@ -24,6 +22,8 @@ from multiprocessing import Queue as MQueue
 
 from scipysim import Actor, Channel, Event
 from scipysim.core.actor import DisplayActor
+
+import time
 
 def target(cls, args, kwargs):
     '''This is the function that gets run in a new process'''
@@ -105,7 +105,6 @@ class Channel2Process(Actor):
             # Block on flushing the data to the pipe. Must be called after close
             self.queue.join_thread()
             self.stop = True
-    
 
 class BasePlotter(DisplayActor):
     def __init__(self, 
@@ -135,6 +134,12 @@ class BasePlotter(DisplayActor):
         self.x_axis_data = []
         self.y_axis_data = []
 
+        # Live updating
+        assert refresh_rate > 0
+        self.refresh_rate = refresh_rate
+        self.min_refresh_time = 1.0 / self.refresh_rate
+        self.last_update = time.time()
+
         # Doing imports here to keep in local scope (and so its in the correct process)  
         from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg as FigureCanvas
         from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg
@@ -152,6 +157,7 @@ class BasePlotter(DisplayActor):
         self.fig = Figure(figsize=figsize, dpi=dpi)
         self.axis = self.fig.add_subplot(1, 1, 1)
         self.title = self.axis.set_title(title)
+        self.line = None
         
         if xlabel is not None: self.axis.set_xlabel(xlabel)
         if ylabel is not None: self.axis.set_ylabel(ylabel)
@@ -166,6 +172,7 @@ class BasePlotter(DisplayActor):
         toolbar = NavigationToolbar2TkAgg( self.canvas, self.root )
         # We can have our own buttons etc here:
         #Tk.Button(master=toolbar, text='Quit', command=sys.exit).pack()
+        self.canvas.show()
 
     def process(self):
         obj = self.input_channel.get()     # this is actually blocking
@@ -181,11 +188,21 @@ class BasePlotter(DisplayActor):
         self.x_axis_data.append(obj['tag'])
         self.y_axis_data.append(obj['value'])
         obj = None
+
+        if time.time() - self.last_update > self.min_refresh_time:
+            self.last_update = time.time()
+            self.plot()
         
     def plot(self):
-        self.axis.plot(self.x_axis_data, self.y_axis_data)
-        self.canvas.show()
-
+        if not self.line:
+            self.line, = self.axis.plot(self.x_axis_data, self.y_axis_data)
+        else:
+            self.line.set_data(self.x_axis_data, self.y_axis_data)
+            axes = self.line.get_axes()
+            self.line.recache()
+            axes.relim()
+            axes.autoscale_view()
+        self.canvas.draw()
 
 class BaseStemmer(BasePlotter):
     def __init__(self,
@@ -212,11 +229,50 @@ class BaseStemmer(BasePlotter):
         super(BaseStemmer, self).__init__(root, input_channel, refresh_rate,
                                           title, own_fig, xlabel, ylabel)
 
-    def plot(self):
-        '''Override base-class plot function to use stemming instead.'''
-        self.axis.stem(self.x_axis_data, self.y_axis_data)
-        self.canvas.show()
+        self.markerline = None
+        self.stemlines = None
+        self.baseline = None
 
+        import matplotlib.lines as lines
+        self.lines = lines
+
+
+    def plot(self):
+        '''Override base-class plot function to use stemming instead.
+
+        Simply using the stem() function works, but is quite slow. The method
+        we use here provides much faster updating.
+
+        '''
+        if not self.markerline:
+            self.markerline, self.stemlines, self.baseline = \
+                self.axis.stem(self.x_axis_data, self.y_axis_data)
+        else:
+            axes = self.markerline.get_axes()
+
+            # The markerline can be built directly from the data
+            self.markerline.set_data(self.x_axis_data, self.y_axis_data)
+            self.markerline.recache()
+
+            # The baseline should be built from the start and end points of
+            # the x axis
+            _ , baseline_y = self.baseline.get_data()
+            self.baseline.set_data([min(self.x_axis_data),
+                max(self.x_axis_data)], baseline_y.tolist())
+            self.baseline.recache()
+
+            # Construct new stemlines and add them to the current plot
+            for x, y in zip(self.x_axis_data, self.y_axis_data)[len(self.stemlines):]:
+                stemline = self.lines.Line2D([0], [0])
+                stemline.update_from(self.stemlines[0]) # Copy format
+                stemline.set_data([x, x], [baseline_y[0], y])
+                stemline.recache()
+                axes.add_line(stemline)
+                self.stemlines.append(stemline)
+
+            axes.relim()
+            axes.autoscale_view()
+        self.canvas.draw()
 
 
 class Plotter(Actor):
@@ -242,7 +298,7 @@ class StemPlotter(Actor):
 
 
 def test_NPA():
-    data = [Event(i, i**2) for i in xrange( 10 )]
+    data = [Event(i, i**2) for i in xrange( 100 )]
     q1 = Channel()
     q2 = Channel()
     npa1 = New_Process_Actor(BasePlotter, input_channel=q1)
@@ -257,10 +313,15 @@ def test_NPA():
     time.sleep(random.random() * 0.01)
 
     print 'Adding data to queue.', q1
-    [q1.put(d) for d in data + [None]]
-
     print 'Adding data to queue.', q2
-    [q2.put(d) for d in data + [None]]
+
+    for d in data:
+        q1.put(d)
+        q2.put(d)
+        time.sleep(0.1)
+
+    q1.put(None)
+    q2.put(None)
 
     print 'other calculations keep going...'
     npa1.join()
