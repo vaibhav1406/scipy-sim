@@ -144,17 +144,12 @@ class BasePlotter(DisplayActor):
         from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg as FigureCanvas
         from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg
         from matplotlib.figure import Figure
-        from matplotlib import rcParams
         
         # Save a reference to the main Tk window
         self.root = root
-        
-        # Set figure characteristcs from Matplotlib style
-        figsize = rcParams['figure.figsize']
-        dpi = rcParams['figure.dpi']
 
         # Creating the plot
-        self.fig = Figure(figsize=figsize, dpi=dpi)
+        self.fig = Figure()
         self.axis = self.fig.add_subplot(1, 1, 1)
         self.title = self.axis.set_title(title)
         self.line = None
