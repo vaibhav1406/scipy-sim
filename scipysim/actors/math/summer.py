@@ -13,7 +13,7 @@ Created on 24/11/2009
 import logging
 #logging.basicConfig(level=logging.DEBUG)
 import numpy as np
-from scipysim.actors import Actor, Channel
+from scipysim.actors import Actor, Channel, Event
 
 class Summer(Actor):
     '''
@@ -59,12 +59,8 @@ class Summer(Actor):
                 if len(current_data) == len(self.inputs) or not self.discard_incomplete:
                     logging.debug("We are summing up what we have and outputting")
                     the_sum = sum([obj['value'] for obj in current_data])
-                    self.output_channel.put(
-                        {
-                            'tag':oldest_tag,
-                            'value': the_sum
-                        }
-                    )
+                    self.output_channel.put(Event(tag = oldest_tag,
+                                                  value = the_sum))
                 else:
                     logging.debug("We are throwing away the oldest tag, and storing the rest")
                 [self.future_data.remove(item) for item in self.future_data if item['tag'] == oldest_tag]
@@ -79,11 +75,7 @@ class Summer(Actor):
             # If all tags are the same we can sum the values and output
             new_value = sum(values)
             logging.debug("Summer received all equally tagged inputs, summed and sent out: (tag: %2.e, value: %2.e)" % (tags[0], new_value))
-            data = {
-                    "tag": tags[0],
-                    "value": new_value
-                    }
-            self.output_channel.put(data)
+            self.output_channel.put(Event(tag = tags[0], value = new_value))
         else:
             logging.debug("Tags were not all equal... First two tags: %.5e, %.5e" % (tags[0], tags[1]))
             # Since they are not equal, and the tags are always sequential, the oldest timed tags are NEVER
@@ -115,12 +107,7 @@ class Summer(Actor):
             if num_points == len(self.inputs) or not self.discard_incomplete:
                 logging.debug("We are summing up what we have and outputting")
                 the_sum = values = sum([obj['value'] for obj in current_data])
-                self.output_channel.put(
-                    {
-                        'tag':oldest_tag,
-                        'value': the_sum
-                    }
-                )
+                self.output_channel.put(Event(tag = oldest_tag, value = the_sum))
             else:
                 logging.debug("We are throwing away the oldest tag, and storing the rest")
 
@@ -142,8 +129,8 @@ class SummerTests(unittest.TestCase):
         q_in_2 = Channel()
         q_out = Channel()
 
-        input1 = [{'value':1, 'tag':i} for i in xrange(100)]
-        input2 = [{'value':2, 'tag':i} for i in xrange(100)]
+        input1 = [Event(value=1, tag=i) for i in xrange(100)]
+        input2 = [Event(value=2, tag=i) for i in xrange(100)]
 
         summer = Summer([q_in_1, q_in_2], q_out)
         summer.start()
@@ -167,8 +154,8 @@ class SummerTests(unittest.TestCase):
         q_in_2 = Channel()
         q_out = Channel()
 
-        input1 = [{'value':1, 'tag':i} for i in xrange(100)]
-        input2 = [{'value':2, 'tag':i + 1} for i in xrange(100)]
+        input1 = [Event(value=1, tag=i) for i in xrange(100)]
+        input2 = [Event(value=2, tag=i+1) for i in xrange(100)]
 
         summer = Summer([q_in_1, q_in_2], q_out, True)
         summer.start()
@@ -193,8 +180,8 @@ class SummerTests(unittest.TestCase):
         q_in_2 = Channel()
         q_out = Channel()
 
-        input1 = [{'value':1, 'tag':i} for i in xrange(100)]
-        input2 = [{'value':2, 'tag':i + DELAY} for i in xrange(100)]
+        input1 = [Event(value=1, tag=i) for i in xrange(100)]
+        input2 = [Event(value=2, tag=i + DELAY) for i in xrange(100)]
 
         summer = Summer([q_in_1, q_in_2], q_out, True)
         summer.start()
@@ -220,8 +207,8 @@ class SummerTests(unittest.TestCase):
         q_in_2 = Channel()
         q_out = Channel()
 
-        input1 = [{'value':1, 'tag':i} for i in xrange(100)]         # First tag is 0, last tag is 99.
-        input2 = [{'value':2, 'tag':i + 1} for i in xrange(100)]     # First tag is 1, last tag is 100.
+        input1 = [Event(value=1, tag=i) for i in xrange(100)]         # First tag is 0, last tag is 99.
+        input2 = [Event(value=2, tag=i + 1) for i in xrange(100)]     # First tag is 1, last tag is 100.
 
         summer = Summer([q_in_1, q_in_2], q_out, False)
         summer.start()
@@ -262,7 +249,7 @@ class SummerTests(unittest.TestCase):
         # Fill each channel with num_data_points of its own index
         # So channel 5 will be full of the value 4, then a None
         for i, input_channel in enumerate(input_channels):
-            [input_channel.put({'value':i, 'tag':j}) for j in xrange(num_data_points)]
+            [input_channel.put(Event(value=i, tag=j)) for j in xrange(num_data_points)]
         [input_channel.put(None) for input_channel in input_channels]
 
         summer = Summer(input_channels, output_channel)
@@ -287,8 +274,8 @@ class SummerTests(unittest.TestCase):
         # Fill each channel with num_data_points of its own index
         # So channel 5 will be full of the value 4, then a None
         for i, input_channel in enumerate(input_channels):
-            [input_channel.put({'value':i, 'tag':j}) for j in xrange(num_data_points) if i is not 0]
-        [input_channels[0].put({'value':0, 'tag':j + DELAY}) for j in xrange(num_data_points)]
+            [input_channel.put(Event(value=i, tag=j)) for j in xrange(num_data_points) if i is not 0]
+        [input_channels[0].put(Event(value=0, tag=j + DELAY)) for j in xrange(num_data_points)]
         [input_channel.put(None) for input_channel in input_channels]
 
         summer = Summer(input_channels, output_channel)
