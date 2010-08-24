@@ -16,7 +16,7 @@ Created on 1/12/2009
 # classes, since it has different behavior. What's in there right now seems like
 # a bit of a hack.
 
-from scipysim.actors import Siso, Channel, SisoTestHelper
+from scipysim.actors import Siso, Channel, Event, SisoTestHelper
 import logging
 import unittest
 
@@ -69,39 +69,42 @@ class Interpolator(Siso):
                     # the tags on the corresponding incoming events.
                     # This is not an issue for models with continuous time.
                     assert self.last_out_tag is not None
-                    new_event['tag'] = self.last_out_tag + i
+                    new_event = Event(self.last_out_tag + i, new_event.value)
 
-                print new_event['tag']
+                # print new_event['tag']
                 self.output_channel.put(new_event)
 
         self.last_event = event.copy()
         if self.domain == 'DT' and self.last_out_tag is not None:
             # Produce DT output tagging as described above
-            event['tag'] = self.last_out_tag + self.interpolation_factor
-        self.last_out_tag = event['tag']
-        self.output_channel.put(event)
+            out_event = Event(self.last_out_tag + self.interpolation_factor,
+                              event.value)
+        else:
+            out_event = event
+        self.last_out_tag = out_event.tag
+        self.output_channel.put(out_event)
 
 
 class InterpolatorZero(Interpolator):
     '''zero interpolation - insert zero values.'''
     def interpolate(self, event, tag):
-        return { 'tag': tag, 'value': 0.0 }
+        return Event(tag = tag, value = 0.0 )
 
 class InterpolatorStep(Interpolator):
     '''step interpolation - holds the last value.'''
     def interpolate(self, event, tag):
-        return { 'tag': tag, 'value': self.last_event['value'] }
+        return Event(tag = tag, value = self.last_event.value )
 
 class InterpolatorLinear(Interpolator):
     '''linear interpolation - places values on a straight line between 
        successive events.
     '''
     def interpolate(self, event, tag):
-        m = ((event['value'] - self.last_event['value'])
-                    / (event['tag'] - self.last_event['tag']))
-        dt = (tag - self.last_event['tag'])
-        val = m * dt + self.last_event['value']
-        return { 'tag': tag, 'value': val }
+        m = ((event.value - self.last_event.value)
+                    / (event.tag - self.last_event.tag))
+        dt = (tag - self.last_event.tag)
+        val = m * dt + self.last_event.value
+        return Event(tag = tag, value = val )
 
 
 class InterpolateTests(unittest.TestCase):
@@ -116,8 +119,8 @@ class InterpolateTests(unittest.TestCase):
     def test_zero_interpolation_ct(self):
         '''Test zero interpolation of a simple CT signal.
         '''
-        inp = [{'value':i, 'tag':i} for i in xrange(-10, 11, 2)]
-        expected_outputs = [{'tag':t, 'value':t if not (t % 2) else 0.0 }
+        inp = [Event(value = i, tag = i) for i in xrange(-10, 11, 2)]
+        expected_outputs = [Event(tag = t, value = t if not (t % 2) else 0.0 )
                                                 for t in xrange(-10, 11, 1)]
         block = InterpolatorZero(self.q_in, self.q_out)
         SisoTestHelper(self, block, inp, expected_outputs)
@@ -125,8 +128,8 @@ class InterpolateTests(unittest.TestCase):
     def test_zero_interpolation_dt(self):
         '''Test zero interpolation of a simple DT signal.
         '''
-        inp = [{'value':i, 'tag':i} for i in xrange(-10, 11, 1)]
-        expected_outputs = [{'tag':t, 'value':(t / 2.0 - 5.0) if not (t % 2) else 0.0 }
+        inp = [Event(value = i, tag = i) for i in xrange(-10, 11, 1)]
+        expected_outputs = [Event(tag = t, value = (t / 2.0 - 5.0) if not (t % 2) else 0.0 )
                                                 for t in xrange(-10, 31, 1)]
         self.q_in = Channel('DT')
         self.q_out = Channel('DT')
@@ -137,8 +140,8 @@ class InterpolateTests(unittest.TestCase):
     def test_step_interpolation_ct(self):
         '''Test step interpolation of a simple CT signal.
         '''
-        inp = [{'value':i, 'tag':i} for i in xrange(-10, 11, 2)]
-        expected_outputs = [{'tag':t, 'value':t if not (t % 2) else t - 1 }
+        inp = [Event(value = i, tag = i) for i in xrange(-10, 11, 2)]
+        expected_outputs = [Event(tag = t, value = t if not (t % 2) else t - 1 )
                                                 for t in xrange(-10, 11, 1)]
         block = InterpolatorStep(self.q_in, self.q_out)
         SisoTestHelper(self, block, inp, expected_outputs)
@@ -146,9 +149,9 @@ class InterpolateTests(unittest.TestCase):
     def test_step_interpolation_dt(self):
         '''Test step interpolation of a simple DT signal.
         '''
-        inp = [{'value':i, 'tag':i} for i in xrange(-10, 11, 1)]
-        expected_outputs = [{'tag':t, 'value':(t / 2.0 - 5.0)
-                                if not (t % 2) else ((t - 1) / 2.0 - 5.0) }
+        inp = [Event(value = i, tag = i) for i in xrange(-10, 11, 1)]
+        expected_outputs = [Event(tag = t, value = (t / 2.0 - 5.0)
+                                if not (t % 2) else ((t - 1) / 2.0 - 5.0) )
                                                 for t in xrange(-10, 31, 1)]
         self.q_in = Channel('DT')
         self.q_out = Channel('DT')
@@ -159,16 +162,16 @@ class InterpolateTests(unittest.TestCase):
     def test_linear_interpolation_ct(self):
         '''Test linear interpolation of a simple CT signal.
         '''
-        inp = [{'value':i, 'tag':i} for i in xrange(-10, 11, 2)]
-        expected_outputs = [{'tag':t, 'value':t } for t in xrange(-10, 11, 1)]
+        inp = [Event(value = i, tag = i) for i in xrange(-10, 11, 2)]
+        expected_outputs = [Event(tag = t, value = t ) for t in xrange(-10, 11, 1)]
         block = InterpolatorLinear(self.q_in, self.q_out)
         SisoTestHelper(self, block, inp, expected_outputs)
 
     def test_linear_interpolation_dt(self):
         '''Test linear interpolation of a simple DT signal.
         '''
-        inp = [{'value':i, 'tag':i} for i in xrange(-10, 11, 1)]
-        expected_outputs = [{'tag':t, 'value':(t / 2.0 - 5.0) }
+        inp = [Event(value = i, tag = i) for i in xrange(-10, 11, 1)]
+        expected_outputs = [Event(tag = t, value = (t / 2.0 - 5.0) )
                                                 for t in xrange(-10, 31, 1)]
         self.q_in = Channel('DT')
         self.q_out = Channel('DT')
