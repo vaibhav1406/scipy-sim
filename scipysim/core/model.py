@@ -1,6 +1,8 @@
-import logging
+from time import sleep
 
-from actor import Actor, DisplayActor
+from actor import Actor
+from actor import DisplayActor
+import logging
 
 class Model(Actor):
     '''
@@ -36,11 +38,26 @@ class Model(Actor):
         '''
         assert hasattr(self, 'components')
 
-        logging.info("Starting simulation")
-        [component.start() for component in self.components]
-        logging.debug("Finished starting actors")
+        try:
+            logging.info("Starting simulation")
+            [component.start() for component in self.components]
+            logging.debug("Finished starting actors")
 
-        [component.join() for component in self.components]
+            # Wait for threads to finish
+            # Required for KeyboardInterrupt to be handled reliably
+            # See: http://luke.maurits.id.au/blog/2008/03/threads-and-signals-in-python/
+            while True:
+                if not any([component.isAlive() for component in self.components]):
+                    # All threads have stopped
+                    break
+                else:
+                    # Some threads are still going
+                    sleep(1)
 
-        logging.debug("Finished running simulation")
+            logging.debug("Finished running simulation")
+        except KeyboardInterrupt:
+            [component.terminate() for component in self.components]
+            [component.join() for component in self.components]
+
+
 
