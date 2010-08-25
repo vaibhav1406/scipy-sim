@@ -3,10 +3,12 @@ Created on 19/11/2009
 
 @author: brian
 '''
+import thread
 
 
 import threading
 import logging
+from thread import interrupt_main
 
 from channel import Channel
 from errors import NoProcessFunctionDefined
@@ -65,8 +67,20 @@ class Actor(threading.Thread):
         Run this actors objects thread
         '''
         logging.debug("Started running an actor thread")
-        while not self.stop:
-            self.process()
+
+        try:
+            
+            while not self.stop:
+                self.process()
+
+        except KeyboardInterrupt:
+            # Need to make sure that Keyboard interrupts are propagated
+            # to main thread in cases where the signal module isn't available.
+            thread.interrupt_main()
+
+    def terminate(self):
+        '''Terminate the actor.'''
+        self.stop = True
 
     def process(self):
         '''
