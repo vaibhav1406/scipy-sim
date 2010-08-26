@@ -22,6 +22,7 @@ from multiprocessing import Queue as MQueue
 from multiprocessing import Event as MEvent
 
 from scipysim import Actor, Channel, Event
+from scipysim.core.channel import Empty
 from scipysim.core.actor import DisplayActor
 
 import time
@@ -187,28 +188,33 @@ class BasePlotter(DisplayActor):
         self.canvas.show()
 
     def process(self):
-        obj = self.input_channel.get()     # this is actually blocking
-        if obj is None:
-            self.stop = True
+        while True:
+            try:
+                obj = self.input_channel.get_nowait()     # this is actually blocking
+                if obj is None:
+                    self.stop = True
 
-            self.input_channel.close()
-            self.input_channel.join_thread()
+                    self.input_channel.close()
+                    self.input_channel.join_thread()
+                    self.plot()
+
+                    return
+
+                self.x_axis_data.append(obj['tag'])
+                self.y_axis_data.append(obj['value'])
+                obj = None
+            except Empty:
+                break
+
+        if self.live:
             self.plot()
-
-            return
-
-        self.x_axis_data.append(obj['tag'])
-        self.y_axis_data.append(obj['value'])
-        obj = None
-
-        if (self.live
-           and (time.time() - self.last_update > self.min_refresh_time)):
-            self.last_update = time.time()
-            self.plot()
+            
+        time.sleep(self.min_refresh_time)
         
     def plot(self):
         if not self.line:
-            self.line, = self.axis.plot(self.x_axis_data, self.y_axis_data)
+            if len(self.x_axis_data) > 0:
+                self.line, = self.axis.plot(self.x_axis_data, self.y_axis_data)
         else:
             self.line.set_data(self.x_axis_data, self.y_axis_data)
             axes = self.line.get_axes()
@@ -260,8 +266,9 @@ class BaseStemmer(BasePlotter):
 
         '''
         if not self.markerline:
-            self.markerline, self.stemlines, self.baseline = \
-                self.axis.stem(self.x_axis_data, self.y_axis_data)
+            if len(self.x_axis_data) > 0:
+                self.markerline, self.stemlines, self.baseline = \
+                    self.axis.stem(self.x_axis_data, self.y_axis_data)
         else:
             axes = self.markerline.get_axes()
 
