@@ -6,9 +6,11 @@ Channel class and helper functions for creating multiple channels.
 
 '''
 
-from Queue import Queue
+from Queue import Queue, Empty
 from time import time
 
+#class Empty(Empty):
+#    pass
 
 class Channel(Queue, object):
     '''
