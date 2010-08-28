@@ -41,7 +41,7 @@ class Merge(Actor):
         Note that this only removes events from those channels that result
         in an output event. Events at the head of other channels are left 
         untouched, and will be checked again the next time the process runs."""
-        #logging.debug("Merge: running")
+        logging.debug("Merge: running")
 
         # Block on each channel in sequence. We can't make a decision
         # on the merge until we have events (and thus tags) on every channel.
@@ -70,14 +70,28 @@ class Merge(Actor):
             self.output_channel.put(None)
             return
 
-        # Otherwise there are still events to process. Send out those events
-        # corresponding to the oldest tag.
-        for input, event in events:
-            if event.tag == oldest_tag:
-                self.output_channel.put(event)
+        elif termination_count > 0:
+            # If we received at least one termination event then we should
+            # begin to pass on termination signals
 
-                # Remove the head from each channel that has produced an output
-                input.drop()
+            # Clear non-terminating inputs
+            for input in self.inputs:
+                if input.head() is not None:
+                    input.drop()
+
+            # Terminate
+            self.output_channel.put(None)
+
+        else:
+
+            # Otherwise there are still events to process. Send out those events
+            # corresponding to the oldest tag.
+            for input, event in events:
+                if event.tag == oldest_tag:
+                    self.output_channel.put(event)
+
+                    # Remove the head from each channel that has produced an output
+                    input.drop()
 
 
 

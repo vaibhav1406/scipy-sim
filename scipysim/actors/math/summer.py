@@ -12,7 +12,7 @@ Created on 24/11/2009
 '''
 import logging
 #logging.basicConfig(level=logging.DEBUG)
-import numpy as np
+from numpy import inf as infinity
 from scipysim.actors import Actor, Channel, Event
 
 class Summer(Actor):
@@ -40,84 +40,76 @@ class Summer(Actor):
         self.inputs = list(inputs)
         self.num_inputs = len(self.inputs)
         self.discard_incomplete = discard_incomplete_sets
-        self.data_is_stored = False
-        self.future_data = []
 
 
     def process(self):
-        """Wait for data from both (all) input channels"""
-        logging.debug("Running summer process")
+        '''
+        Note that this only removes events from those channels that result
+        in an output event. Events at the head of other channels are left
+        untouched, and will be checked again the next time the process runs.
+        '''
 
-        # this is blocking on each channel in sequence
-        objects = [in_channel.get(True) for in_channel in self.inputs]
+        logging.debug("Summer: running")
 
-        # We are finished iff all the input objects are None, but we still have to process the future data
-        if objects.count(None) == len(objects):
-            while len(self.future_data) > 0:
-                oldest_tag = min([obj['tag'] for obj in self.future_data])
-                current_data = [obj for obj in self.future_data if obj['tag'] == oldest_tag]
-                if len(current_data) == len(self.inputs) or not self.discard_incomplete:
-                    logging.debug("We are summing up what we have and outputting")
-                    the_sum = sum([obj['value'] for obj in current_data])
-                    self.output_channel.put(Event(tag = oldest_tag,
-                                                  value = the_sum))
-                else:
-                    logging.debug("We are throwing away the oldest tag, and storing the rest")
-                [self.future_data.remove(item) for item in self.future_data if item['tag'] == oldest_tag]
+        # Block on each channel in sequence. We can't make a decision
+        # on the sum until we have events (and thus tags) on every channel.
+        events = []
+        termination_count = 0
+        oldest_tag = infinity
+        for input in self.inputs:
+            event = input.head()
+            if event is None:
+                termination_count += 1
+            else:
+                oldest_tag = min(oldest_tag, event.tag)
+                events.append((input, event))
 
-            logging.info("We have finished summing the data")
+
+        # We are finished iff all the input channels have None at the head
+        if termination_count == self.num_inputs:
+            logging.info("Summer: finished summing all events")
+
+            # Clear all input channels
+            for input in self.inputs:
+                input.drop()
+
+            # Terminate this process and pass on termination signal
             self.stop = True
             self.output_channel.put(None)
             return
-        tags = [obj['tag'] for obj in objects]
-        values = [obj['value'] for obj in objects]
-        if tags.count(tags[0]) == len(tags):
-            # If all tags are the same we can sum the values and output
-            new_value = sum(values)
-            logging.debug("Summer received all equally tagged inputs, summed and sent out: (tag: %2.e, value: %2.e)" % (tags[0], new_value))
-            self.output_channel.put(Event(tag = tags[0], value = new_value))
+
+        elif termination_count > 0:
+            # If we received at least one termination event then we should
+            # begin to pass on termination signals
+
+            # Clear non-terminating inputs
+            for input in self.inputs:
+                if input.head() is not None:
+                    input.drop()
+
+            # Terminate
+            self.output_channel.put(None)
+
         else:
-            logging.debug("Tags were not all equal... First two tags: %.5e, %.5e" % (tags[0], tags[1]))
-            # Since they are not equal, and the tags are always sequential, the oldest timed tags are NEVER
-            # going to have equivalent values from the buffers that have returned newer tags.
-            # So we sum all the values at the oldest tag value. (0th option)
-            # Alternatively (1) we could discard this time step
-            # (2) We could do some sort of integration, histogram style sum for continuous time systems
-            # My feeling is that a CT sum is going to have to be to different to be implemented it the same actor.
+            # Otherwise there are still events to process.
+            # We sum all the values at the oldest tag value. (0th option)
+            # Alternatively (1) we could discard this time step if some tags don't match,
+            # (2) We could do some sort of integration, histogram style sum for
+            # continuous time systems. My (Brian's) feeling is that a CT sum is going
+            # to have to be too different to be implemented in the same actor.
+            sum = 0
+            incomplete = False
+            for input, event in events:
+                if event.tag == oldest_tag:
+                    sum += event.value
 
-            # With the 0th option there is a major problem when one signal isn't creating the same rate of signals
-            # because the current actor (without director) model only processes after receiving an input from
-            # EVERY input channel. So this would be sub optimal also...
+                    # Remove the head from each channel that has produced an output
+                    input.drop()
+                else:
+                    incomplete = True
 
-            # need oldest tag out of stored and new
-            oldest_tag = min(tags + [a['tag'] for a in self.future_data])
-
-            if self.data_is_stored:
-                logging.debug("We have got previously stored data - checking for any at oldest tag")
-                current_data = [obj for obj in self.future_data + objects if obj['tag'] == oldest_tag]
-            else:
-                current_data = [obj for obj in objects if obj['tag'] == oldest_tag]
-
-
-            # At this point we either sum ALL we have at 'now' or discard 'now'
-            # depending on how many data points there are relative to inputs
-
-            num_points = len(current_data)
-
-            if num_points == len(self.inputs) or not self.discard_incomplete:
-                logging.debug("We are summing up what we have and outputting")
-                the_sum = values = sum([obj['value'] for obj in current_data])
-                self.output_channel.put(Event(tag = oldest_tag, value = the_sum))
-            else:
-                logging.debug("We are throwing away the oldest tag, and storing the rest")
-
-            # Provided its not the very oldest data point (either saved already or arrived
-            # in this process, we keep it for the future.
-            self.future_data = [obj for obj in self.future_data + objects if obj['tag'] is not oldest_tag]
-            if self.future_data is not None: self.data_is_stored = True
-
-        # if the tags won't be the same -  we store a buffer of future tag/value pairs
-        #future = max(tags)
+            if not (incomplete and self.discard_incomplete):
+                self.output_channel.put(Event(oldest_tag, sum))
 
 
 import unittest
@@ -192,10 +184,10 @@ class SummerTests(unittest.TestCase):
         q_in_1.put(None)
         q_in_2.put(None)
         summer.join()
-        #for i in xrange(DELAY, 99):
 
-        self.assertEquals(q_out.get()['value'], 3)
-        #self.assertEquals(q_out.get(), None)
+        for i in xrange(DELAY, 100):
+            self.assertEquals(q_out.get()['value'], 3)
+        self.assertEquals(q_out.get(), None)
 
 
     def test_delayed_summer3(self):
@@ -231,8 +223,6 @@ class SummerTests(unittest.TestCase):
             self.assertEquals(data['tag'], i)
 
         data = q_out.get()
-        self.assertEquals(data['value'], 2)
-        self.assertEquals(data['tag'], 100)
         # lastly the channel should contain a 'None'
         self.assertEquals(q_out.get(), None)
 
