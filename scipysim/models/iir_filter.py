@@ -28,7 +28,7 @@ class IIR(Model):
             # Signal source
             DTSinGenerator(wires[0], simulation_length=200),
             Split(wires[0], [wires[1], wires[2]]),
-            StemPlotter(wires[1], title="Original signal", xlabel="n", ylabel="value"),
+            StemPlotter(wires[1], title="Original signal", refresh_rate=5, xlabel="n", ylabel="value"),
 
             # The filter: y[n] = x[n] - 0.5y[n-1]
             Summer([wires[2], wires[7]], wires[3]),
@@ -37,7 +37,7 @@ class IIR(Model):
             Gain(wires[6], wires[7], gain = -0.5),
 
             # Plot
-            StemPlotter(wires[5], title="Filtered signal", xlabel="n", ylabel="value"),
+            StemPlotter(wires[5], title="Filtered signal", refresh_rate=5, xlabel="n", ylabel="value"),
         ]
 
 
