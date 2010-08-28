@@ -26,6 +26,9 @@ from scipysim.core.actor import DisplayActor
 
 import time
 
+import logging
+
+
 def target(cls, args, kwargs):
     '''This is the function that gets run in a new process'''
     run_gui_loop = issubclass(cls, DisplayActor)
@@ -103,7 +106,8 @@ class Channel2Process(Actor):
         if self.first_time:
             # Make sure the other end of the Queue can receive before trying to send
             # (avoids race conditions on the underlying pipe, and Broken Pipe errors)
-            self.ready_event.wait() 
+            self.ready_event.wait()
+            logging.info("Channel2Process done waiting for process")
             self.first_time = False
 
         obj = self.channel.get(True)
@@ -118,6 +122,8 @@ class Channel2Process(Actor):
             # Block on flushing the data to the pipe. Must be called after close
             self.queue.join_thread()
             self.stop = True
+            logging.info("Channel2Process finished")
+
 
 class BasePlotter(DisplayActor):
     def __init__(self, 
@@ -196,6 +202,7 @@ class BasePlotter(DisplayActor):
                 self.input_channel.close()
                 self.input_channel.join_thread()
                 self.plot()
+                logging.info("Plotter finished")
 
                 return
 
