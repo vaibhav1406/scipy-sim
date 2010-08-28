@@ -2,6 +2,8 @@
 """
 A simple model that demonstrates discrete-time system simulation using an
 IIR filter.
+
+@author: Allan McInnes
 """
 from scipysim.actors import Model, MakeChans, Event
 from scipysim.actors.signal import Split, Delay
@@ -31,7 +33,7 @@ class IIR(Model):
             # The filter: y[n] = x[n] - 0.5y[n-1]
             Summer([wires[2], wires[7]], wires[3]),
             Split(wires[3], [wires[4], wires[5]]),
-            Delay(wires[4], wires[6], wait=1),
+            Delay(wires[4], wires[6], wait=1),  
             Gain(wires[6], wires[7], gain = -0.5),
 
             # Plot

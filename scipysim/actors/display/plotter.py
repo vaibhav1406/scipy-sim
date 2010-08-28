@@ -22,7 +22,6 @@ from multiprocessing import Queue as MQueue
 from multiprocessing import Event as MEvent
 
 from scipysim import Actor, Channel, Event
-from scipysim.core.channel import Empty
 from scipysim.core.actor import DisplayActor
 
 import time
@@ -188,27 +187,26 @@ class BasePlotter(DisplayActor):
         self.canvas.show()
 
     def process(self):
-        while True:
-            try:
-                obj = self.input_channel.get_nowait()     # this is actually blocking
-                if obj is None:
-                    self.stop = True
+        # Grab all values that are currently available
+        while not self.input_channel.empty():
+            obj = self.input_channel.get_nowait()  # Non-blocking
+            if obj is None:
+                self.stop = True
 
-                    self.input_channel.close()
-                    self.input_channel.join_thread()
-                    self.plot()
+                self.input_channel.close()
+                self.input_channel.join_thread()
+                self.plot()
 
-                    return
+                return
 
-                self.x_axis_data.append(obj['tag'])
-                self.y_axis_data.append(obj['value'])
-                obj = None
-            except Empty:
-                break
+            self.x_axis_data.append(obj['tag'])
+            self.y_axis_data.append(obj['value'])
 
+        # Update the plot if necessary
         if self.live:
             self.plot()
-            
+
+        # Wait for next update
         time.sleep(self.min_refresh_time)
         
     def plot(self):
