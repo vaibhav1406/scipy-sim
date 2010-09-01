@@ -3,12 +3,10 @@ This Sum actor takes any number of input channels and adds up the data points
 where the tags coincide, if there are missing tags it can discard the data point
 or alternatively sum the remaining inputs.
 
-@todo There is a bug where two unmatched channels. One channel finishes 
-and a 'None' object gets treated like a dictionary... same in subtract.py
-
 Created on 24/11/2009
 
 @author: Brian Thorne
+@author: Allan McInnes
 '''
 import logging
 #logging.basicConfig(level=logging.DEBUG)
@@ -28,7 +26,9 @@ class Summer(Actor):
         """
         Constructor for a summation block
 
-        @param inputs: A Python list of input channels for summing.
+        @param inputs: A Python list of input channels for summing. Elements
+        of the list may optionally be tuples containing a string defining
+        the sign of the input (e.g. [(in1, '+'), (in2, '-'), in3] )
 
         @param output_channel: A single channel where the output will be put.
 
@@ -37,7 +37,14 @@ class Summer(Actor):
 
         """
         super(Summer, self).__init__(output_channel=output_channel)
-        self.inputs = list(inputs)
+
+
+        # Set default signs for input channels
+        self.inputs = [ (input, '+') if not isinstance(input, tuple) else input 
+                                        for input in list(inputs) ]
+        # Process input signs by converting sign strings to numbers.
+        self.inputs = [ (input, float(sign+'1')) for input, sign in self.inputs ]
+
         self.num_inputs = len(self.inputs)
         self.discard_incomplete = discard_incomplete_sets
 
@@ -54,42 +61,32 @@ class Summer(Actor):
         # Block on each channel in sequence. We can't make a decision
         # on the sum until we have events (and thus tags) on every channel.
         events = []
-        termination_count = 0
         oldest_tag = infinity
-        for input in self.inputs:
+        for input, sign in self.inputs:
             event = input.head()
-            if event is None:
-                termination_count += 1
-            else:
+            if event is not None:
                 oldest_tag = min(oldest_tag, event.tag)
-                events.append((input, event))
+                events.append((input, sign, event))
 
 
         # We are finished iff all the input channels have None at the head
-        if termination_count == self.num_inputs:
-            logging.info("Summer: finished summing all events")
-
-            # Clear all input channels
-            for input in self.inputs:
-                input.drop()
-
-            # Terminate this process and pass on termination signal
-            self.stop = True
-            self.output_channel.put(None)
-            return
-
-        elif termination_count > 0:
+        if len(events) < self.num_inputs:
             # If we received at least one termination event then we should
             # begin to pass on termination signals
 
             # Clear non-terminating inputs
-            for input in self.inputs:
+            for input, sign in self.inputs:
                 if input.head() is not None:
                     input.drop()
 
-            # Terminate
+            # Send termination signal
             self.output_channel.put(None)
 
+            if len(events) == 0:
+                # Terminate this process
+                logging.info("Summer: finished summing all events")
+                self.stop = True
+                return
         else:
             # Otherwise there are still events to process.
             # We sum all the values at the oldest tag value. (0th option)
@@ -99,9 +96,9 @@ class Summer(Actor):
             # to have to be too different to be implemented in the same actor.
             sum = 0
             incomplete = False
-            for input, event in events:
+            for input, sign, event in events:
                 if event.tag == oldest_tag:
-                    sum += event.value
+                    sum += sign * event.value
 
                     # Remove the head from each channel that has produced an output
                     input.drop()
@@ -135,6 +132,28 @@ class SummerTests(unittest.TestCase):
         summer.join()
         for i in xrange(100):
             self.assertEquals(q_out.get()['value'], 3)
+        self.assertEquals(q_out.get(), None)
+
+    def test_signed_summer(self):
+        '''Test subtracting one channel from another'''
+        q_in_1 = Channel()
+        q_in_2 = Channel()
+        q_out = Channel()
+
+        input1 = [Event(value=1, tag=i) for i in xrange(100)]
+        input2 = [Event(value=2, tag=i) for i in xrange(100)]
+
+        summer = Summer([q_in_1, (q_in_2, '-')], q_out)
+        summer.start()
+        for val in input1:
+            q_in_1.put(val)
+        for val in input2:
+            q_in_2.put(val)
+        q_in_1.put(None)
+        q_in_2.put(None)
+        summer.join()
+        for i in xrange(100):
+            self.assertEquals(q_out.get()['value'], -1)
         self.assertEquals(q_out.get(), None)
 
     def test_delayed_summer(self):
