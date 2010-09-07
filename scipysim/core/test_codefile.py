@@ -32,7 +32,7 @@ class Test_Code_File_Path( unittest.TestCase ):
         c = CodeFile( path.join( PATH_TO_SRC_DIR, 'scipysim', 'actors', 'math', 'trig', 'sin.py' ) )
 
     def test_file_isnt_class_name( self ):
-        '''Test that a class in a trickly named file is still parsed as a valid CodeFile'''
+        '''Test that a class in a trickily named file is still parsed as a valid CodeFile'''
         c = CodeFile( path.join( PATH_TO_SRC_DIR, 'scipysim', 'actors', 'strings', 'intparser.py' ) )
 
 class Test_Code_File_Num_Input_Output_Parsing( unittest.TestCase ):
@@ -53,7 +53,7 @@ class Test_Code_File_Num_Input_Output_Parsing( unittest.TestCase ):
         self.assertEqual( c.num_outputs, 0 )
 
     def test_dynamic_actor( self ):
-        '''Test the a block that can have multiple inputs (summer)'''
+        '''Test that a block that can have multiple inputs (summer)'''
         c = CodeFile( self.src_dir + '/scipysim/actors/math/summer.py' )
         self.assertEqual( c.num_outputs, 1 )
         self.assertEqual( c.num_inputs, None )

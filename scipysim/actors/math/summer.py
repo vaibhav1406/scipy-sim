@@ -194,17 +194,37 @@ class CTSummer(BaseSummer):
 
         return (sum, False)
 
-def Summer(inputs, output_channel):
+class Summer:
     '''
-    Factory for summation blocks.
+    Wrapper for summation blocks.
     '''
-    domain = output_channel.domain
-    if domain == 'CT':
-        return CTSummer(inputs, output_channel)
-    elif domain == 'DT':
-        return DTSummer(inputs, output_channel)
-    else:
-        raise NotImplementedError, "No summer for " + domain + " domain."
+    num_inputs = None
+    num_outputs = 1
+    output_domains = (None,)
+    input_domains = (None,)
+    
+    def __init__(self, inputs, output_channel):
+        """
+        Wrapper for summation blocks.
+
+        @param inputs: A Python list of input channels for summing. Elements
+        of the list may optionally be tuples containing a string defining
+        the sign of the input (e.g. [(in1, '+'), (in2, '-'), in3] ). If the
+        sign is not specified then it defaults to '+'.
+
+        @param output_channel: A single channel where the output will be put.
+
+        """
+        domain = output_channel.domain
+        if domain == 'CT':
+            self.__summer = CTSummer(inputs, output_channel)
+        elif domain == 'DT':
+            self.__summer = DTSummer(inputs, output_channel)
+        else:
+            raise NotImplementedError, "No summer for " + domain + " domain."
+
+    def __getattr__(self, arg):
+        return getattr(self.__summer, arg)
 
 
 import unittest
