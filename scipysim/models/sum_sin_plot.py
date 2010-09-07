@@ -16,7 +16,8 @@ logging.info( "Logger enabled" )
 
 class SumSinPlot( Model ):
     """
-    Summing two continous sinusoidal sources together and plotting. 
+    Summing two continous sinusoidal sources with different timesteps,
+    and plotting.
     """
     def __init__( self ):
         '''Setup the simulation'''
@@ -26,12 +27,12 @@ class SumSinPlot( Model ):
         connection3 = Channel()
 
         # 2 Hz, 90 degree phase
-        src1 = CTSinGenerator( connection1, 2, 2.0, numpy.pi / 2 )
-        # 4 Hz, 45 degree phase
-        src2 = CTSinGenerator( connection2, 1, 3.5, numpy.pi / 4 )
+        src1 = CTSinGenerator( connection1, 2, 2.0, numpy.pi / 2, timestep = 0.001 )
+        # 4 Hz, 45 degree phase, different timestep
+        src2 = CTSinGenerator( connection2, 1, 3.5, numpy.pi / 4, timestep = 0.005 )
 
         summer = Summer( [connection1, connection2], connection3 )
-        dst = Plotter( connection3, refresh_rate=1.0 / 2 )
+        dst = Plotter( connection3, refresh_rate=50 )
 
         self.components = [src1, src2, summer, dst]
 
