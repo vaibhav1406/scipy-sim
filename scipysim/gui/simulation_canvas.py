@@ -38,20 +38,24 @@ class CanvasBlock ( object ):
                         ]
 
 
-        self.canvas.create_rectangle( *( x, y ) + self.BLOCK_SIZE,
+        self.canvas.create_rectangle( *( x, y )
+                                      + (x + self.BLOCK_WIDTH, y + self.BLOCK_HEIGHT),
                                      fill=colour,
                                      tags=preview_tags + ["type:block"]
                                      )
 
-        self.canvas.create_text ( x + ( self.BLOCK_WIDTH / 4 ), y + ( self.BLOCK_HEIGHT / 2 ),
+        self.canvas.create_text ( x + ( self.BLOCK_WIDTH / 2 ), y + ( self.BLOCK_HEIGHT / 2 ),
                                  font=self.font, text=codefile.name,
                                  tags=preview_tags + ["type:text"]
                                  )
-        num_inputs, num_outputs = codefile.num_inputs, codefile.num_outputs
-        x_, y_ = x, y
-        logging.debug( "Block has %d inputs, and %d outputs." % ( num_inputs, num_outputs ) )
+
         # Draw on input and output ports
         gap = 5
+
+        num_inputs, num_outputs = codefile.num_inputs, codefile.num_outputs
+        x_, y_ = x, (y + (self.BLOCK_HEIGHT / 2) - gap*(num_inputs / 2))
+        logging.debug( "Block has %d inputs, and %d outputs." % ( num_inputs, num_outputs ) )
+
         if num_inputs is None:
             # Will default to drawing one connector, and when it is used we will draw another
             num_inputs = 1
@@ -59,20 +63,22 @@ class CanvasBlock ( object ):
             pass
         else:
             for input in xrange( num_inputs ):
-                self.canvas.create_polygon( x, y_ + gap , x - gap, y_ + gap * 3 / 2 , x , y_ + 2 * gap,
+                self.canvas.create_polygon( x - gap, y_ - gap, x, y_, x - gap , y_ + gap,
                                             tags=preview_tags + ["type:input-%d" % input],
                                             fill="#000000" )
-                y_ = y_ + gap
-        x_, y_ = x + 50 + gap, y
+                y_ = y_ + 2*gap
+
+        x_, y_ = x + self.BLOCK_WIDTH, (y + (self.BLOCK_HEIGHT / 2) - gap*(num_outputs / 2))
         if num_outputs is None:
             num_outputs = 1
         elif num_outputs == 0:
             pass
         else:
             for output in xrange( num_outputs ):
-                self.canvas.create_polygon( x_, y_ + gap , x_ + gap, y_ + gap * 3 / 2 , x_ , y_ + 2 * gap,
+                self.canvas.create_polygon( x_, y_ - gap , x_ + gap, y_, x_, y_ + gap,
                                             tags=preview_tags + ["type:output-%d" % output],
                                             fill="#000000" )
+                y_ = y_ + 2*gap
 
 
     def move_to( self, x, y ):
@@ -84,7 +90,7 @@ class CanvasBlock ( object ):
         the text and outline etc black.
         '''
         # TODO filter out all but the block
-        self.canvas.itemconfigure( "id:%s" % self.id, fill=colour )
+        self.canvas.itemconfigure("id:%s && type:block" % self.id, fill=colour )
 
 class SimulationCanvas( object ):
     """A canvas where blocks can be dragged around and connected up"""
@@ -94,7 +100,7 @@ class SimulationCanvas( object ):
          "background": "#CCFFCC", # Pale weak green. A weak yellow is FFFFCC
          "block": "#00FF66", # a lime green
          "preview": "#0099FF", # a blue
-         "selected": "#FF6600" # orangne - red
+         "selected": "#FF6600" # orange - red
          }
 
     size = ( width, height ) = ( 550, 300 )
@@ -167,10 +173,10 @@ class SimulationCanvas( object ):
                         logging.info( "Moved out of preview zone, adding now component to model" )
                         self.canvas.dtag( "preview" )
                         #TODO HERE - add to model compiler or what ever...
-                    event.widget.itemconfigure( "Selected", fill=self.colours["block"] )
+                    event.widget.itemconfigure( "Selected && type:block", fill=self.colours["block"] )
                     event.widget.itemconfigure( "type:text", fill="#000000" )
                 else:
-                    event.widget.itemconfigure( "Selected", fill=self.colours["preview"] )
+                    event.widget.itemconfigure( "Selected && type:block", fill=self.colours["preview"] )
                     self.canvas.addtag_withtag( "preview", "Selected" )
 
                 #block = self.canvas.gettags("Selected")

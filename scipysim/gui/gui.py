@@ -219,7 +219,7 @@ def writeFile( filepath, content ):
 if __name__ == "__main__":
     root = Tk()
 
-    root.title( "Scipy-Simulator Gui" )
+    root.title( "Scipysim" )
 
     app = App( root )
     logging.debug( "Entering mainloop..." )
