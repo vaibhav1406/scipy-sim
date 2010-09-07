@@ -8,7 +8,7 @@ from scipysim.actors.display import Plotter
 from scipysim.actors.signal import Ramp, Split
 from scipysim.actors.logic import GreaterThan, PassThrough
 from scipysim.actors.math.trig import CTSinGenerator
-from scipysim.actors.math import Subtractor, Summer, Constant
+from scipysim.actors.math import Summer, Constant
 
 
 import logging
@@ -60,7 +60,7 @@ class Pulse_Width_Modulator( Model ):
         sin_plotter = Plotter( wires['sin_plot'] )
 
         # Output = sin - ramp
-        subtractor = Subtractor( wires['offset_sin'], wires['ramp'], wires['diff'] )
+        subtractor = Summer( [wires['offset_sin'], (wires['ramp'], '-')], wires['diff'] )
 
         # Want to see when that is > 0
         comparison = GreaterThan( wires['diff'], wires['pwm_bool'], threshold=0.0, boolean_output=True )

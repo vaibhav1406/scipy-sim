@@ -11,5 +11,6 @@ from dt_integrator import DTIntegratorBackwardEuler
 from dt_integrator import DTIntegratorForwardEuler
 from dt_integrator import DTIntegratorTrapezoidal
 from proportional import Proportional
-from subtract import Subtractor
 from summer import Summer
+from summer import CTSummer
+from summer import DTSummer
