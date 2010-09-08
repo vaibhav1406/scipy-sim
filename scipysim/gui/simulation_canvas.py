@@ -49,11 +49,11 @@ class CanvasBlock ( object ):
                                  tags=preview_tags + ["type:text"]
                                  )
 
-        # Draw on input and output ports
-        gap = 5
-
         num_inputs, num_outputs = codefile.num_inputs, codefile.num_outputs
-        x_, y_ = x, (y + (self.BLOCK_HEIGHT / 2) - gap*(num_inputs / 2))
+
+        # Draw on input and output ports
+        port_size = 5
+
         logging.debug( "Block has %d inputs, and %d outputs." % ( num_inputs, num_outputs ) )
 
         if num_inputs is None:
@@ -62,23 +62,32 @@ class CanvasBlock ( object ):
         elif num_inputs == 0:
             pass
         else:
+            input_gap = 0
+            if num_inputs > 1:
+                input_gap = (self.BLOCK_HEIGHT - 2*port_size) / (num_inputs - 1)
+            x_, y_ = x, ((y + self.BLOCK_HEIGHT / 2) - ((num_inputs - 1) * input_gap)/2)
+
             for input in xrange( num_inputs ):
-                self.canvas.create_polygon( x - gap, y_ - gap, x, y_, x - gap , y_ + gap,
+                self.canvas.create_polygon( x - port_size, y_ - port_size, x, y_, x - port_size , y_ + port_size,
                                             tags=preview_tags + ["type:input-%d" % input],
                                             fill="#000000" )
-                y_ = y_ + 2*gap
+                y_ = y_ + input_gap
 
-        x_, y_ = x + self.BLOCK_WIDTH, (y + (self.BLOCK_HEIGHT / 2) - gap*(num_outputs / 2))
         if num_outputs is None:
             num_outputs = 1
         elif num_outputs == 0:
             pass
         else:
+            output_gap = 0
+            if num_outputs > 1:
+                output_gap = (self.BLOCK_HEIGHT - 2*port_size) / (num_outputs - 1)
+            x_, y_ = x + self.BLOCK_WIDTH, ((y + self.BLOCK_HEIGHT / 2) - ((num_outputs - 1) * output_gap)/2)
+
             for output in xrange( num_outputs ):
-                self.canvas.create_polygon( x_, y_ - gap , x_ + gap, y_, x_, y_ + gap,
+                self.canvas.create_polygon( x_, y_ - port_size , x_ + port_size, y_, x_, y_ + port_size,
                                             tags=preview_tags + ["type:output-%d" % output],
                                             fill="#000000" )
-                y_ = y_ + 2*gap
+                y_ = y_ + output_gap
 
 
     def move_to( self, x, y ):
