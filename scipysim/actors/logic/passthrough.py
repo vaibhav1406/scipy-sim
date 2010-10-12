@@ -8,7 +8,7 @@ Created on 13/12/2009
 @author: Brian
 '''
 
-from scipysim.actors import Actor
+from scipysim.actors import Actor, LastEvent
 import logging
 
 class PassThrough(Actor):
@@ -59,10 +59,10 @@ class PassThrough(Actor):
             else_data_in = self.else_data_input.get(True)
 
         # We are finished iff all the input objects are None
-        if bool_in is None and data_in is None:
+        if bool_in.last and data_in.last:
             logging.info("We have finished PassingThrough the data")
             self.stop = True
-            self.output_channel.put(None)
+            self.output_channel.put(LastEvent(bool_in.tag))
             return
         logging.debug("Received a boolean and a data point. Tags = (%e,%e)" % (bool_in.tag, data_in.tag))
 

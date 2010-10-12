@@ -8,7 +8,7 @@ Created on Feb 7, 2010
 
 import logging
 from numpy import linspace
-from scipysim.actors import Source, Channel, Model, Event
+from scipysim.actors import Source, Channel, Model, Event, LastEvent
 
 
 class Step(Source):
@@ -40,7 +40,7 @@ class Step(Source):
             #time.sleep(random.random() * 0.001)     # Adding a delay so we can see the async
         logging.debug("Step process finished adding all data to channel")
         self.stop = True
-        self.output_channel.put(None)
+        self.output_channel.put(LastEvent(self.simulation_time))
 
 from scipysim.actors.display import Stemmer
 from scipysim.actors.signal import Decimator

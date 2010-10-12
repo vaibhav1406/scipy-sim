@@ -7,7 +7,7 @@ Created on 29/11/2009
 '''
 import logging
 import numpy
-from scipysim import Source, Actor, Channel, Event
+from scipysim import Source, Actor, Channel, Event, LastEvent
 
 import logging
 verbose = True
@@ -58,11 +58,11 @@ if havePygame:
                 >>> in_channel, out_channel = Channel(), Channel()
                 >>> vid_src = VideoSnapshot(in_channel, out_channel)
                 >>> in_channel.put(msg)
-                >>> in_channel.put(None)  # Tells the component we are finished
+                >>> in_channel.put(LastEvent())  # Tells the component we are finished
                 >>> vid_src.start()     # Start the thread, it will process its input channel
                 >>> vid_src.join()
                 >>> img1 = out_channel.get()
-                >>> assert out_channel.get()['value'] == None
+                >>> assert out_channel.get().last == True
             """
             super(VideoSnapshot, self).__init__(input_signal, output_channel)
             self.MAX_FREQUENCY = max_freq
@@ -92,10 +92,10 @@ if havePygame:
 
             while True:
                 obj = self.input_channel.get(True)     # this is blocking
-                if obj is None:
+                if obj.last:
                     logging.info("We have finished capturing from the webcam.")
                     self.stop = True
-                    self.output_channel.put(None)
+                    self.output_channel.put(obj)
                     return
                 tag = obj['tag']
                 try:
@@ -118,7 +118,7 @@ if havePygame:
         input = Channel()
         output = Channel()
         input.put(Event(tag=0, value=first))
-        input.put(None)
+        input.put(LastEvent())
         vs = VideoSnapshot(input_signal=input, output_channel=output)
         vs.start()
         image = output.get()['value']

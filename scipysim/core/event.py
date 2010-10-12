@@ -17,11 +17,14 @@ Created on 16/03/2010
 # For backwards compatibility with dict-based events
 from collections import Mapping 
 
+from numpy import inf
+
 class Event(Mapping):
     '''
     An Event consists of a tag (e.g. time in a continuous-time model of
     computation, but may be interpreted in other ways by other models of 
-    computation) and a value.
+    computation) and a value. An event may be marked as representing
+    the last event in a signal by constructing it with 'last' = true.
     
     @note For backwards compatibility with older-style dict-based events, the
     Event class uses the Mapping mixin from collections.
@@ -49,7 +52,7 @@ class Event(Mapping):
     '''
     __event = None 
 
-    def __init__(self, tag=None, value=None):
+    def __init__(self, tag=None, value=None, last=False):
         '''
         Construct an immutable event from a tag and a value.
         
@@ -57,12 +60,15 @@ class Event(Mapping):
         
         @param tag
         @param value
+        @param last: true if this is the last event in a signal
         '''
         super(Event, self).__setattr__('_Event__event', 
-                                       { 'tag': tag, 'value': value })
+                                       { 'tag':   tag,
+                                         'value': value,
+                                         'last':   last})
     
     def __repr__(self):
-        return 'Event(%s, %s)' % (self.tag, self.value)
+        return 'Event(%s, %s, %s)' % (self.tag, self.value, self.last)
     
     def __iter__(self):
         '''
@@ -86,11 +92,11 @@ class Event(Mapping):
         return len(self.__event)    
         
     def __getitem__(self, key):
-        '''Allow dict-style access for 'tag' and 'value'.'''    
+        '''Allow dict-style access for 'tag', 'value', and 'last'.'''
         return self.__event[key]
     
     def __getattr__(self, name):
-        '''Allow accessors for 'tag' and 'value'. '''
+        '''Allow accessors for 'tag', 'value', and 'last'. '''
         return self.__event[name]    
     
     def __setattr__(self, name, value):
@@ -124,11 +130,11 @@ class Event(Mapping):
         
     def copy(self):
         '''Return a shallow copy of the Event.'''
-        return Event(self.tag, self.value)
+        return Event(self.tag, self.value, self.last)
         
     def __copy__(self):
         '''Return a shallow copy of the Event.'''
-        return Event(self.tag, self.value)  
+        return Event(self.tag, self.value, self.last)
         
     def __deepcopy__(self, memo={}):
         '''Return a deep copy of the Event.'''
@@ -136,9 +142,25 @@ class Event(Mapping):
         result = self.__class__()
         memo[id(self)] = result
         copied = deepcopy(self.__event, memo)
-        result.__init__(copied['tag'], copied['value'])
+        result.__init__(copied['tag'], copied['value'], copied['last'])
         return result    
+
+
+class LastEvent(Event):
+    '''
+    An immutable signal termination event with a value of None.
+
+    '''
+
+    def __init__(self, tag=inf):
+        '''
+        Construct an immutable termination event.
         
+        @param tag
+        '''
+        super(LastEvent, self).__init__(tag, None, True)
+
+
 # --------------------------------------------------------------------
 # Testing
 # --------------------------------------------------------------------
@@ -190,8 +212,39 @@ if __name__ == "__main__":
         def test_event_map_is_immutable(self):
             def mutate():
                 self.event['aKey'] = 5            
-            self.assertRaises(TypeError, mutate)                
+            self.assertRaises(TypeError, mutate)
+
+        def test_event_map_is_picklable(self):
+            state = self.event.__getstate__()
+            event = Event()
+            event.__setstate__(state)
+            self.assertEqual(event.tag, self.tag)
+            self.assertEqual(event.value, self.value)
+
+        def test_event_is_not_terminal(self):
+            self.assertFalse(self.event.last)
+
             
+    class TestLastEvent(unittest.TestCase):
+
+        def setUp(self):
+            self.tag = 1.1
+            self.event = LastEvent(self.tag)
+
+        def test_event_is_terminal(self):
+            self.assertTrue(self.event.last)
+
+        def test_event_is_copyable(self):
+            event = self.event.copy()
+            self.assertEqual(event.tag, self.tag)
+            self.assertEqual(event.value, None)
+            self.assertTrue(event.last)
+
+        def test_last_is_immutable(self):
+            def mutate():
+                self.event.last = False
+            self.assertRaises(TypeError, mutate)
+
     unittest.main()
 
         

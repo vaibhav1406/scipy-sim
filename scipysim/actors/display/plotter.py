@@ -111,12 +111,9 @@ class Channel2Process(Actor):
             self.first_time = False
 
         obj = self.channel.get(True)
+        self.queue.put(obj)
  
-        if obj is not None:
-            self.queue.put(obj)
-        else:
-            
-            self.queue.put(None)
+        if obj.last:
             # Indicate that nothing else from this process will be put in queue
             self.queue.close()
             # Block on flushing the data to the pipe. Must be called after close
@@ -196,7 +193,7 @@ class BasePlotter(DisplayActor):
         # Grab all values that are currently available
         while not self.input_channel.empty():
             obj = self.input_channel.get_nowait()  # Non-blocking
-            if obj is None:
+            if obj.last:
                 self.stop = True
 
                 self.input_channel.close()
@@ -347,8 +344,8 @@ def test_NPA():
         q2.put(d)
         time.sleep(0.1)
 
-    q1.put(None)
-    q2.put(None)
+    q1.put(LastEvent())
+    q2.put(LastEvent())
 
     print 'other calculations keep going...'
     npa1.join()

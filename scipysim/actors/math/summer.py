@@ -9,7 +9,7 @@ depend on the kind of signals that are being added.
 import logging
 #logging.basicConfig(level=logging.DEBUG)
 from numpy import inf as infinity
-from scipysim.actors import Actor, Channel, Event
+from scipysim.actors import Actor, Channel, Event, LastEvent
 
 class BaseSummer(Actor):
     '''
@@ -70,23 +70,23 @@ class BaseSummer(Actor):
         oldest_tag = infinity
         for input in self.inputs:
             event = input.head()
-            if event is not None:
+            if not event.last:
                 oldest_tag = min(oldest_tag, event.tag)
                 events.append((input, event))
 
 
-        # We are finished iff all the input channels have None at the head
+        # We are finished iff all the input channels have a terminal event at the head
         if len(events) < self.num_inputs:
             # If we received at least one termination event then we should
             # begin to pass on termination signals
 
             # Clear non-terminating inputs
             for input in self.inputs:
-                if input.head() is not None:
+                if not input.head().last:
                     input.drop()
 
             # Send termination signal
-            self.output_channel.put(None)
+            self.output_channel.put(LastEvent())
 
             if len(events) == 0:
                 # Terminate this process
@@ -245,12 +245,12 @@ class SummerTests(unittest.TestCase):
             q_in_1.put(val)
         for val in input2:
             q_in_2.put(val)
-        q_in_1.put(None)
-        q_in_2.put(None)
+        q_in_1.put(LastEvent())
+        q_in_2.put(LastEvent())
         summer.join()
         for i in xrange(100):
             self.assertEquals(q_out.get()['value'], 3)
-        self.assertEquals(q_out.get(), None)
+        self.assertTrue(q_out.get().last)
 
     def test_input_domain_check(self):
         def run():
@@ -283,12 +283,12 @@ class SummerTests(unittest.TestCase):
             q_in_1.put(val)
         for val in input2:
             q_in_2.put(val)
-        q_in_1.put(None)
-        q_in_2.put(None)
+        q_in_1.put(LastEvent())
+        q_in_2.put(LastEvent())
         summer.join()
         for i in xrange(100):
             self.assertEquals(q_out.get()['value'], -1)
-        self.assertEquals(q_out.get(), None)
+        self.assertTrue(q_out.get().last)
 
     def test_delayed_summer(self):
         '''
@@ -308,12 +308,12 @@ class SummerTests(unittest.TestCase):
             q_in_1.put(val)
         for val in input2:
             q_in_2.put(val)
-        q_in_1.put(None)
-        q_in_2.put(None)
+        q_in_1.put(LastEvent())
+        q_in_2.put(LastEvent())
         summer.join()
         for i in xrange(99):
             self.assertEquals(q_out.get()['value'], 3)
-        self.assertEquals(q_out.get(), None)
+        self.assertTrue(q_out.get().last)
 
     def test_delayed_summer2(self):
         '''
@@ -334,13 +334,13 @@ class SummerTests(unittest.TestCase):
             q_in_1.put(val)
         for val in input2:
             q_in_2.put(val)
-        q_in_1.put(None)
-        q_in_2.put(None)
+        q_in_1.put(LastEvent())
+        q_in_2.put(LastEvent())
         summer.join()
 
         for i in xrange(DELAY, 100):
             self.assertEquals(q_out.get()['value'], 3)
-        self.assertEquals(q_out.get(), None)
+        self.assertTrue(q_out.get().last)
 
 
     def test_delayed_summer3(self):
@@ -361,8 +361,8 @@ class SummerTests(unittest.TestCase):
             q_in_1.put(val)
         for val in input2:
             q_in_2.put(val)
-        q_in_1.put(None)
-        q_in_2.put(None)
+        q_in_1.put(LastEvent())
+        q_in_2.put(LastEvent())
         summer.join()
 
         # First value should be 1, next 99 should be 3, last should be 2.
@@ -376,8 +376,8 @@ class SummerTests(unittest.TestCase):
             self.assertEquals(data['tag'], i)
 
         data = q_out.get()
-        # lastly the channel should contain a 'None'
-        self.assertEquals(q_out.get(), None)
+        # lastly the channel should contain a terminal event
+        self.assertTrue(q_out.get().last)
 
     def test_ct_summer_with_different_rates(self):
         '''
@@ -400,8 +400,8 @@ class SummerTests(unittest.TestCase):
             q_in_1.put(val)
         for val in input2:
             q_in_2.put(val)
-        q_in_1.put(None)
-        q_in_2.put(None)
+        q_in_1.put(LastEvent())
+        q_in_2.put(LastEvent())
         summer.join()
 
         self.assertEquals(q_out.get()['value'], 1.0)
@@ -409,7 +409,7 @@ class SummerTests(unittest.TestCase):
             self.assertEquals(q_out.get()['value'], i + i)
             self.assertEquals(q_out.get()['value'], i + i + 1)
         self.assertEquals(q_out.get()['value'], 196)
-        self.assertEquals(q_out.get(), None)
+        self.assertTrue(q_out.get().last)
 
     def test_multi_summer(self):
         '''
@@ -422,10 +422,10 @@ class SummerTests(unittest.TestCase):
         output_channel = Channel('DT')
 
         # Fill each channel with num_data_points of its own index
-        # So channel 5 will be full of the value 4, then a None
+        # So channel 5 will be full of the value 4, then a terminal event
         for i, input_channel in enumerate(input_channels):
             [input_channel.put(Event(value=i, tag=j)) for j in xrange(num_data_points)]
-        [input_channel.put(None) for input_channel in input_channels]
+        [input_channel.put(LastEvent()) for input_channel in input_channels]
 
         summer = Summer(input_channels, output_channel)
         summer.start()
@@ -433,7 +433,7 @@ class SummerTests(unittest.TestCase):
         s = sum(xrange(num_input_channels))
         for i in xrange(num_data_points):
             self.assertEquals(output_channel.get()['value'], s)
-        self.assertEquals(output_channel.get(), None)
+        self.assertTrue(output_channel.get().last)
 
     def test_multi_delayed_summer(self):
         '''
@@ -447,11 +447,11 @@ class SummerTests(unittest.TestCase):
         output_channel = Channel('DT')
 
         # Fill each channel with num_data_points of its own index
-        # So channel 5 will be full of the value 4, then a None
+        # So channel 5 will be full of the value 4, then a terminal event
         for i, input_channel in enumerate(input_channels):
             [input_channel.put(Event(value=i, tag=j)) for j in xrange(num_data_points) if i is not 0]
         [input_channels[0].put(Event(value=0, tag=j + DELAY)) for j in xrange(num_data_points)]
-        [input_channel.put(None) for input_channel in input_channels]
+        [input_channel.put(LastEvent()) for input_channel in input_channels]
 
         summer = Summer(input_channels, output_channel)
         summer.start()
@@ -459,7 +459,7 @@ class SummerTests(unittest.TestCase):
         s = sum(xrange(num_input_channels))
         for i in xrange(num_data_points - DELAY):
             self.assertEquals(output_channel.get()['value'], s)
-        self.assertEquals(output_channel.get(), None)
+        self.assertTrue(output_channel.get().last)
 
 
 if __name__ == "__main__":

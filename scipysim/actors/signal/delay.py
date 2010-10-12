@@ -5,7 +5,7 @@ Created on 23/11/2009
 '''
 
 import logging
-from scipysim.actors import Siso, Channel, Event
+from scipysim.actors import Siso, Channel, Event, LastEvent
 
 import unittest
 import numpy
@@ -54,12 +54,12 @@ class DelayTests(unittest.TestCase):
 
         block = Delay(self.q_in, self.q_out, delay)
         block.start()
-        [self.q_in.put(i) for i in input1 + [None]]
+        [self.q_in.put(i) for i in input1 + [LastEvent()]]
 
         block.join()
         actual_output = [self.q_out.get() for i in xrange(100)]
         [self.assertEquals(actual_output[i], expected_output[i]) for i in xrange(100)]
-        self.assertEquals(None, self.q_out.get())
+        self.assertTrue(self.q_out.get().last)
 
     def test_complex_delay(self):
         '''Test delaying a CT signal'''
@@ -75,12 +75,12 @@ class DelayTests(unittest.TestCase):
 
         block = Delay(self.q_in, self.q_out, delay)
         block.start()
-        [self.q_in.put(i) for i in data_in + [None]]
+        [self.q_in.put(i) for i in data_in + [LastEvent()]]
 
         block.join()
         actual_output = [self.q_out.get() for i in xrange(len(tags))]
         [self.assertEquals(actual_output[i], expected_output[i]) for i in xrange(len(tags))]
-        self.assertEquals(None, self.q_out.get())
+        self.assertTrue(self.q_out.get().last)
 
 
 if __name__ == "__main__":

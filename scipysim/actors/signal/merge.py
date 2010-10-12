@@ -10,7 +10,7 @@ the merge deterministic. It also implicitly introduces "super-dense" time.
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
-from scipysim.actors import Actor, Channel, MakeChans, Event
+from scipysim.actors import Actor, Channel, MakeChans, Event, LastEvent
 from numpy import inf as infinity
 
 class Merge(Actor):
@@ -50,14 +50,14 @@ class Merge(Actor):
         oldest_tag = infinity
         for input in self.inputs:
             event = input.head()
-            if event is None:
+            if event.last:
                 termination_count += 1 
             else:
                 oldest_tag = min(oldest_tag, event.tag)
                 events.append((input, event))
         
 
-        # We are finished iff all the input channels have None at the head
+        # We are finished iff all the input channels have a LastEvent at the head
         if termination_count == self.num_inputs:
             logging.info("Merge: finished merging all events")
 
@@ -67,7 +67,7 @@ class Merge(Actor):
 
             # Terminate this process and pass on termination signal
             self.stop = True
-            self.output_channel.put(None)
+            self.output_channel.put(LastEvent())
             return
 
         elif termination_count > 0:
@@ -76,11 +76,11 @@ class Merge(Actor):
 
             # Clear non-terminating inputs
             for input in self.inputs:
-                if input.head() is not None:
+                if not input.head().last:
                     input.drop()
 
             # Terminate
-            self.output_channel.put(None)
+            self.output_channel.put(LastEvent())
 
         else:
 
@@ -105,8 +105,8 @@ class MergeTests(unittest.TestCase):
         q_in_2 = Channel()
         q_out = Channel()
 
-        input1 = [Event(value=1, tag=i) for i in xrange(100)] + [None]
-        input2 = [Event(value=2, tag=i) for i in xrange(100)] + [None]
+        input1 = [Event(value=1, tag=i) for i in xrange(100)] + [LastEvent()]
+        input2 = [Event(value=2, tag=i) for i in xrange(100)] + [LastEvent()]
 
         merge = Merge([q_in_1, q_in_2], q_out)
         merge.start()
@@ -118,7 +118,7 @@ class MergeTests(unittest.TestCase):
         for i in xrange(100):
             self.assertEquals(q_out.get().value, 1)
             self.assertEquals(q_out.get().value, 2)
-        self.assertEquals(q_out.get(), None)
+        self.assertTrue(q_out.get().last)
 
     def test_alternating_merge(self):
         '''
@@ -128,8 +128,8 @@ class MergeTests(unittest.TestCase):
         q_in_2 = Channel()
         q_out = Channel()
 
-        input1 = [Event(value=1, tag=2.0*i) for i in xrange(100)] + [None]
-        input2 = [Event(value=2, tag=2.0*i + 1.0) for i in xrange(100)] + [None]
+        input1 = [Event(value=1, tag=2.0*i) for i in xrange(100)] + [LastEvent()]
+        input2 = [Event(value=2, tag=2.0*i + 1.0) for i in xrange(100)] + [LastEvent()]
 
         merge = Merge([q_in_1, q_in_2], q_out)
         merge.start()
@@ -141,7 +141,7 @@ class MergeTests(unittest.TestCase):
         for i in xrange(100):
             self.assertEquals(q_out.get().value, 1)
             self.assertEquals(q_out.get().value, 2)
-        self.assertEquals(q_out.get(), None)
+        self.assertTrue(q_out.get().last)
 
     def test_interleaving_merge(self):
         '''
@@ -152,8 +152,8 @@ class MergeTests(unittest.TestCase):
         q_in_2 = Channel()
         q_out = Channel()
 
-        input1 = [Event(value=1, tag=2.0*i) for i in xrange(3)] + [None]
-        input2 = [Event(value=2, tag=0.5*i) for i in xrange(11)] + [None]
+        input1 = [Event(value=1, tag=2.0*i) for i in xrange(3)] + [LastEvent()]
+        input2 = [Event(value=2, tag=0.5*i) for i in xrange(11)] + [LastEvent()]
 
         merge = Merge([q_in_1, q_in_2], q_out)
         merge.start()
@@ -191,7 +191,7 @@ class MergeTests(unittest.TestCase):
         self.assertEquals(q_out.get().value, 2)
         self.assertEquals(q_out.head().tag, 5.0)
         self.assertEquals(q_out.get().value, 2)         
-        self.assertEquals(q_out.get(), None)
+        self.assertTrue(q_out.get().last)
 
 
     def test_mass_merge(self):
@@ -204,10 +204,10 @@ class MergeTests(unittest.TestCase):
         output_channel = Channel()
 
         # Fill each channel with num_data_points of (channel, data) pairs,
-        # then a None
+        # then a LastEvent()
         for i, input_channel in enumerate(input_channels):
             _ = [input_channel.put(Event(value=(i,j), tag=j)) for j in xrange(num_data_points)]
-        _ = [input_channel.put(None) for input_channel in input_channels]
+        _ = [input_channel.put(LastEvent()) for input_channel in input_channels]
 
         merge = Merge(input_channels, output_channel)
         merge.start()
@@ -215,7 +215,7 @@ class MergeTests(unittest.TestCase):
         for i in xrange(num_data_points):
             for chan in xrange(num_input_channels):
                 self.assertEquals(output_channel.get().value, (chan, i))
-        self.assertEquals(output_channel.get(), None)
+        self.assertTrue(output_channel.get().last)
 
 
 if __name__ == "__main__":

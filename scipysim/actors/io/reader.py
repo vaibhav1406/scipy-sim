@@ -3,7 +3,7 @@ Created on Feb 1, 2010
 
 @author: brianthorne
 '''
-from scipysim.actors import Source, Channel, Event
+from scipysim.actors import Source, Channel, Event, LastEvent
 import numpy
 
 class Reader(Source):
@@ -31,7 +31,7 @@ class Reader(Source):
     def process(self):
         x = numpy.load(self.filename)
         [self.output_channel.put(Event(tag, value)) for (tag, value) in x]
-        self.output_channel.put(None)
+        self.output_channel.put(LastEvent)
         self.stop = True
 
 
@@ -54,7 +54,7 @@ class TextReader(Source):
                 [self.output_channel.put(Event(tag=i, value=word.strip())) for j, word in enumerate(line.split())]
             else:
                 self.output_channel.put(Event(tag=i, value=line.strip()))
-        self.output_channel.put(None)
+        self.output_channel.put(LastEvent)
         self.stop = True
 
 

@@ -5,7 +5,7 @@ Created on 23/11/2009
 '''
 import logging
 from numpy import linspace
-from scipysim.actors import Source, Event
+from scipysim.actors import Source, Event, LastEvent
 
 class Constant(Source):
     '''
@@ -33,5 +33,5 @@ class Constant(Source):
         #time.sleep(random.random() * 0.001)     # Adding a delay so we can see the async
         logging.debug("Const process finished adding all data to its output channel")
         self.stop = True
-        self.output_channel.put(None)
+        self.output_channel.put(LastEvent(self.simulation_time))
 

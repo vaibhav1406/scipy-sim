@@ -37,13 +37,13 @@ class Bundle(Actor):
         """Send packets of events at one time"""
         logging.debug("Running buffer/bundle process")
         obj = self.input_channel.get(True)     # this is blocking
-        if obj is not None:
+        if not obj.last:
             self.temp_data.append(obj)
-        if obj is None or self.bundle_size is not None and len(self.temp_data) >= self.bundle_size:
+        if obj.last or self.bundle_size is not None and len(self.temp_data) >= self.bundle_size:
             self.send_bundle()
 
-            if obj is None:
-                self.output_channel.put(None)
+            if obj.last:
+                self.output_channel.put(obj) # Propagate termination
                 self.stop = True
             else:
                 self.temp_data = []

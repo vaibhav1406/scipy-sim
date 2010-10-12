@@ -3,7 +3,7 @@ Created on 19/11/2009
 TODO
 @author: Brian Thorne
 '''
-from scipysim.actors import Source, Event
+from scipysim.actors import Source, Event, LastEvent
 import logging
 from numpy import linspace
 import time
@@ -52,4 +52,4 @@ class RandomSource(Source):
             #time.sleep(random.random() * 0.01)     # Adding a delay so we can see the async
         logging.debug("Random process finished adding all data to channel")
         self.stop = True
-        self.output_channel.put(None)
+        self.output_channel.put(LastEvent(self.simulation_time))

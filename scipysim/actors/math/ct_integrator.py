@@ -4,7 +4,7 @@ Created on 8/03/2010
 @author: Brian Thorne
 '''
 
-from scipysim.actors import Actor, Channel, Siso, Event
+from scipysim.actors import Actor, Channel, Siso, Event, LastEvent
 
 class CTIntegrator(Siso):
     '''
@@ -72,13 +72,13 @@ class CTIntegratorTests(unittest.TestCase):
 
         block.start()
         [self.q_in.put(val) for val in inp]
-        self.q_in.put(None)
+        self.q_in.put(LastEvent())
         block.join()
 
         for expected_output in expected_output_values:
             out = self.q_out.get()
             self.assertEquals(out.value, expected_output)
-        self.assertEquals(self.q_out.get(), None)
+        self.assertTrue(self.q_out.get().last)
 
     def test_different_rate(self):
         '''Test that integration of a simple positive constant signal doesn't change with samplerate.
@@ -98,7 +98,7 @@ class CTIntegratorTests(unittest.TestCase):
             block1.start(); block2.start()
             [q_in1.put(val) for val in inp_1]
             [q_in2.put(val) for val in inp_2]
-            q_in1.put(None); q_in2.put(None)
+            q_in1.put(LastEvent()); q_in2.put(LastEvent())
             block1.join(); block2.join()
 
             out = []
@@ -109,12 +109,12 @@ class CTIntegratorTests(unittest.TestCase):
             self.assertEquals(len(out), len(expected_output_values_1))
 
             #[self.assertEquals(out[i], expected_output[i]) for i, _ in enumerate(expected_output_values_1)]
-            self.assertEquals(q_out1.get(), None)
+            self.assertTrue(q_out1.get().last)
 
             for expected_output in expected_output_values_2:
                 out = q_out2.get()
                 self.assertAlmostEquals(out.value, expected_output)
-            self.assertEquals(q_out2.get(), None)
+            self.assertTrue(q_out2.get().last)
 
 if __name__ == '__main__':
     unittest.main()

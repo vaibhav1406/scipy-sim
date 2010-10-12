@@ -1,4 +1,4 @@
-from scipysim.actors import Actor, Channel, Event
+from scipysim.actors import Actor, Channel, Event, LastEvent
 import unittest
 import numpy as np
 
@@ -9,9 +9,9 @@ class BundleDerivative(Actor):
 
     def process(self):
         obj = self.input_channel.get(True)     # this is blocking
-        if obj is None:
+        if hasattr(obj, 'last'):
             self.stop = True
-            self.output_channel.put(None)
+            self.output_channel.put(obj)
             return
 
         values = obj["Value"][:]
@@ -53,7 +53,7 @@ class BundleDerivativeTests(unittest.TestCase):
         bundler = Bundle(self.q_in, self.q_out)
         diffblock = BundleDerivative(self.q_out, self.q_out2, threshold=50)
 
-        [self.q_in.put(i) for i in self.input + [None]]
+        [self.q_in.put(i) for i in self.input + [LastEvent()]]
         [block.start() for block in [bundler, diffblock]]
 
         [block.join() for block in [bundler, diffblock]]
@@ -61,7 +61,7 @@ class BundleDerivativeTests(unittest.TestCase):
         self.assertNotEqual(outputs, None)
 
         [self.assertEquals(outs[i], outputs['Value'][i]) for i in xrange(len(outs))]
-        self.assertEquals(self.q_out2.get(), None)
+        self.assertTrue(self.q_out2.get().last)
 
 if __name__ == "__main__":
     unittest.main()

@@ -27,14 +27,16 @@ class Writer(Actor):
 
     def process(self):
         obj = self.input_channel.get(True)     # this is blocking
-        self.temp_data.append(obj)
-        if obj is None:
+        if obj.last:
             self.write_file()
             self.stop = True
             return
+        else:
+            self.temp_data.append(obj)
+
 
     def write_file(self):
-        x = numpy.zeros(len(self.temp_data),
+        x = numpy.zeros(len(self.temp_data)+1,
                             dtype=
                             {
                                 'names': ["Tag", "Value"],
@@ -42,6 +44,6 @@ class Writer(Actor):
                                 'titles': ['Domain', 'Name']    # This might not get used...
                              }
                         )
-        x[:-1] = [ (element['tag'], element['value']) for element in self.temp_data if element is not None]
+        x[:-1] = [ (element['tag'], element['value']) for element in self.temp_data]
 
         numpy.save(self.filename, x)
