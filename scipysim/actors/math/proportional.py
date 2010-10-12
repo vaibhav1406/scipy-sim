@@ -5,7 +5,7 @@ Created on 23/11/2009
 '''
 
 import logging
-from scipysim.actors import Siso, Channel, Event
+from scipysim.actors import Siso, Channel, Event, LastEvent
 
 class Proportional(Siso):
     '''
@@ -45,14 +45,14 @@ class ProportionalTests(unittest.TestCase):
         doubler = Proportional(q_in, q_out)
         doubler.start()
         [q_in.put(val) for val in inp]
-        q_in.put(None)
+        q_in.put(LastEvent())
         doubler.join()
 
         for i in xrange(100):
             out = q_out.get()
             self.assertEquals(out.value, expected_output[i].value)
             self.assertEquals(out.tag, expected_output[i].tag)
-        self.assertEquals(q_out.get(), None)
+        self.assertTrue(q_out.get().last)
 
 if __name__ == "__main__":
     unittest.main()

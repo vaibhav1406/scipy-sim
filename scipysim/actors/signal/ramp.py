@@ -6,7 +6,7 @@ Created on 23/11/2009
 '''
 import logging
 from numpy import linspace
-from scipysim.actors import Source, Actor, Event
+from scipysim.actors import Source, Actor, Event, LastEvent
 
 import time, random # These are used to test the async
 
@@ -43,5 +43,5 @@ class Ramp(Source):
             #time.sleep(random.random() * 0.001)     # Adding a delay so we can see the async
         logging.debug("Ramp process finished adding all data to channel")
         self.stop = True
-        self.output_channel.put(None)
+        self.output_channel.put(LastEvent(self.simulation_time))
 

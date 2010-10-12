@@ -8,7 +8,7 @@ Notes
 How do we deal with "weird" input signals... what about random time intervals in DE?
 Incompatible input/output frequencies...?
 '''
-from scipysim.actors import Siso, Actor, Channel, Event, InvalidSimulationInput
+from scipysim.actors import Siso, Actor, Channel, Event, LastEvent, InvalidSimulationInput
 import logging
 import unittest
 from numpy import linspace
@@ -67,14 +67,14 @@ class SamplerTests(unittest.TestCase):
         down_sampler = Sampler(self.q_in, self.q_out, 0.5)
         down_sampler.start()
         [self.q_in.put(val) for val in inp]
-        self.q_in.put(None)
+        self.q_in.put(LastEvent())
         down_sampler.join()
 
         for expected_output in expected_outputs:
             out = self.q_out.get()
             self.assertEquals(out.value, expected_output.value)
             self.assertEquals(out.tag, expected_output.tag)
-        self.assertEquals(self.q_out.get(), None)
+        self.assertTrue(self.q_out.get().last)
 
     def test_compatible_signals(self):
         '''Test reducing the frequency of a more complicated signal.
@@ -99,14 +99,14 @@ class SamplerTests(unittest.TestCase):
         down_sampler = Sampler(self.q_in, self.q_out, desired_resolution)
         down_sampler.start()
         [self.q_in.put(val) for val in inp]
-        self.q_in.put(None)
+        self.q_in.put(LastEvent())
         down_sampler.join()
 
         for expected_output_element in expected_output:
             out = self.q_out.get()
             self.assertEquals(out.value, expected_output_element.value)
             self.assertEquals(out.tag, expected_output_element.tag)
-        self.assertEquals(self.q_out.get(), None)
+        self.assertTrue(self.q_out.get().last)
 
     def test_incompatible_signals(self):
         '''Test reducing the frequency by non integer factor.
@@ -129,13 +129,13 @@ class SamplerTests(unittest.TestCase):
         down_sampler = Sampler(self.q_in, self.q_out, desired_resolution)
         down_sampler.start()
         [self.q_in.put(val) for val in inp]
-        self.q_in.put(None)
+        self.q_in.put(LastEvent())
         down_sampler.join()
 
         out = self.q_out.get()
         # @todo: NEED TO WORK OUT HOW WE WANT TO DO THIS...
         self.assertEquals(type(out), InvalidSimulationInput)
-        self.assertEquals(self.q_out.get(), None)
+        self.assertTrue(self.q_out.get().last)
 
 if __name__ == "__main__":
     unittest.main()

@@ -86,7 +86,7 @@ class Stemmer(DisplayActor):
         plot any values in the buffer
         '''
         obj = self.input_channel.get(True)     # this is blocking
-        if obj is None:
+        if obj.last:
             logging.info("We have finished processing the channel of data to be displayed")
             self.update_plot()
             self.stop = True

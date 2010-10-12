@@ -40,7 +40,7 @@ class BundleHistPlotter(Actor):
     def process(self):
         '''Collect the data in one lot from the channel and create an image'''
         self.data = self.input_channel.get(True)     # this is blocking
-        if self.data is None:
+        if hasattr(self.data, 'last'): # Hack for bundles
             self.stop = True
         else:
             assert type(self.data) == numpy.ndarray

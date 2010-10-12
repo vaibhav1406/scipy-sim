@@ -3,7 +3,7 @@ Created on 21/12/2009
 
 @author: Allan McInnes
 '''
-from scipysim.actors import Siso, Event
+from scipysim.actors import Siso, Event, LastEvent
 import numpy as np  
 
 
@@ -169,13 +169,13 @@ class CTIntegratorQS1(Siso):
             self.__external_transition(tag, xdot)
 
         #if self.next_t > 20:
-        #    self.output_channel.put(None)
+        #    self.output_channel.put(LastEvent())
 
 
 import unittest
 from scipysim.actors import SisoCTTestHelper, Channel
 
-class CTintegratorTest(unittest.TestCase):
+class CTintegratorQSTests(unittest.TestCase):
     '''Test the integrator actor'''
 
     def setUp(self):
@@ -234,7 +234,7 @@ class CTintegratorTest(unittest.TestCase):
                     CTIntegratorQS1(q1, q3, init=1.0, delta=0.1, k=10.0 / 0.1)
                   ]
 
-        [self.q_in.put(val) for val in inputs + [None]]
+        [self.q_in.put(val) for val in inputs + [LastEvent()]]
 
         [b.start() for b in blocks]
         [b.join() for b in blocks]
@@ -243,7 +243,7 @@ class CTintegratorTest(unittest.TestCase):
             self.assertAlmostEqual(out.value, expected_output.value, 4)
             self.assertAlmostEqual(out.tag, expected_output.tag, 4)
 
-        self.assertEquals(q2.get(), None)
+        self.assertTrue(q2.get().last)
 
 def quickTest():
     from scipysim.actors.math import Proportional
@@ -260,7 +260,7 @@ def quickTest():
     [b.start() for b in blocks]
     [b.join() for b in blocks]
     out = c4.get()
-    while not out is None :
+    while not out.last :
         out = c4.get()
 
 if __name__ == '__main__':

@@ -8,6 +8,17 @@ from Tkinter import Canvas
 import logging
 import itertools
 
+
+# The colour palette
+# Randomly chosen from (visibone.com colour-lab)
+# TODO: make configurable
+colours = {
+     "background": "#CCFFCC", # Pale weak green. A weak yellow is FFFFCC
+     "block": "#00FF66", # a lime green
+     "preview": "#0099FF", # a blue
+     "selected": "#FF6600" # orange - red
+     }
+
 class CanvasBlock ( object ):
     '''An instance of an Actor drawn on a Simulation Canvas'''
 
@@ -20,11 +31,11 @@ class CanvasBlock ( object ):
     BLOCK_SIZE = ( BLOCK_WIDTH, BLOCK_HEIGHT ) = ( 70, 50 )
 
 
-    def __init__( self, canvas, codefile, x, y, colour ):
+    def __init__( self, canvas, codefile, x, y):
         self.canvas = canvas
         self.codefile = codefile
         self.x, self.y = x, y
-        self.colour = colour
+        self.colour = colours["preview"]
         self.id = str( self.counter.next() )
 
         preview_tags = [
@@ -40,7 +51,7 @@ class CanvasBlock ( object ):
 
         self.canvas.create_rectangle( *( x, y )
                                       + (x + self.BLOCK_WIDTH, y + self.BLOCK_HEIGHT),
-                                     fill=colour,
+                                     fill=self.colour,
                                      tags=preview_tags + ["type:block"]
                                      )
 
@@ -81,7 +92,7 @@ class CanvasBlock ( object ):
             output_gap = 0
             if num_outputs > 1:
                 output_gap = (self.BLOCK_HEIGHT - 2*port_size) / (num_outputs - 1)
-            x_, y_ = x + self.BLOCK_WIDTH, ((y + self.BLOCK_HEIGHT / 2) - ((num_outputs - 1) * output_gap)/2)
+            x_, y_ = x + self.BLOCK_WIDTH + 1, ((y + self.BLOCK_HEIGHT / 2) - ((num_outputs - 1) * output_gap)/2)
 
             for output in xrange( num_outputs ):
                 self.canvas.create_polygon( x_, y_ - port_size , x_ + port_size, y_, x_, y_ + port_size,
@@ -91,8 +102,31 @@ class CanvasBlock ( object ):
 
 
     def move_to( self, x, y ):
-        '''Move this block to blah'''
-        pass
+        '''Move this block to the specified location'''
+        self.x, self.y = x - self.selected_x, y - self.selected_y
+        self.canvas.move( "id:%s" % self.id, self.x, self.y )
+
+
+    def select(self, selected_x, selected_y):
+        """Select the block."""
+        self.canvas.addtag( 'Selected', "withtag" , "id:%s" % self.id )
+        self.canvas.dtag( "id:%s" % self.id, "preview" )
+        self.set_colour(colours["selected"])
+        self.selected_x, self.selected_y = selected_x, selected_y
+
+    def unselect(self):
+        """Unselect the block."""
+        self.canvas.dtag( "id:%s" % self.id, 'Selected' )
+        self.set_colour(colours["block"])
+
+    def preview(self):
+        """Preview the block."""
+        self.canvas.addtag( 'preview', "withtag" , "id:%s" % self.id )
+        self.canvas.dtag( "id:%s" % self.id, "Selected" )
+        self.set_colour(colours["preview"])
+
+    def is_preview(self):
+        return self.canvas.find_withtag("preview && id:%s" % self.id)
 
     def set_colour( self, colour ):
         '''Set the main colour of this block to "colour" but keep
@@ -101,16 +135,15 @@ class CanvasBlock ( object ):
         # TODO filter out all but the block
         self.canvas.itemconfigure("id:%s && type:block" % self.id, fill=colour )
 
+    def select_port(self, port):
+        """Select a port."""
+        self.canvas.addtag( "Selected", "withtag", "id:%s && type:%s" % (self.id, port) )
+        self.canvas.itemconfigure("id:%s && type:%s" % (self.id, port), fill=colours["selected"] )
+
+
+
 class SimulationCanvas( object ):
     """A canvas where blocks can be dragged around and connected up"""
-    # The class attribute colours will hold all the colour info 
-    # Randomly chosen from (visibone.com colour-lab)
-    colours = {
-         "background": "#CCFFCC", # Pale weak green. A weak yellow is FFFFCC
-         "block": "#00FF66", # a lime green
-         "preview": "#0099FF", # a blue
-         "selected": "#FF6600" # orange - red
-         }
 
     size = ( width, height ) = ( 550, 300 )
 
@@ -119,7 +152,7 @@ class SimulationCanvas( object ):
         self.canvas = Canvas( frame,
                              width=self.width, height=self.height,
                              relief=RIDGE,
-                             background=self.colours["background"],
+                             background=colours["background"],
                              borderwidth=1 )
         # Add event handlers for dragable items
         self.canvas.tag_bind ( "DRAG", "<ButtonPress-1>", self.mouse_down )
@@ -149,52 +182,68 @@ class SimulationCanvas( object ):
         logging.debug( "Deleting any existing items still tagged 'preview'" )
         self.canvas.delete( "preview" )
 
-        block = CanvasBlock( self.canvas, codefile, *self.PREVIEW_LOCATION, colour=self.colours["preview"] )
+        block = CanvasBlock( self.canvas, codefile, *self.PREVIEW_LOCATION )
         self.blocks[block.id] = block
 
 
 
     def mouse_down( self, event ):
-        self.select_location = ( event.x, event.y )
         logging.debug( "The mouse was pressed at (%d, %d)" % ( event.x, event.y ) )
         logging.debug( "The mouse went down on a block. Binding mouse release..." )
         selected = self.canvas.gettags( "current" )
         logging.debug( "Currently selected items tags are %s" % selected.__repr__() )
-        self.selected_name = [a for a in selected if a.startswith( "name:" ) ][0]
-        self.selected_id = [tag for tag in selected if tag.startswith( "id:" ) ][0]
-        logging.debug( "Block selected was %s with %s" % ( self.selected_name, self.selected_id ) )
-        block_id = self.selected_id[3:]
+        self.selected_name = [tag for tag in selected if tag.startswith( "name:" ) ][0][5:]
+        self.selected_id = [tag for tag in selected if tag.startswith( "id:" ) ][0][3:]
+        self.selected_type = [tag for tag in selected if tag.startswith( "type:" ) ][0][5:]
+        logging.debug( "Block selected was %s with id:%s" % ( self.selected_name, self.selected_id ) )
 
-        self.canvas.addtag( 'Selected', 'withtag', self.selected_id )
+        #self.canvas.addtag( 'Selected', 'withtag', self.selected_id )
         logging.debug( "Current blocks are: %s" % self.blocks )
-        self.blocks[block_id].set_colour( self.colours['selected'] )
+        #self.blocks[block_id].set_colour( colours['selected'] )
 
-        self.canvas.bind( "<ButtonRelease-1>", self.block_move_mouse_release )
+        if self.selected_type == "block" or self.selected_type == "text":
+            self.blocks[self.selected_id].select(event.x, event.y)
+            self.canvas.bind( "<ButtonRelease-1>", self.block_move_mouse_release )
+        elif self.selected_type.startswith("input") or self.selected_type.startswith("output"):
+            self.blocks[self.selected_id].select_port(self.selected_type)
+            self.canvas.bind( "<ButtonRelease-1>", self.port_connect_mouse_release )
+        else:
+            logging.info("Tried to select %s" % self.selected_type)
 
+    
     def block_move_mouse_release( self, event ):
         logging.debug( "The mouse was released at (%d, %d)" % ( event.x, event.y ) )
+        self.canvas.bind( "<ButtonRelease-1>", lambda e: None )
         if event.x >= 0 and event.x <= self.canvas.winfo_width() \
             and event.y >= 0 and event.y <= self.canvas.winfo_height():
                 logging.debug( "Valid move inside canvas. Relocating block." )
-                self.canvas.move( "Selected", event.x - self.select_location[0], event.y - self.select_location[1] )
+                self.blocks[self.selected_id].move_to(event.x, event.y)
                 if event.x >= self.PREVIEW_WIDTH:
-                    if "preview" in self.canvas.gettags( "Selected" ):
-                        logging.info( "Moved out of preview zone, adding now component to model" )
-                        self.canvas.dtag( "preview" )
+                    if self.blocks[self.selected_id].is_preview():
+                        logging.info( "Moved out of preview zone, adding new component to model" )
                         #TODO HERE - add to model compiler or what ever...
-                    event.widget.itemconfigure( "Selected && type:block", fill=self.colours["block"] )
-                    event.widget.itemconfigure( "type:text", fill="#000000" )
+                    self.blocks[self.selected_id].unselect()
                 else:
-                    event.widget.itemconfigure( "Selected && type:block", fill=self.colours["preview"] )
-                    self.canvas.addtag_withtag( "preview", "Selected" )
+                    self.blocks[self.selected_id].preview()
+        else:
+            logging.info( "Invalid move." )
+
+    def port_connect_mouse_release( self, event ):
+        logging.debug( "The mouse was released at (%d, %d)" % ( event.x, event.y ) )
+        self.canvas.bind( "<ButtonRelease-1>", lambda e: None )
+        if event.x >= 0 and event.x <= self.canvas.winfo_width() \
+            and event.y >= 0 and event.y <= self.canvas.winfo_height():
+                logging.debug( "Valid location inside canvas." )
+
+                event.widget.itemconfigure( "Selected", fill="#000000" )
+                event.widget.itemconfigure( "type:text", fill="#000000" )
 
                 #block = self.canvas.gettags("Selected")
                 #logging.debug("Block moved was made up of these components: %s" % block.__repr__())
                 self.canvas.dtag( "Selected", "Selected" )
 
         else:
-            logging.info( "Invalid move." )
-
+            logging.info( "Invalid wiring." )
 
     def enter( self, event ):
         logging.debug( "Enter" )

@@ -4,7 +4,7 @@ Created on Feb 2, 2010
 @author: brianthorne
 '''
 import unittest
-from scipysim.actors import SisoTestHelper, Channel, Event
+from scipysim.actors import SisoTestHelper, Channel, Event, LastEvent
 import numpy
 from scipysim.actors.logic import GreaterThan, LessThan, PassThrough
 
@@ -24,7 +24,7 @@ class PassThroughTests(unittest.TestCase):
         # some fake pass through data, and add it to the channel
         self.data = range(100)
         [self.data_in.put(Event(tag=i, value=i)) for i in range(100)]
-        self.data_in.put(None)
+        self.data_in.put(LastEvent())
 
         # create the block
         self.block = PassThrough(self.bool_in, self.data_in, self.output)
@@ -33,11 +33,11 @@ class PassThroughTests(unittest.TestCase):
         '''Test that it passes through every point when given True control signal'''
         every_point = [True] * 100
         [self.bool_in.put(Event(tag=i, value=every_point[i])) for i in self.data]
-        self.bool_in.put(None)
+        self.bool_in.put(LastEvent())
         self.block.start()
         self.block.join()
         [self.assertEquals(self.output.get().tag, i) for i in self.data]
-        self.assertEquals(None, self.output.get())
+        self.assertTrue(self.output.get().last)
 
     def test_every_second_point(self):
         '''Test every second point is passed through
@@ -46,12 +46,12 @@ class PassThroughTests(unittest.TestCase):
         [self.bool_in.put(
                           Event(tag=i, value=self.every_second_point[i])
                          ) for i in self.data]
-        self.bool_in.put(None)
+        self.bool_in.put(LastEvent())
         self.block.start()
         self.block.join()
         [self.assertEquals(self.output.get().tag,
                            i) for i in self.data if i % 2 == 0]
-        self.assertEquals(None, self.output.get())
+        self.assertTrue(self.output.get().last)
 
 
     def test_no_points(self):
@@ -59,10 +59,10 @@ class PassThroughTests(unittest.TestCase):
         [self.bool_in.put(
                           Event(tag=i, value=self.no_points[i])
                           ) for i in self.data]
-        self.bool_in.put(None)
+        self.bool_in.put(LastEvent())
         self.block.start()
         self.block.join()
-        self.assertEquals(None, self.output.get())
+        self.assertTrue(self.output.get().last)
 
 class ElsePassThroughTests(unittest.TestCase):
     '''Test the IF-Else actor'''
@@ -83,8 +83,8 @@ class ElsePassThroughTests(unittest.TestCase):
                               Event(tag=i, value=self.data_alt[i])
                               ) for i in range(100)]
         [self.data_in.put(Event(tag=i, value=i)) for i in range(100)]
-        self.data_in.put(None)
-        self.alt_data_in.put(None)
+        self.data_in.put(LastEvent())
+        self.alt_data_in.put(LastEvent())
 
         # create the block
         self.block = PassThrough(self.bool_in,
@@ -98,7 +98,7 @@ class ElsePassThroughTests(unittest.TestCase):
         [self.bool_in.put(
                           Event(tag=i, value=self.every_second_point[i])
                          ) for i in self.data]
-        self.bool_in.put(None)
+        self.bool_in.put(LastEvent())
         self.block.start()
         self.block.join()
         for i in self.data:
@@ -108,7 +108,7 @@ class ElsePassThroughTests(unittest.TestCase):
                 self.assertEquals(output.value, i)
             else:
                 self.assertEquals(output.value, self.data_alt[i])
-        self.assertEquals(None, self.output.get())
+        self.assertTrue(self.output.get().last)
 
 class CompareTests(unittest.TestCase):
     '''Test the comparison actors'''

@@ -1,29 +1,30 @@
 import logging
 from actor import Actor
+from event import LastEvent
 
 def SisoTestHelper(test_case, block, inputs, expected_outputs):
     '''Helper function for testing SISO actors.
     '''
-    [block.input_channel.put(val) for val in inputs + [None]]
+    [block.input_channel.put(val) for val in inputs + [LastEvent()]]
     block.start()
     block.join()
     for expected_output in expected_outputs:
         out = block.output_channel.get()
         test_case.assertEquals(out['value'], expected_output['value'])
         test_case.assertEquals(out['tag'], expected_output['tag'])
-    test_case.assertEquals(block.output_channel.get(), None)
+    test_case.assertTrue(block.output_channel.get().last)
 
 def SisoCTTestHelper(test_case, block, inputs, expected_outputs):
     '''Helper function for testing SISO actors. This one uses assertAlmostEqual.
     '''
-    [block.input_channel.put(val) for val in inputs + [None]]
+    [block.input_channel.put(val) for val in inputs + [LastEvent()]]
     block.start()
     block.join()
     for expected_output in expected_outputs:
         out = block.output_channel.get()
         test_case.assertAlmostEqual(out['value'], expected_output['value'], 6)
         test_case.assertAlmostEqual(out['tag'], expected_output['tag'], 6)
-    test_case.assertEquals(block.output_channel.get(), None)
+    test_case.assertTrue(block.output_channel.get().last)
 
 class Siso(Actor):
     '''This is a generic single input, single output actor.
@@ -69,10 +70,10 @@ class Siso(Actor):
         logging.debug("Running generic SISO process")
 
         obj = self.input_channel.get(True)     # this is blocking
-        if obj is None:
+        if obj.last:
             logging.info('Siso process is finished with the data')
             self.stop = True
-            self.output_channel.put(None)
+            self.output_channel.put(obj)
             return
         data = self.siso_process(obj)
         if not self.child_handles_output:

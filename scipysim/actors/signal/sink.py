@@ -2,7 +2,7 @@
 Sink 
 @author Allan McInnes
 '''
-from scipysim.actors import Actor, Channel, Event
+from scipysim.actors import Actor, Channel, Event, LastEvent
 import logging
 import unittest
 
@@ -31,7 +31,7 @@ class Sink(Actor):
         the channel and discarded.
         """
         event = self.input_channel.get(True)     # this is blocking
-        if event is None:
+        if event.last:
             logging.info('Sink process is finished.')
             self.stop = True
             return
@@ -57,7 +57,7 @@ class SinkTests(unittest.TestCase):
             sink = Sink(self.q_in)
             sink.start()
             [self.q_in.put(val) for val in inp]
-            self.q_in.put(None)
+            self.q_in.put(LastEvent())
             sink.join()
         except:
             self.fail("Sink failed to run without exception.")

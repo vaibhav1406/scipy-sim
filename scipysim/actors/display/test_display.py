@@ -5,7 +5,7 @@ Created on Feb 5, 2010
 '''
 
 from scipysim.actors.io import Bundle
-from scipysim.actors import Actor, DisplayActor, Channel, Event
+from scipysim.actors import Actor, DisplayActor, Channel, Event, LastEvent
 from bundlePlotter import BundlePlotter
 
 import numpy
@@ -37,7 +37,7 @@ class BundlePlotTests( unittest.TestCase ):
 
         block = Bundle( self.q_in, self.q_out )
         block.start()
-        [self.q_in.put( i ) for i in self.input + [None]]
+        [self.q_in.put( i ) for i in self.input + [LastEvent()]]
         block.join()
         bundled_data = self.q_out.get()
         self.assertEqual( len( bundled_data ), 100 )
@@ -51,7 +51,7 @@ class BundlePlotTests( unittest.TestCase ):
         bundler = Bundle( self.q_in, self.q_out )
         bundlingPlotter = BundlePlotter( self.q_out, self.title )
         [block.start() for block in [bundler, bundlingPlotter]]
-        [self.q_in.put( i ) for i in self.input + [None]]
+        [self.q_in.put( i ) for i in self.input + [LastEvent()]]
         [block.join() for block in [bundler, bundlingPlotter]]
         self.assertTrue(os.path.exists(self.url))
 

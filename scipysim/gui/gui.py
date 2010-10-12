@@ -57,7 +57,7 @@ class App:
         callbacks = ( self.write_to_win, self.set_active_block )
 
         logging.debug( "Searching Actors and Models packages and locating scipysim actors" )
-        ExamplesGroup( "Models", file_frame, models, callbacks )
+        #ExamplesGroup( "Models", file_frame, models, callbacks )
         ExamplesGroup( "Actors", file_frame, actors, callbacks )
         logging.info( "Finished locating blocks" )
         # The frame for the main window
@@ -102,7 +102,7 @@ class App:
 
         logging.debug( "Adding the screens to the notebook" )
         self.notebook.add_screen( component_src_frame, "Component Source" )
-        self.notebook.add_screen( model_src_frame, "Model Source" )
+        #self.notebook.add_screen( model_src_frame, "Model Source" )
         self.notebook.add_screen( blank_src_frame, "Hide Source Viewer" )
 
         self.console = Text( main_frame, height=10, width=80 )

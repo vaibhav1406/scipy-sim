@@ -16,7 +16,7 @@ input time tags.
 Created on 9/12/2009
 Additional integration algorithms added 08/02/2010
 '''
-from scipysim.actors import Actor, Channel, Event, Siso
+from scipysim.actors import Actor, Channel, Event, LastEvent, Siso
 
 class DTIntegrator(Siso):
     '''
@@ -109,13 +109,13 @@ class DTIntegratorTests(unittest.TestCase):
         block = DTIntegratorBackwardEuler(self.q_in, self.q_out)
         block.start()
         [self.q_in.put(val) for val in inp]
-        self.q_in.put(None)
+        self.q_in.put(LastEvent())
         block.join()
 
         for expected_output in expected_output_values:
             out = self.q_out.get()
             self.assertEquals(out.value, expected_output)
-        self.assertEquals(self.q_out.get(), None)
+        self.assertTrue(self.q_out.get().last)
 
     def test_forward_euler(self):
         '''Test forward Euler integration of a simple positive integer signal.
@@ -128,13 +128,13 @@ class DTIntegratorTests(unittest.TestCase):
 
         block.start()
         [self.q_in.put(val) for val in inp]
-        self.q_in.put(None)
+        self.q_in.put(LastEvent())
         block.join()
 
         for expected_output in expected_output_values:
             out = self.q_out.get()
             self.assertEquals(out.value, expected_output)
-        self.assertEquals(self.q_out.get(), None)
+        self.assertTrue(self.q_out.get().last)
 
     def test_trapezoidal(self):
         '''Test trapezoidal integration of a simple positive integer signal.
@@ -148,13 +148,13 @@ class DTIntegratorTests(unittest.TestCase):
 
         block.start()
         [self.q_in.put(val) for val in inp]
-        self.q_in.put(None)
+        self.q_in.put(LastEvent())
         block.join()
 
         for expected_output in expected_output_values:
             out = self.q_out.get()
             self.assertEquals(out.value, expected_output)
-        self.assertEquals(self.q_out.get(), None)
+        self.assertTrue(self.q_out.get().last)
 
 if __name__ == "__main__":
     unittest.main()

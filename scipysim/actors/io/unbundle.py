@@ -16,8 +16,8 @@ class Unbundle(Actor):
 
     def process(self):
         x = self.input_channel.get(True)
-        if x is not None:
+        if not hasattr(x, 'last'): # Hack for bundles
             [self.output_channel.put(Event(tag, value)) for (tag, value) in x]
         else:
-            self.output_channel.put(None)
+            self.output_channel.put(x)
             self.stop = True

@@ -3,7 +3,7 @@ Created on 2010-04-06
 
 @author: Allan McInnes
 '''
-from scipysim.actors import Siso, Actor, Channel, Event
+from scipysim.actors import Siso, Actor, Channel, Event, LastEvent
 import logging
 import unittest
 from numpy import floor
@@ -56,14 +56,14 @@ class QuantizerTests(unittest.TestCase):
                 
         quantizer.start()
         [self.q_in.put(val) for val in inp]
-        self.q_in.put(None)
+        self.q_in.put(LastEvent())
         quantizer.join()
 
         for expected_output in expected_outputs:
             out = self.q_out.get()
             self.assertEquals(out.value, expected_output.value)
             self.assertEquals(out.tag, expected_output.tag)
-        self.assertEquals(self.q_out.get(), None)
+        self.assertTrue(self.q_out.get().last)
 
 if __name__ == "__main__":
     unittest.main()
