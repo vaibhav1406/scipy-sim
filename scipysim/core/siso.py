@@ -59,6 +59,10 @@ class Siso(Actor):
         '''
         raise NotImplementedError("No siso process function found.")
 
+    def finish(self):
+        '''Perform any final operations needed at the end of a signal.'''
+        self.stop = True
+
     def process(self):
         """This gets called all the time by the Actor parent.
         It will look at the input channel - if it contains "None"
@@ -72,7 +76,7 @@ class Siso(Actor):
         obj = self.input_channel.get(True)     # this is blocking
         if obj.last:
             logging.info('Siso process is finished with the data')
-            self.stop = True
+            self.finish()
             self.output_channel.put(obj)
             return
         data = self.siso_process(obj)

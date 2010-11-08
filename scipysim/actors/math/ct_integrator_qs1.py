@@ -81,7 +81,7 @@ class CTIntegratorQS1(Siso):
 
     def __internal_transition(self):
         '''
-        DEVS-style 'internal transition' occurs when time has advanced
+        DEVS-style 'internal transitions' occur when time has advanced
         to the next output instant. They generate both an output
         and a state change.
         '''    
