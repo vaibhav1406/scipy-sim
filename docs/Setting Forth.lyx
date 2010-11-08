@@ -1,0 +1,221 @@
+#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\language british
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Simulation in SciPy Project
+\end_layout
+
+\begin_layout Section*
+Things to do
+\end_layout
+
+\begin_layout Itemize
+The problem with Threads - Edward Lee
+\end_layout
+
+\begin_layout Itemize
+Overview of Ptolemy
+\end_layout
+
+\begin_layout Itemize
+Compare graphics toolkits for use with scipy - Tk, Wx, Qt, GTK (others?)
+\end_layout
+
+\begin_layout Itemize
+Go through Lecture Notes on Concurrent/Embedded Systems and modelling etc
+\end_layout
+
+\begin_layout Itemize
+What could we use from scipy/numpy? Signal integration etc...
+\end_layout
+
+\begin_layout Itemize
+Tagged signal models.
+\end_layout
+
+\begin_layout Itemize
+Discrete time models.
+ Tags are integer numbers
+\end_layout
+
+\begin_layout Itemize
+Continuous time models.
+ tags are real numbers
+\end_layout
+
+\begin_layout Itemize
+Actors without directors.
+ We might want to use this/ we might not - will it be too difficult to implement
+?
+\end_layout
+
+\begin_layout Itemize
+If the signals stuff still isn't making sense - read Structure and Interpretatio
+n of Signals and Systems by Edward Lee
+\end_layout
+
+\begin_layout Section*
+The 10000' foot overview
+\end_layout
+
+\begin_layout Subsection*
+Input
+\end_layout
+
+\begin_layout Standard
+A few basic blocks like:
+\end_layout
+
+\begin_layout Itemize
+random number generator
+\end_layout
+
+\begin_layout Itemize
+sin wave source
+\end_layout
+
+\begin_layout Itemize
+step
+\end_layout
+
+\begin_layout Itemize
+ramp
+\end_layout
+
+\begin_layout Itemize
+impulse
+\end_layout
+
+\begin_layout Subsection*
+Processes
+\end_layout
+
+\begin_layout Itemize
+P
+\end_layout
+
+\begin_layout Itemize
+I - use a numerical integration method from scipy
+\end_layout
+
+\begin_layout Itemize
+D
+\end_layout
+
+\begin_layout Itemize
+arbitrary transfer function
+\end_layout
+
+\begin_layout Subsection*
+Output
+\end_layout
+
+\begin_layout Standard
+Want to look at and compare gnuplot, matplotlib and mayavii for output.
+ Create a 
+\begin_inset Quotes eld
+\end_inset
+
+Scope
+\begin_inset Quotes erd
+\end_inset
+
+ block.
+\end_layout
+
+\begin_layout Section
+Ptolemy
+\end_layout
+
+\begin_layout Standard
+for modelling and designing embedded systems software
+\end_layout
+
+\begin_layout Standard
+MoML - modelling language based on xml
+\end_layout
+
+\begin_layout Subsection
+Models of Computation
+\end_layout
+
+\begin_layout Standard
+Process:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\xymatrix{ &  & Ramp\, Source\ar[dr]\\
+Start &  & Random\, Source\ar[r] & SumBlock\ar[r] & Plotter &  & Complete\\
+ &  & Ramp\, Source\ar[ur]}
+$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Kahn process networks 
+\end_layout
+
+\begin_layout Standard
+Good read on wiki.
+\end_layout
+
+\begin_layout Standard
+processes communicate via unbounded FIFO channels.
+ Processes read and write atomic data elements or tokens from and to channels.
+ Writing to a channel is non-blocking, i.e.
+ it always succeeds and does not stall the process, while reading from a
+ channel is blocking, i.e.
+ a process that reads from an empty channel will stall and can only continue
+ when the channel contains sufficient data items (tokens).
+ Processes are not allowed to test an input channel for existence of tokens
+ without consuming them.Given a specific input (token) history for a process,
+ the process must be deterministic so that it always produces the same outputs
+ (tokens).
+ Timing or execution order of processes must not affect the result and therefore
+ testing input channels for tokens is forbidden.
+\end_layout
+
+\end_body
+\end_document
