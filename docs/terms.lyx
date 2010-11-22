@@ -1,0 +1,198 @@
+#LyX 1.6.4.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\language british
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+SciPy-Simulation Project - Glossary of Terms
+\end_layout
+
+\begin_layout Standard
+The scipy-simulator project aims to create a visual stream processing system
+ for different models of computation using tagged signals communicating
+ over uni-directional channels to asynchronous and deterministic blocks.
+ In the shorthand notation introduced by Stephens
+\begin_inset CommandInset citation
+LatexCommand citet
+key "stephens1997survey"
+
+\end_inset
+
+ the dataflow network type is ADU-SPS.
+ Note there may be individual blocks that are not deterministic - eg a random
+ source.
+\end_layout
+
+\begin_layout Standard
+Much of the semantics comes from Liu and Lee in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "liu2008cpo"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Description
+Actor An individual component in a system
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Actors are refered to in some literature as agents
+\end_layout
+
+\end_inset
+
+.
+ Actors run in parrallel, in charge of their own actions.
+ Data is provided to them from the environment - which may include other
+ actors.
+ They may react to the data and provide data back to the environment.
+ Our Actor is closer to that of the Ptolemy II project than the classical
+ Actor model of Hewitt and Agha, although each component does have its own
+ thread of control.
+ 
+\end_layout
+
+\begin_deeper
+\begin_layout Description
+Primitive
+\begin_inset space ~
+\end_inset
+
+Actor An Actor that is not defined in terms of other actors.
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Ports Actors have ports over which they communicate with the environment,
+ there is a distinction between input and output ports.
+\end_layout
+
+\begin_layout Description
+Channels A unidirectional pipe implemented with a FIFO queue connecting
+ Actors.
+\end_layout
+
+\begin_layout Description
+System A collection of Actors communicating via channels.
+ The system state may not be observable, and may not be well defined.
+ The structure must be static, its the 
+\begin_inset Quotes eld
+\end_inset
+
+source code
+\begin_inset Quotes erd
+\end_inset
+
+ for the simulation.
+\end_layout
+
+\begin_layout Description
+Event A 
+\emph on
+tag/value 
+\emph default
+pair - every
+\emph on
+ 
+\emph default
+discrete communication over a channel is an event.
+\end_layout
+
+\begin_layout Description
+Signal The set of every event in a channel makes a signal - often this is
+ infinite.
+ A signal must be associated with 2 ports.
+\end_layout
+
+\begin_layout Description
+Stream
+\begin_inset space ~
+\end_inset
+
+Processing
+\begin_inset space ~
+\end_inset
+
+System
+\begin_inset space ~
+\end_inset
+
+(SPS) A system comprised of a collection of modules that compute in parallel,
+ that communicate data via channels.
+\end_layout
+
+\begin_layout Section
+Types of Blocks
+\end_layout
+
+\begin_layout Description
+Source A source block creates at least one output signal, it may have initial
+ parameters but no input signals.
+ Sources pass data into the system.
+\end_layout
+
+\begin_layout Description
+Filter A block that alters its input to create an output.
+ A filter performs some atomic computation.
+\end_layout
+
+\begin_layout Description
+Sink A block that passes data out of the system.
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "bibliography"
+options "bibtotoc,plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
