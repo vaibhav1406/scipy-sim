@@ -42,7 +42,7 @@ class ControlStep(Model):
         src = Constant(wires[0], value=0, resolution=freq, simulation_time=T)
 
         # Create the signal source
-        signal = Step(wires[1], switch_time=60, resolution=50, simulation_time=120)
+        signal = Step(wires[1], switch_time=60, timestep=50.0/120.0, simulation_time=120)
 
         dst = Plotter(wires[0])
         dst2 = Plotter(wires[1])

@@ -1,5 +1,13 @@
 '''
-Created on 21/12/2009
+********************************************************************************
+
+                    !!!! CAUTION !!!!
+
+  Highly experimental. In a constant state of flux. Filled with horrible hacks.
+  Possibly broken. Likely buggy. Do not use unless you know what you're getting
+  in to.
+
+********************************************************************************
 
 @author: Allan McInnes
 '''
@@ -25,7 +33,7 @@ class CTIntegratorQS1(Siso):
     input_domains = ('CT',)
     output_domains = ('CT',)
 
-    def __init__(self, xdot, x, init=0.0, delta=0.1, k=10.0):
+    def __init__(self, xdot, x, init=0.0, delta=0.1, k=10.0, algebraic_loop=False):
         '''
         Construct a SISO CT integrator.
         
@@ -46,6 +54,8 @@ class CTIntegratorQS1(Siso):
         self.dx = 0
         self.next_t = 0.0     # TODO: should probably make this configurable
         self.last_t = self.next_t
+        self.algebraic_loop = algebraic_loop
+        self.last_out = 0.0
 
         # Generate an initial output
         self.__internal_transition()
@@ -55,8 +65,10 @@ class CTIntegratorQS1(Siso):
         
     def __statestep(self, x, xdot):
         qx = self.__quantize(x)
-        dist = (x - qx) if abs(x - qx) > 1e-15 else 0  # Enforce a minimum step - seems like Kofman's hysteresis
-        dist = dist if abs(self.delta - dist) > 1e-15 else 0  # Enforce a minimum step - seems like Kofman's hysteresis
+        dist = (x - qx) if np.fabs(x - qx) > 100.0 * np.finfo(np.float_).resolution else 0  # Enforce a minimum step
+        dist = dist if np.fabs(self.delta - dist) > 100.0 * np.finfo(np.float_).resolution else 0  # Enforce a minimum step
+        if dist == 0:
+            x = qx
         if xdot > 0:
             step = self.delta - dist
         elif xdot < 0:
@@ -150,23 +162,43 @@ class CTIntegratorQS1(Siso):
         '''
         tag, xdot = event.tag, event.value
 
-        if abs(tag - self.last_t) < 1e-15:
+        # The following is one option for breaking causality problems
+        # with algebraic loops
+
+        if self.algebraic_loop and np.fabs(tag - self.last_t) < 100.0 * np.finfo(np.float_).resolution:
             # We assume that a nearly identical time to the previous event
             # indicates that the only thing advancing time is the integrator
-            # itself. Note that this will fail if there's a delay in the
-            # loop
-            self.__external_transition(tag, xdot)                    
+            # itself. This is a bit of a hack, and doesn't work properly if
+            # there are other sources of time information entering the loop.
+            self.__external_transition(tag, xdot)
             self.__internal_transition()
         else:
+
             # External time has moved past the internal time, so first
             # process 'internal transition' (DEVS terminology) to bring
             # the integrator up-to-date
+            did_output = False
             while tag >= self.next_t:
                 self.__internal_transition()
-            
+                did_output = True
+
             # Process 'external transition' (DEVS terminology) caused by
             # reception of an input event
             self.__external_transition(tag, xdot)
+
+            # Generate an intermediate output to avoid deadlock.
+            # Chandy-Misra-Bryant style null-messages might be
+            # a better alternative.
+
+            # This forces an output if the one wasn't already generated, and
+            # the simulation timestep (arbitrarily set to 0.1 here) is exceeded.
+            # In theory, the maximum step of the integrator should have this effect,
+            # but it isn't. Need to think about why, and possibly fix.
+            if not did_output and np.fabs(tag - self.last_out) >= 0.1 - 100.0 * np.finfo(np.float_).resolution:
+                out_event = Event(tag, self.__quantize(self.x))
+                self.last_out = tag
+                self.output_channel.put( out_event )
+
 
         #if self.next_t > 20:
         #    self.output_channel.put(LastEvent())
@@ -203,7 +235,7 @@ class CTintegratorQSTests(unittest.TestCase):
         expected_outputs = [Event(value=val, tag=tag) for (val, tag) in zip(expected_output_values, expected_output_tags)]
 
         # k has been set to make maxstep 10.0
-        block = CTIntegratorQS1(self.q_in, self.q_out, init=1.0, delta=0.1, k=10.0 / 0.1)
+        block = CTIntegratorQS1(self.q_in, self.q_out, init=1.0, delta=0.1, k=10.0 / 0.1, algebraic_loop=True)
         SisoCTTestHelper(self, block, inputs, expected_outputs)
 
     def test_simple_integration_2(self):
@@ -229,9 +261,9 @@ class CTintegratorQSTests(unittest.TestCase):
         q1, q2, q3 = Channel(), Channel(), Channel()
 
         blocks = [
-                    CTIntegratorQS1(self.q_in, self.q_out, init=1.0, delta=0.1, k=10.0 / 0.1),
+                    CTIntegratorQS1(self.q_in, self.q_out, init=1.0, delta=0.1, k=10.0 / 0.1, algebraic_loop=True),
                     Split(self.q_out, [q1, q2]),
-                    CTIntegratorQS1(q1, q3, init=1.0, delta=0.1, k=10.0 / 0.1)
+                    CTIntegratorQS1(q1, q3, init=1.0, delta=0.1, k=10.0 / 0.1, algebraic_loop=True)
                   ]
 
         [self.q_in.put(val) for val in inputs + [LastEvent()]]
