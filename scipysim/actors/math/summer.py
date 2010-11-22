@@ -9,6 +9,7 @@ depend on the kind of signals that are being added.
 import logging
 #logging.basicConfig(level=logging.DEBUG)
 from numpy import inf as infinity
+import numpy
 from scipysim.actors import Actor, Channel, Event, LastEvent
 
 class BaseSummer(Actor):
@@ -49,7 +50,7 @@ class BaseSummer(Actor):
             # Record signs for input channels. Default is +. The sign
             # string are converted to numbers.
             if isinstance(input, tuple):
-                self.signs[input[0]] = float(input[1]+'1.0')
+                self.signs[input[0]] = numpy.float(input[1]+'1.0')
             else:
                 self.signs[input] = 1.0
 
@@ -68,12 +69,12 @@ class BaseSummer(Actor):
         # on the sum until we have events (and thus tags) on every channel.
         events = []
         oldest_tag = infinity
+
         for input in self.inputs:
             event = input.head()
             if not event.last:
                 oldest_tag = min(oldest_tag, event.tag)
                 events.append((input, event))
-
 
         # We are finished iff all the input channels have a terminal event at the head
         if len(events) < self.num_inputs:
@@ -186,7 +187,7 @@ class CTSummer(BaseSummer):
         for input, event in events:
             # Remove the head from each channel that has a matching tag,
             # and update the stored value
-            if event.tag == oldest_tag:
+            if numpy.fabs(event.tag - oldest_tag) <= 100.0 * numpy.finfo(numpy.float_).resolution:
                 input.drop()
                 self.held_values[input] = event.value
 
