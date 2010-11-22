@@ -107,3 +107,13 @@ def MakeChans(num, domain='CT'):
                         - defaults to 'CT' domain.    
     '''
     return [Channel(domain) for i in xrange(num)]
+
+
+def MakeNamedChans(names, domain='CT'):
+    '''Return a dict of channels corresponding to the provided names.
+
+    @param names: names of the channels to create.
+    @param domain: The specific domain of events that this channel will carry.
+                        - defaults to 'CT' domain.
+    '''
+    return dict( zip( names, MakeChans( len( names ) ) ) )
