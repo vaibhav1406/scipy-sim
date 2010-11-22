@@ -3,7 +3,7 @@ Created on 13/12/2009
 
 @author: brian
 '''
-from scipysim.actors import MakeChans, Model
+from scipysim.actors import MakeNamedChans, Model
 from scipysim.actors.display import Plotter
 from scipysim.actors.signal import Ramp, Split
 from scipysim.actors.logic import GreaterThan, PassThrough
@@ -29,7 +29,7 @@ class Pulse_Width_Modulator( Model ):
         self.sim_time = simulation_length
         self.sim_res = simulation_resolution
 
-        wire_names = ( 'ramp',
+        wire_names = ['ramp',
                       'sin',
                       'const_offset',
                       'offset_sin',
@@ -42,10 +42,9 @@ class Pulse_Width_Modulator( Model ):
                       'on_value',
                       'off_value',
                       'pwm_value'
-                      )
-        raw_wires = MakeChans( len( wire_names ) )
+                     ]
 
-        wires = dict( zip( wire_names, raw_wires ) )
+        wires = MakeNamedChans(wire_names)
 
         ramp_src = Ramp( wires['ramp_probe'], freq=500, simulation_time=self.sim_time, resolution=self.sim_res )
         sin_src = CTSinGenerator( wires['sin'], amplitude=0.5, freq=50.0, phi=0.0, timestep=1.0 / self.sim_res, simulation_time=self.sim_time )
