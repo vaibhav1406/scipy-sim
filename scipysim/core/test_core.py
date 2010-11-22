@@ -2,6 +2,7 @@ import unittest
 from actor import Actor
 from errors import NoProcessFunctionDefined
 
+from event import TestEvent, TestLastEvent
 
 class TestActor(unittest.TestCase):
 

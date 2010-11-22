@@ -164,87 +164,87 @@ class LastEvent(Event):
 # --------------------------------------------------------------------
 # Testing
 # --------------------------------------------------------------------
+import unittest
+class TestEvent(unittest.TestCase):
+
+    def setUp(self):
+        self.tag = 1.1
+        self.value = 3.1415927
+        self.event = Event(self.tag, self.value)
+
+    def test_event_is_readable(self):
+        self.assertEqual(self.event.tag, self.tag)
+        self.assertEqual(self.event.value, self.value)
+
+    def test_event_is_copyable(self):
+        event = self.event.copy()
+        self.assertEqual(event.tag, self.tag)
+        self.assertEqual(event.value, self.value)
+
+    def test_event_is_a_map(self):
+        self.assertEqual(self.event['tag'], self.tag)
+        self.assertEqual(self.event['value'], self.value)
+
+    def test_tag_is_immutable(self):
+        def mutate():
+            self.event.tag = 5.0
+        self.assertRaises(TypeError, mutate)
+
+    def test_value_is_immutable(self):
+        def mutate():
+            self.event.value = 5.0
+        self.assertRaises(TypeError, mutate)
+
+    def test_event_is_immutable(self):
+        def mutate():
+            self.event.newfield = "hi"
+        self.assertRaises(TypeError, mutate)
+
+    def test_event_map_value_is_immutable(self):
+        def mutate():
+            self.event['tag'] = 5
+        self.assertRaises(TypeError, mutate)
+
+    def test_event_map_is_immutable(self):
+        def mutate():
+            self.event['aKey'] = 5
+        self.assertRaises(TypeError, mutate)
+
+    def test_event_map_is_picklable(self):
+        state = self.event.__getstate__()
+        event = Event()
+        event.__setstate__(state)
+        self.assertEqual(event.tag, self.tag)
+        self.assertEqual(event.value, self.value)
+
+    def test_event_is_not_terminal(self):
+        self.assertFalse(self.event.last)
+
+
+class TestLastEvent(unittest.TestCase):
+
+    def setUp(self):
+        self.tag = 1.1
+        self.event = LastEvent(self.tag)
+
+    def test_event_is_terminal(self):
+        self.assertTrue(self.event.last)
+
+    def test_event_is_copyable(self):
+        event = self.event.copy()
+        self.assertEqual(event.tag, self.tag)
+        self.assertEqual(event.value, None)
+        self.assertTrue(event.last)
+
+    def test_last_is_immutable(self):
+        def mutate():
+            self.event.last = False
+        self.assertRaises(TypeError, mutate)
+
+
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-    
-    import unittest        
-    class TestEvent(unittest.TestCase):
-    
-        def setUp(self):
-            self.tag = 1.1
-            self.value = 3.1415927
-            self.event = Event(self.tag, self.value)
-            
-        def test_event_is_readable(self):
-            self.assertEqual(self.event.tag, self.tag)
-            self.assertEqual(self.event.value, self.value)
-
-        def test_event_is_copyable(self):
-            event = self.event.copy()
-            self.assertEqual(event.tag, self.tag)
-            self.assertEqual(event.value, self.value)
-
-        def test_event_is_a_map(self):
-            self.assertEqual(self.event['tag'], self.tag)
-            self.assertEqual(self.event['value'], self.value)    
-    
-        def test_tag_is_immutable(self):
-            def mutate():
-                self.event.tag = 5.0
-            self.assertRaises(TypeError, mutate)
-            
-        def test_value_is_immutable(self):
-            def mutate():
-                self.event.value = 5.0            
-            self.assertRaises(TypeError, mutate)
-            
-        def test_event_is_immutable(self):
-            def mutate():
-                self.event.newfield = "hi"            
-            self.assertRaises(TypeError, mutate)            
-
-        def test_event_map_value_is_immutable(self):
-            def mutate():
-                self.event['tag'] = 5            
-            self.assertRaises(TypeError, mutate) 
-     
-        def test_event_map_is_immutable(self):
-            def mutate():
-                self.event['aKey'] = 5            
-            self.assertRaises(TypeError, mutate)
-
-        def test_event_map_is_picklable(self):
-            state = self.event.__getstate__()
-            event = Event()
-            event.__setstate__(state)
-            self.assertEqual(event.tag, self.tag)
-            self.assertEqual(event.value, self.value)
-
-        def test_event_is_not_terminal(self):
-            self.assertFalse(self.event.last)
-
-            
-    class TestLastEvent(unittest.TestCase):
-
-        def setUp(self):
-            self.tag = 1.1
-            self.event = LastEvent(self.tag)
-
-        def test_event_is_terminal(self):
-            self.assertTrue(self.event.last)
-
-        def test_event_is_copyable(self):
-            event = self.event.copy()
-            self.assertEqual(event.tag, self.tag)
-            self.assertEqual(event.value, None)
-            self.assertTrue(event.last)
-
-        def test_last_is_immutable(self):
-            def mutate():
-                self.event.last = False
-            self.assertRaises(TypeError, mutate)
-
     unittest.main()
 
         
