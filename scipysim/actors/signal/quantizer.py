@@ -32,7 +32,7 @@ class Quantizer(Siso):
     def siso_process(self, event):
         logging.debug("Quantizer received (tag: %2.e, value: %2.e )" % (event.tag, event.value))        
         quantized_value = self.delta * floor(event.value / self.delta)
-        self.output_channel.put(Event(tag, quantized_value))
+        self.output_channel.put(Event(event.tag, quantized_value))
 
         return
 

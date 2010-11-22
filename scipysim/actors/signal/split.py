@@ -38,7 +38,7 @@ class Split(Actor):
             return
 
         [q.put(event) for q in self.output_channels]
-        event = None
+
 
 import unittest
 class SplitTests(unittest.TestCase):
