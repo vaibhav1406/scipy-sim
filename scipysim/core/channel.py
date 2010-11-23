@@ -99,11 +99,12 @@ class Channel(Queue, object):
         del self.queue[0]
 
 
-def MakeChans(num, domain='CT'):
+def MakeChans(num, domains=None):
     '''Return a list of n channels.
     
     @param num: number of channels to create.
-    @param domain: The specific domain of events that this channel will carry.
+    @param domain: The specific domains of events that these channels will carry.
                         - defaults to 'CT' domain.    
     '''
-    return [Channel(domain) for i in xrange(num)]
+    if domains is None: domains = ['CT' for _ in xrange(num)]
+    return [Channel(domain) for domain in domains]
