@@ -60,6 +60,7 @@ class App:
         #ExamplesGroup( "Models", file_frame, models, callbacks )
         ExamplesGroup( "Actors", file_frame, actors, callbacks )
         logging.info( "Finished locating blocks" )
+
         # The frame for the main window
         main_frame = Frame( frame )
         main_frame.pack( side=LEFT )
@@ -80,7 +81,7 @@ class App:
         model_src_frame = Frame( self.notebook() )
 
         logging.debug( "Creating Model Source Text Editor" )
-        # TODO: decide if this should be read only...
+        # TODO: decide if this should be read only... use pygmentize to highlight the code?
         self.modelSrcEdit = Text( model_src_frame, width=80 )
         self.modelSrcEdit.pack( side=TOP, fill=X )
         self.modelSrcEdit.insert( END, "Model Source Viewer" )
@@ -189,10 +190,8 @@ class PythonRunner:
         pass
 
     def runFile( self, file ):
-        # FIX: This seems to work from the command line, but not when launched from
-        # eclipse... ?
         try:
-            proc = subprocess.Popen( 'python2.6 "' + file + '"', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
+            proc = subprocess.Popen( 'python "' + file + '"', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
             output, err = proc.communicate()
             retcode = proc.wait()
             if retcode < 0:

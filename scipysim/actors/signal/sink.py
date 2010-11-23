@@ -25,9 +25,10 @@ class Sink(Actor):
                                    output_channel=None)
 
     def process(self):
-        """This gets called by the Actor parent.
-        It will look at the input channel - if the channel contains "None"
-        the actor is stopped. Otherwise the new Event is popped off
+        """
+        This gets called by the Actor parent.
+        Accepts everything from the input channel - if the channel contains 
+        last, the actor is stopped. Otherwise the new Event is popped off
         the channel and discarded.
         """
         event = self.input_channel.get(True)     # this is blocking
