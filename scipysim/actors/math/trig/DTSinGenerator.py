@@ -1,11 +1,11 @@
 from scipysim.actors import Channel, Source
-from sin import Sin
+from scipysim.actors.math.trig.sin import Sin
 from scipysim.actors.signal import Ramp
 
 
 import logging
 #logging.basicConfig(level=logging.info)
-logging.info("Logger enabled in DTSinGenerator")
+#logging.info("Logger enabled in DTSinGenerator")
 
 class DTSinGenerator(Source):
     '''A discrete sinusoidal signal generator. 
