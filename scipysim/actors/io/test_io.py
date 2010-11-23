@@ -6,7 +6,7 @@ Created on Dec 11, 2009
 
 from scipysim.actors import Channel, Event, LastEvent
 from scipysim.actors.io import Reader, Writer, Bundle, Unbundle
-from scipysim.actors.io import TextReader
+from scipysim.actors.io import TextReader, TextWriter
 import Queue as queue
 import numpy
 
@@ -26,6 +26,21 @@ class TestReader(unittest.TestCase):
         self.assertEquals("'''", output.get().value)
         self.assertEquals(1, output.get().tag)
 
+class TestTextWriter(unittest.TestCase):
+
+    def test_text_writer(self):
+        tfile = tempfile.NamedTemporaryFile()
+        filename = tfile.name
+        output = Channel()
+        writer = TextWriter(output, filename)
+        [output.put(e) for e in [Event(value=i ** 3, tag=i) for i in xrange(100)] + [LastEvent()]]
+        writer.start()
+        writer.join()
+
+        for i, line in enumerate(tfile):
+            self.assertEquals('%s, %s' % (str(i), str(i**3)), line.strip())
+        
+        
 
 class FileIOTests(unittest.TestCase):
     '''Test the FileIO Actors'''
@@ -39,7 +54,6 @@ class FileIOTests(unittest.TestCase):
     def tearDown(self):
         self.f.close()
 
-
     def test_file_write(self):
         '''Test that we can save data'''
         fileWriter = Writer(self.chan, self.f.name)
@@ -51,6 +65,7 @@ class FileIOTests(unittest.TestCase):
         # Check that the channel is empty...
         self.assertRaises(queue.Empty, self.chan.get_nowait)
 
+        # TODO check the data (load with numpy)
 
     def test_file_read(self):
         '''Test that we can retrieve data'''
