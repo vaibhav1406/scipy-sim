@@ -2,6 +2,7 @@ import unittest
 from actor import Actor
 from errors import NoProcessFunctionDefined
 
+from graph import TestNode, TestGraph
 
 class TestActor(unittest.TestCase):
 
