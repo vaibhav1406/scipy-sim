@@ -58,20 +58,35 @@ class CodeFile(object):
             The name of the *Actor* class within the given file.
 
         """
-        logging.debug("Trying to load a '%s' Actor from module found at '%s'" % (name, filepath))
+        logging.debug("Trying to load Actor from module found at '%s'. Actor might be called '%s'" % (filepath, name))
 
         self.filepath = filepath
         assert path.exists(filepath)
         
         the_path, the_file = path.split(filepath)
+        
         self.module_name, ext = path.splitext(the_file)
         assert 'py' in ext
+
+        # Find root module
+        current_dir = the_path
+        parent_module = ''
+        while path.exists(path.join(current_dir, '__init__.py')):
+            parent_module = path.basename(current_dir) + '.' + parent_module
+            current_dir = path.dirname(current_dir)
+
+        module = parent_module + self.module_name
+        logging.debug('Module is: %s' % module)
+        # TODO FIXME - If we have to add to the path to find it, so will automatically created models.
+        # It would be better to find the highest module eg scipysim where the module can
+        # be found.
+        # m = __import__('scipysim.actors.math.trig', {},{},[''])
         
-        logging.debug("Adding '%s' to the Python Path" % the_path)
-        sys.path.insert(0, the_path)
+        #logging.warning("Adding '%s' to the Python Path" % the_path)
+        #sys.path.insert(0, the_path)
         
         logging.debug('Now trying to execute `import %s` to get the module containing the Class.' % self.module_name)
-        module = __import__(self.module_name, level=10)
+        module = __import__(module, {},{},[''],level=10)
         logging.debug("'%s' module imported" % module)
 
         # Dynamically find the class that is not a unittest or part of the core
@@ -169,6 +184,12 @@ class CodeFile(object):
 
         self.params = parameters
         return parameters
+
+    def get_import(self):
+        '''
+        Return the way python sees the class
+        '''
+        return 'from %s import %s' % (inspect.getmodule(self.block_class).__name__, self.name)
 
     def get_code(self):
         '''Load an actor or model file.

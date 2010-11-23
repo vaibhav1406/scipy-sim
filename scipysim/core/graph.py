@@ -104,8 +104,10 @@ class Node(object):
 
 class Graph(object):
 
-    def __init__(self):
+    def __init__(self, name='Generic Model'):
         self.nodes = []
+        self.codefiles = set()
+        self.name = name
 
     def __repr__(self):
         out = ''
@@ -127,6 +129,7 @@ class Graph(object):
             a Node instance for the Actor to be added to this graph.
         '''
         self.nodes.append(node)
+        self.codefiles.add(node.codefile)
 
     def remove(self, node):
         # TODO: It might be required to disconnect the channels first
@@ -181,15 +184,67 @@ class Graph(object):
         '''
         Create a program from the graph and run it.
         '''
-        #TODO
-        pass
+        # Create a python program in a temporary file
+        from tempfile import NamedTemporaryFile
+        tempfile = NamedTemporaryFile()
+        filename = tempfile.name
+        self.write_to_py_file(filename)
+
+        # preview the output:
+        h = '\n' + '#' * 80 + '\n\n'
+        print h + ''.join(line for line in tempfile) + h
+
+        # Execute the python program
+        from scipysim.core.util import run_python_file
+        
+        output = run_python_file( filename )
+        print output
+        return output
 
     def write_to_py_file(self, filename):
         '''
         Create a python file containing an exectuable version of this model
         '''
-        #TODO
-        pass
+        domains = []
+        
+        code = """#!/bin/env python
+import scipysim
+from scipysim.actors import Model, MakeChans, Event
+%(imports)s
+
+print '%(header)s
+
+class %(class_name)s(Model):
+    '''
+    A model of ...
+    '''
+
+    def __init__(self):
+
+        wires = MakeChans(%(number_chans)d, %(domains)s)
+
+        self.components = [
+            #DTSinGenerator(wires[1], amplitude = 0.1, freq = 0.45, simulation_length=200),
+            %(components)s
+        ]
+
+
+if __name__ == '__main__':
+    %(class_name)s().run()
+
+""" %   {
+            'imports': '\n'.join(codefile.get_import() for codefile in self.codefiles),
+            'header': 'Scipysim Automatically Generated Program',
+            'class_name': self.name.replace(' ', '_'),
+            'number_chans': len(domains),
+            'domains': str(domains),
+            'components': '\n            '.join(node.write_to_py() for node in self.nodes)
+        }
+
+        f = open(filename, 'w')
+        f.write(code)
+        
+        f.close()
 
 import unittest
 get_source = lambda *args: os.path.abspath(os.path.join( os.path.dirname( __file__ ), os.path.pardir, os.path.pardir, *args ))
@@ -275,6 +330,16 @@ class TestGraph(unittest.TestCase ):
         chan = source_node.output_channels[0]
         g.connect(chan, gain)
         self.assertTrue(g.ready())
+
+    def test_verify_fails(self):
+        '''Create a model with an unfilled input channel'''
+        g = Graph()
+        
+        gain = Node(CodeFile( get_source( 'scipysim', 'actors', 'math', 'proportional.py'), 'Proportional'))
+        g.add(gain)
+        gain.params['gain'] = 10
+
+        self.assertFalse(g.ready())        
 
     def test_run(self):
         '''Test execution'''
