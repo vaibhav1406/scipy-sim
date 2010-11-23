@@ -115,5 +115,11 @@ class Test_Code_File_Parameters( unittest.TestCase ):
         for name, value in [('out', None), ('amplitude',1.0), ('freq',0.01), ('phi',0.0), ('simulation_length',100)]:
             self.assertEquals(params[name], value)
 
+class Test_CodeFile_Imports(unittest.TestCase):
+    def test_codefile_import(self):
+        filepath = path.abspath(path.join(PATH_TO_SRC_DIR, 'scipysim','actors','math','trig','DTSinGenerator.py'))
+        c = CodeFile( filepath )
+        self.assertEquals(c.get_import(), 'from scipysim.actors.math.trig.DTSinGenerator import DTSinGenerator')
+        
 if __name__ == "__main__":
     unittest.main()
