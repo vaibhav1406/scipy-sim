@@ -36,8 +36,8 @@ class Reader(Source):
 
 
 class TextReader(Source):
-    '''This source creates string objects from a file.
-    
+    '''
+    This source creates string objects from a file.
     '''
     def __init__(self, output_channel, filename, send_as_words=False):
         '''A TextReader requires a valid filename to read from.
@@ -57,5 +57,5 @@ class TextReader(Source):
         self.output_channel.put(LastEvent)
         self.stop = True
 
-
+# TODO TaggedTextReader for files of (tag, value)...
 
