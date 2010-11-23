@@ -8,7 +8,7 @@ from Tkinter import Tk
 from Tkinter import Frame, Button, Canvas, Text
 from Tkconstants import LEFT, BOTH, END, X, Y, TOP, RIDGE
 from ttk import *
-import subprocess
+
 import os
 from os import path
 import tempfile
@@ -19,8 +19,9 @@ import logging
 from tabs import Notebook as NoteBook
 
 from scipysim.core.codefile import CodeFile
-from codegroup import ExamplesGroup
+from scipysim.core.util import run_python_file
 
+from codegroup import ExamplesGroup
 from simulation_canvas import SimulationCanvas
 
 
@@ -149,8 +150,7 @@ class App:
         #temp = os.path.join(os.path.split(PATH_TO_SCRIPT)[0], 'local', 'temp.py')
         temp = tempfile.NamedTemporaryFile( 'w', dir=path.join( EXAMPLES_DIRECTORY, 'models' ) )
         writeFile( temp.name, text )
-        pr = PythonRunner()
-        output = pr.runFile( temp.name )
+        output = run_python_file( temp.name )
         self.write_to_console( output )
 
     def write_to_console( self, text ):
@@ -183,25 +183,6 @@ class App:
         help_button.pack( side=LEFT )
         quit_button = Button( controls_frame, text="QUIT", command=frame.quit )
         quit_button.pack( side=LEFT )
-
-
-class PythonRunner:
-    def __init__( self ):
-        pass
-
-    def runFile( self, file ):
-        try:
-            proc = subprocess.Popen( 'python "' + file + '"', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
-            output, err = proc.communicate()
-            retcode = proc.wait()
-            if retcode < 0:
-                logging.error( "Child Python process was terminated by signal: %d" % retcode )
-                return output + err
-            else:
-                logging.debug( "Child Python process returned: %d" % retcode )
-                return output + err
-        except OSError, e:
-            logging.error( "Execution failed: %s" % e )
 
 
 def writeFile( filepath, content ):
