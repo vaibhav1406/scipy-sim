@@ -1,7 +1,6 @@
-
 import logging
 from numpy import sin, pi
-#from Actor import Source, Actor
+
 from scipysim.actors import Siso, Event
 
 class Sin(Siso):

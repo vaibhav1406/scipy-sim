@@ -8,4 +8,4 @@ The Reader and Writer actors read and write data channels into a file.
 from bundle import Bundle
 from unbundle import Unbundle
 from reader import Reader, TextReader
-from writer import Writer
+from writer import Writer, TextWriter

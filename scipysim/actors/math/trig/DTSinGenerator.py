@@ -1,5 +1,5 @@
 from scipysim.actors import Channel, Source
-from sin import Sin
+from scipysim.actors.math.trig.sin import Sin
 from scipysim.actors.signal import Ramp
 
 
