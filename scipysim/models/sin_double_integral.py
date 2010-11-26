@@ -38,9 +38,9 @@ class SinDoubleIntegral( Model ):
             # 0.5 Hz, 0 degree phase
             CTSinGenerator( wires[0], 1, 0.5, 0.0 ),
             Split(wires[0], [wires[1], wires[2]]),
-            CTIntegratorQS1(wires[1], wires[3], init=0.0, delta=0.001, k=10),
+            CTIntegratorQS1(wires[1], wires[3], init=0.0, delta=0.001, maxstep=0.01),
             Split(wires[3], [wires[4], wires[5]]),
-            CTIntegratorQS1(wires[5], wires[6], init=0.0, delta=0.001, k=10),
+            CTIntegratorQS1(wires[5], wires[6], init=0.0, delta=0.001, maxstep=0.01),
             Plotter( wires[2], title="Input", own_fig=True), 
             Plotter( wires[4], title="1st Integral", own_fig=True),            
             Plotter( wires[6], title="2nd Integral", own_fig=True),

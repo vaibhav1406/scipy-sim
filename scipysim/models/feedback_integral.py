@@ -32,7 +32,7 @@ class FeedbackIntegral(Model):
 
             # The system
             Summer(inputs = [wires[1], (wires[7],'-')], output_channel = wires[3]),
-            CTIntegratorQS1(wires[3], wires[4], init=0.0, delta=0.001, k=100),
+            CTIntegratorQS1(wires[3], wires[4], init=0.0, delta=0.01, maxstep=0.099),
             #CTIntegrator(wires[3], wires[4], init=0.0),
             Split(wires[4], [wires[5], wires[6]]),
             Delay(wires[5], wires[7], wait=0.1),  # for causality
