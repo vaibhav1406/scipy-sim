@@ -64,7 +64,7 @@ class Actor(threading.Thread):
 
     def run(self):
         '''
-        Run this actors objects thread
+        Run this actor's thread
         '''
         logging.debug("Started running an actor thread")
 
