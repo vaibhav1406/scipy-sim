@@ -6,7 +6,7 @@ Created on 23/11/2009
 '''
 import logging
 from numpy import linspace
-from scipysim.actors import Source, Actor, Event, LastEvent
+from scipysim import Source, Actor, Event, LastEvent
 
 import time, random # These are used to test the async
 

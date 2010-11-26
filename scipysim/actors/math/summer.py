@@ -33,27 +33,28 @@ class BaseSummer(Actor):
         """
         super(BaseSummer, self).__init__(output_channel=output_channel)
 
-        domain = output_channel.domain
-        for input in inputs:
-            # Unpack input tuples
-            inp = input[0] if isinstance(input, tuple) else input
-
-            if not inp.domain == domain:
-                raise TypeError, "Summer channels must all have the same domain."
-
         self.signs = {}
         self.inputs = []
-        for input in list(inputs):
-            # Grab input channels
-            self.inputs.append( input[0] if isinstance(input, tuple) else input )
+        
+        domain = output_channel.domain
 
-            # Record signs for input channels. Default is +. The sign
-            # string are converted to numbers.
+        # Grab input channels
+        for input in inputs:
+            # Unpack input tuples and record signs for input channels.
+            # Default is +. The sign string are converted to numbers.
             if isinstance(input, tuple):
-                self.signs[input[0]] = numpy.float(input[1]+'1.0')
+                inp, sign = input
+                sign = numpy.float(sign + '1.0')
             else:
-                self.signs[input] = 1.0
+                inp = input
+                sign = 1.0
 
+            self.signs[inp] = sign
+            self.inputs.append(inp)
+            
+            if not inp.domain == domain:
+                raise TypeError, "Summer channels must all have the same domain."
+                
         self.num_inputs = len(self.inputs)
 
     def process(self):
