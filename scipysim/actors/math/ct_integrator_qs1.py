@@ -1,5 +1,13 @@
 '''
-Created on 21/12/2009
+********************************************************************************
+
+                    !!!! CAUTION !!!!
+
+  Highly experimental. In a constant state of flux. Filled with horrible hacks.
+  Possibly broken. Likely buggy. Do not use unless you know what you're getting
+  in to.
+
+********************************************************************************
 
 @author: Allan McInnes
 '''
@@ -25,7 +33,7 @@ class CTIntegratorQS1(Siso):
     input_domains = ('CT',)
     output_domains = ('CT',)
 
-    def __init__(self, xdot, x, init=0.0, delta=0.1, k=10.0):
+    def __init__(self, xdot, x, init=0.0, delta=0.1, maxstep=1, algebraic_loop=False):
         '''
         Construct a SISO CT integrator.
         
@@ -33,50 +41,51 @@ class CTIntegratorQS1(Siso):
         @param x: output integral
         @param init: the initial state of the integral
         @param delta: the state quantization step-size
-        @param k: coefficient for the maximum allowable timestep (k*delta)
+        @param maxstep: maximum allowable timestep
         '''
         super(CTIntegratorQS1, self).__init__(input_channel=xdot,
                                               output_channel=x,
                                               child_handles_output=True)
                                               
         self.delta = delta
-        self.maxstep = k * delta
+        self.maxstep = maxstep
         self.x = init
-        self.xdot = -1.0      # TODO: make this configurable
-        self.dx = 0
+        self.xdot = 0.0      # TODO: make this configurable
+        self.qx = self.__quantize(init)
+        self.dx = 0.0
         self.next_t = 0.0     # TODO: should probably make this configurable
         self.last_t = self.next_t
+        self.algebraic_loop = algebraic_loop
+
+        self.last_dt_out_t = 0.0
+        self.discrete_time = False
 
         # Generate an initial output
         self.__internal_transition()
 
     def __quantize(self, x):
-        return self.delta * np.floor(x / self.delta)
+        return self.delta * np.rint(x / self.delta)
         
-    def __statestep(self, x, xdot):
-        qx = self.__quantize(x)
-        dist = (x - qx) if abs(x - qx) > 1e-15 else 0  # Enforce a minimum step - seems like Kofman's hysteresis
-        dist = dist if abs(self.delta - dist) > 1e-15 else 0  # Enforce a minimum step - seems like Kofman's hysteresis
-        if xdot > 0:
-            step = self.delta - dist
-        elif xdot < 0:
-            step = -dist if dist != 0 else -self.delta
-        else:
-            step = 0
-        return step
+    def __statestep(self):
+        return self.qx + np.sign(self.xdot)*self.delta/2.0 - self.x
 
     def __timestep(self):
         '''
         The size of the time step is either the amount of
         time it takes to reach the next quantization level given
         the current value of the derivative (assuming a linear projection
-        forward in time), or the maximum step size, whichever is smaller.   
+        forward in time), or the time it takes to reach a point that will 
+        ensure outputs are no more than the maximum step size apart,
+        whichever is smaller.
         '''
-        if self.xdot != 0.0 and self.dx != 0.0:
-            step = abs(self.dx / self.xdot)
+        if self.xdot != 0.0: # and self.dx > 100.0 * np.finfo(np.float_).resolution:
+            de_step = np.fabs(self.dx / self.xdot)
         else:
-            step = np.inf 
-        return min(step, self.maxstep)   
+            de_step = np.inf
+
+        step = min(de_step, (self.last_dt_out_t + self.maxstep) - self.last_t)
+        self.discrete_time = (step != de_step)
+        return step
             
 
     def __internal_transition(self):
@@ -84,20 +93,24 @@ class CTIntegratorQS1(Siso):
         DEVS-style 'internal transitions' occur when time has advanced
         to the next output instant. They generate both an output
         and a state change.
-        '''    
-        self.x += self.dx 
-        self.last_t = self.next_t        
+        '''
+        elapsed = self.next_t - self.last_t
+        self.last_t = self.next_t
 
-        # Quantize here in case the actual state is the result
-        # of taking a max_step, and has left us between quantum levels    
-        out_event = Event(self.last_t, self.__quantize(self.x))
+        if self.discrete_time:
+            self.x += self.xdot * elapsed
+            self.qx = self.__quantize(self.x)
+            self.last_dt_out_t = self.last_t
+        else:
+            self.x = self.qx + np.sign(self.xdot)*self.delta/2.0
+            self.qx += np.sign(self.xdot)*self.delta
         
         # Project time to reach next quantization level based on current 
         # derivative.         
-        self.dx = self.__statestep(self.x, self.xdot)
+        self.dx = self.__statestep()
         self.next_t += self.__timestep()           # Next output time
 
-        self.output_channel.put( out_event )
+        self.output_channel.put( Event(self.last_t, self.qx) )
 
         
         
@@ -116,17 +129,14 @@ class CTIntegratorQS1(Siso):
         # since tag < self.next_t, and self.next_t indicates the time
         # at which the next quantization level would be reached given
         # a derivative of self.xdot.
-        new_x = self.x + self.xdot * elapsed
-        
+        self.x = self.x + self.xdot * elapsed
+        self.xdot = xdot
+        self.last_t += elapsed
+
         # Find the change in x required to reach the next quantization level
         # from the new intermediate state
-        self.dx = self.__statestep(new_x, xdot)
-
-        # Update the state
-        self.xdot = xdot          
-        self.last_t += elapsed  
+        self.dx = self.__statestep()
         self.next_t = self.last_t + self.__timestep()  # Next output time
-        self.x = new_x
 
 
     def __str__(self):
@@ -138,7 +148,9 @@ class CTIntegratorQS1(Siso):
         s += "next_t:" + str(self.next_t) + ", "        
         s += "x:" + str(self.x) + ", "
         s += "xdot:" + str(self.xdot) + ", "
-        s += "dx:" + str(self.dx)        
+        s += "dx:" + str(self.dx) + ", "
+        s += "qx:" + str(self.qx) + ", "
+        s += "last_out:" + str(self.last_out)
         s += "]"
         return s 
 
@@ -150,27 +162,26 @@ class CTIntegratorQS1(Siso):
         '''
         tag, xdot = event.tag, event.value
 
-        if abs(tag - self.last_t) < 1e-15:
+        # The following is one option for breaking causality problems
+        # with algebraic loops        
+        if self.algebraic_loop and np.fabs(tag - self.last_t) < 100.0 * np.finfo(np.float_).resolution:
             # We assume that a nearly identical time to the previous event
             # indicates that the only thing advancing time is the integrator
-            # itself. Note that this will fail if there's a delay in the
-            # loop
-            self.__external_transition(tag, xdot)                    
+            # itself. This is a bit of a hack, and doesn't work properly if
+            # there are other sources of time information entering the loop.
+            self.__external_transition(tag, xdot)
             self.__internal_transition()
         else:
+
             # External time has moved past the internal time, so first
             # process 'internal transition' (DEVS terminology) to bring
             # the integrator up-to-date
             while tag >= self.next_t:
                 self.__internal_transition()
-            
+
             # Process 'external transition' (DEVS terminology) caused by
             # reception of an input event
             self.__external_transition(tag, xdot)
-
-        #if self.next_t > 20:
-        #    self.output_channel.put(LastEvent())
-
 
 import unittest
 from scipysim.actors import SisoCTTestHelper, Channel
@@ -194,16 +205,16 @@ class CTintegratorQSTests(unittest.TestCase):
         # to the function f(x) = -x, and then later checking that the outputs we 
         # get match the inputs we fed in. This allows the testing to be done 
         # without relying on other actors.
-        intags = [0.0, 0.10000000000000001, 0.21111111111111114, 0.33611111111111114, 0.47896825396825399, 0.64563492063492067, 0.84563492063492074, 1.0956349206349207, 1.428968253968254, 1.928968253968254, 2.9289682539682538, 12.928968253968254]
-        invals = [-1, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.0]
+        intags = [0.0, 0.0500000000000000, 0.1611111111111, 0.28611111111111, 0.42896825396825566, 0.59563492063492, 0.79563492063492, 1.04563492063492, 1.37896825396825, 1.878968253968261, 2.878968253968262]
+        invals = [-1, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0]
         inputs = [Event(value=val, tag=tag) for (val, tag) in zip(invals, intags)]
 
-        expected_output_tags = [0.0, 0.10000000000000001, 0.21111111111111114, 0.33611111111111114, 0.47896825396825399, 0.64563492063492067, 0.84563492063492074, 1.0956349206349207, 1.428968253968254, 1.928968253968254, 2.9289682539682538, 12.928968253968254, 22.928968253968254]
-        expected_output_values = [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0, 0.0, 0.0]
+        expected_output_tags = [0.0, 0.0500000000000000, 0.1611111111111, 0.28611111111111, 0.42896825396825566, 0.59563492063492, 0.79563492063492, 1.04563492063492, 1.37896825396825, 1.878968253968261, 2.878968253968262, 10.0]
+        expected_output_values = [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0, 0.1]
         expected_outputs = [Event(value=val, tag=tag) for (val, tag) in zip(expected_output_values, expected_output_tags)]
 
         # k has been set to make maxstep 10.0
-        block = CTIntegratorQS1(self.q_in, self.q_out, init=1.0, delta=0.1, k=10.0 / 0.1)
+        block = CTIntegratorQS1(self.q_in, self.q_out, init=1.0, delta=0.1, maxstep=10.0, algebraic_loop=True)
         SisoCTTestHelper(self, block, inputs, expected_outputs)
 
     def test_simple_integration_2(self):
@@ -218,20 +229,20 @@ class CTintegratorQSTests(unittest.TestCase):
         # to the function f(x) = -x, and then later checking that the outputs we 
         # get match the inputs we fed in. This allows the testing to be done 
         # without relying on other actors.
-        intags = [0.0, 0.10000000000000001, 0.21111111111111114, 0.33611111111111114, 0.47896825396825399, 0.64563492063492067, 0.84563492063492074, 1.0956349206349207, 1.428968253968254, 1.928968253968254, 2.9289682539682538, 12.928968253968254]
-        invals = [-1, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.0]
+        intags = [0.0, 0.0500000000000000, 0.1611111111111, 0.28611111111111, 0.42896825396825566, 0.59563492063492, 0.79563492063492, 1.04563492063492, 1.37896825396825, 1.878968253968261, 2.878968253968262]
+        invals = [-1, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0]
         inputs = [Event(value=val, tag=tag) for (val, tag) in zip(invals, intags)]
 
-        expected_output_tags = [0.0, 0.10000000000000001, 0.21111111111111114, 0.33611111111111114, 0.47896825396825399, 0.64563492063492067, 0.84563492063492074, 1.0956349206349207, 1.428968253968254, 1.928968253968254, 2.9289682539682538, 12.928968253968254, 22.928968253968254]
-        expected_output_values = [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0, 0.0, 0.0]
+        expected_output_tags = [0.0, 0.0500000000000000, 0.1611111111111, 0.28611111111111, 0.42896825396825566, 0.59563492063492, 0.79563492063492, 1.04563492063492, 1.37896825396825, 1.878968253968261, 2.878968253968262, 10.0]
+        expected_output_values = [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0, 0.1]
         expected_outputs = [Event(value=val, tag=tag) for (val, tag) in zip(expected_output_values, expected_output_tags)]
 
         q1, q2, q3 = Channel(), Channel(), Channel()
 
         blocks = [
-                    CTIntegratorQS1(self.q_in, self.q_out, init=1.0, delta=0.1, k=10.0 / 0.1),
+                    CTIntegratorQS1(self.q_in, self.q_out, init=1.0, delta=0.1, maxstep=10.0, algebraic_loop=True),
                     Split(self.q_out, [q1, q2]),
-                    CTIntegratorQS1(q1, q3, init=1.0, delta=0.1, k=10.0 / 0.1)
+                    CTIntegratorQS1(q1, q3, init=1.0, delta=0.1, maxstep=10.0, algebraic_loop=True)
                   ]
 
         [self.q_in.put(val) for val in inputs + [LastEvent()]]
@@ -245,25 +256,6 @@ class CTintegratorQSTests(unittest.TestCase):
 
         self.assertTrue(q2.get().last)
 
-def quickTest():
-    from scipysim.actors.math import Proportional
-    from scipysim.actors.signal import Split
-
-    c1, c2, c3, c4 = Channel(), Channel(), Channel(), Channel()
-    
-    blocks = [
-                CTIntegratorQS1(c1, c2, init=1.0, delta=0.1, k=10/0.1),
-                Split(c2, [c3, c4]),
-                Proportional(c3, c1, -1.0),
-             ]
-    
-    [b.start() for b in blocks]
-    [b.join() for b in blocks]
-    out = c4.get()
-    while not out.last :
-        out = c4.get()
-
 if __name__ == '__main__':
     unittest.main()
-    #quickTest()
 

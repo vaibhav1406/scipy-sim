@@ -34,10 +34,10 @@ class ThrownBall(Model):
             Split(wires[0], [wires[1], wires[2]]),
             # Integrate to get velocity
             Integrator(wires[1], wires[3], initial_velocity),
-            QSIntegrator(wires[2], wires[4], initial_velocity),
+            QSIntegrator(wires[2], wires[4], initial_velocity, delta=0.1 ),
             # Integrate to get displacement
             Integrator(wires[3], wires[5], initial_position),
-            QSIntegrator(wires[4], wires[6], initial_position),
+            QSIntegrator(wires[4], wires[6], initial_position, delta=0.1 ),
             # Plot
             StemPlotter(wires[5], title="Displacement (discrete-time integration)", live=True, xlabel="Time (s)", ylabel="(m)"),
             StemPlotter(wires[6], title="Displacement (quantized-state integration)", live=True, xlabel="Time (s)", ylabel="(m)"),
