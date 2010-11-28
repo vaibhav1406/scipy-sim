@@ -59,12 +59,8 @@ class Node(object):
         self.output_channels = []
 
         # Export some of codefile's attributes
-        for attrib in [ 'name',
-                        'num_outputs',
-                        'num_inputs',
-                        'output_domains',
-                        'input_domains',
-                        'get_default_parameters']:
+        for attrib in [ 'name', 'num_outputs', 'num_inputs', 'output_domains',
+                        'input_domains', 'get_default_parameters' ]:
             setattr(self, attrib, getattr(codefile, attrib))
         # Export the codefile itself
         self.codefile = codefile
@@ -83,11 +79,13 @@ class Node(object):
                     self.input_channels.extend(self.params.pop(key))
                 else:
                     self.input_channels.append(self.params.pop(key))
+                self.input_channels_name = key
             if key in ['output', 'out', 'output_channel', 'outputs', 'outs', 'output_channels']:
                 if type(self.params[key]) in [list, tuple]:
                     self.output_channels.extend(self.params.pop(key))
                 else:
                     self.output_channels.append(self.params.pop(key))
+                self.output_channels_name = key
 
         # Create output channels
         for _ in range(self.output_channels.count(None)):
@@ -101,6 +99,37 @@ class Node(object):
         
     def set_parameter(name, value):
         self.params[name] = value
+        
+    def write_to_py(self):
+        '''
+        Take the parameters and create a text representation that will be used
+        in a "model".
+        
+        DTSinGenerator(wires[1], amplitude = 0.1, freq = 0.45, simulation_length=200)
+        '''
+        logging.debug('Connecting %s actor. Inputs: %s, Outputs: %s, Parameters: %s' % (self.name,
+                                                                                        self.input_channels,
+                                                                                        self.output_channels,
+                                                                                        self.params))
+        if len(self.input_channels) > 1:
+            input_channels = '%s=%s, ' % (self.input_channels_name, self.input_channels)
+        elif len(self.input_channels) == 1:
+            input_channels = '%s=%s, ' % (self.input_channels_name, self.input_channels[0])
+        else:
+            input_channels = ''
+        
+        if len(self.output_channels) > 1:
+            output_channels = '%s=%s, ' % (self.output_channels_name, self.output_channels)
+        elif len(self.output_channels) == 1:
+            output_channels = '%s=%s, ' % (self.output_channels_name, self.output_channels[0])
+        else:
+            output_channels = ''
+            
+        parameters = ''
+        for parameter_name in self.params:
+            parameters += parameter_name + '=' + repr(self.params[parameter_name]) + ', '
+        parameters = parameters.rstrip(', ')
+        return '%s(%s%s%s)' % (self.name, input_channels, output_channels, parameters)
 
 class Graph(object):
 
@@ -203,16 +232,47 @@ class Graph(object):
 
     def write_to_py_file(self, filename):
         '''
-        Create a python file containing an exectuable version of this model
+        Create a python file containing an exectuable version of this model.
+        
+        Make instances of each Channel, and give them a name.
         '''
+        
+        # Replace <Channel Instance> with something like chan[0]
+        # for each node.
+        channel_set = set()
+        for node in self.nodes:
+            for channel in node.input_channels + node.output_channels:
+                if channel.domain is None: channel.domain = 'None'
+                channel_set.add(channel)
+                
+        
+        channel_names = dict([(channel, channel.name + '_' + channel.domain + '_' + str(i)) 
+                              for i, channel in enumerate(channel_set)])
+        
+        for node in self.nodes:
+            # replace the Node's channels with strings referring to them
+            actual_input_channels = node.input_channels[:]
+            for channel in actual_input_channels:
+                node.input_channels.remove(channel)
+                node.input_channels.insert(0, channel_names[channel])
+            
+            actual_output_channels = node.output_channels[:]
+            for channel in actual_output_channels:
+                node.output_channels.remove(channel)
+                node.output_channels.insert(0, channel_names[channel])
+        
+        # Get the domains of all those channels
         domains = []
+        for channel in channel_names:   # Note same iteration method to create the names
+            domains.append(channel.domain)
+        
         
         code = """#!/bin/env python
 import scipysim
 from scipysim.actors import Model, MakeChans, Event
 %(imports)s
 
-print '%(header)s
+print '%(header)s'
 
 class %(class_name)s(Model):
     '''
@@ -221,10 +281,10 @@ class %(class_name)s(Model):
 
     def __init__(self):
 
-        wires = MakeChans(%(number_chans)d, %(domains)s)
+        %(wire_names)s = MakeChans(%(number_chans)d, %(domains)s)
 
         self.components = [
-            #DTSinGenerator(wires[1], amplitude = 0.1, freq = 0.45, simulation_length=200),
+            #DTSinGenerator(wires[0], amplitude = 0.1, freq = 0.45, simulation_length=200),
             %(components)s
         ]
 
@@ -236,9 +296,10 @@ if __name__ == '__main__':
             'imports': '\n'.join(codefile.get_import() for codefile in self.codefiles),
             'header': 'Scipysim Automatically Generated Program',
             'class_name': self.name.replace(' ', '_'),
-            'number_chans': len(domains),
+            'number_chans': len(channel_set),
             'domains': str(domains),
-            'components': '\n            '.join(node.write_to_py() for node in self.nodes)
+            'wire_names': ', '.join(channel_names.values()),
+            'components': ',\n            '.join(node.write_to_py() for node in self.nodes)
         }
 
         f = open(filename, 'w')

@@ -53,10 +53,10 @@ All the tests can be run as a suite using nosetests::
 
 	nosetests
 	
-A helper script called test_scipysim.py has been placed in the scipysim 
-module to launch nosetests::
+A helper script called test_scipysim.py has been placed in the root 
+scipysim directory to launch nosetests::
 
-	./scipysim/test_scipysim.py
+	./test_scipysim.py -v
 
 If you downloaded from the repository the tests can be run with setuptools::
 
