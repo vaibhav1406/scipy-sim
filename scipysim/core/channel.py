@@ -26,7 +26,7 @@ class Channel(Queue, object):
 
     '''
 
-    def __init__(self, domain='CT'):
+    def __init__(self, domain='CT', name=''):
         '''Construct a queue with domain type information.
         
         @param domain: The specific domain of events that this channel will carry.
@@ -34,6 +34,7 @@ class Channel(Queue, object):
         '''
         super(Channel, self).__init__()
         self.domain = domain
+        self.name = name
 
     def put(self, item, *args, **kwargs):
         '''Put an event into the channel.'''
