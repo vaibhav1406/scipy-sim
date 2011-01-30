@@ -142,7 +142,7 @@ class Graph(object):
         out = ''
         for node in self.nodes:
             out += str(node)
-        return node
+        return out
 
     def __contains__(self, node):
         return node in self.nodes
