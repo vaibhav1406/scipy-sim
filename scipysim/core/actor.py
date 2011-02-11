@@ -3,8 +3,6 @@ Created on 19/11/2009
 
 @author: brian
 '''
-import thread
-
 
 import threading
 import logging
@@ -13,11 +11,10 @@ from thread import interrupt_main
 from channel import Channel
 from errors import NoProcessFunctionDefined
 
-class Actor(threading.Thread):
+class Actor(object):
     '''
     This is a base Actor class for use in a simulation.
     All blocks should inherit from this, including composite models.
-    The class inherits from Thread which enables all the blocks to run concurrently.
     
     Attributes that are used in the GUI for connecting components include the
     domain and number of an Actors inputs and outputs. As a convention 
@@ -36,37 +33,52 @@ class Actor(threading.Thread):
     num_outputs = None
     output_domains = (None,)
     input_domains = (None,)
+    thread = None
 
     def __init__(self, input_channel=None, output_channel=None, *args, **kwargs):
         '''Constructor for a generic base actor.
         
         @param input_channel: If an input queue is not passed in, one will be created.
-                            This enables scipysim to stop the thread by passing it a
+                            This enables scipysim to stop the actor by passing it a
                             message.
         
         @param output_channel: Optional channel for output from this actor to be put into.
         
-        Any other named parameters will be passed on to the Thread constructor.
         '''
         super(Actor, self).__init__()
 
-        # Every actor will have at least an input thread - even if its just a control
+        # Every actor will have at least an input channel - even if its just a control
         if input_channel is None:
             input_channel = Channel()
         self.input_channel = input_channel
 
         # A sink doesn't require an output queue so this could be None
         self.output_channel = output_channel
-
         self.stop = False
-        self.setDaemon(True)
 
+    def start(self):
+        '''
+        Start execution of the actor.
+        '''
+        self.thread = threading.Thread(target=self.run)
+        self.thread.start()
+
+    def join(self):
+        '''
+        Wait for actor execution to terminate.
+        '''
+        # Loop on a join with timeout as a workaround to allow
+        # KeyboardInterrupts to be caught.
+        # See http://bugs.python.org/issue1167930
+        while self.thread.is_alive():
+            self.thread.join(1.0)
 
     def run(self):
         '''
-        Run this actor's thread
+        Execute the actor behaviour in accordance with the selected
+        simulation algorithm.
         '''
-        logging.debug("Started running an actor thread")
+        logging.debug("Started running an actor")
 
         try:
             
@@ -76,7 +88,7 @@ class Actor(threading.Thread):
         except KeyboardInterrupt:
             # Need to make sure that Keyboard interrupts are propagated
             # to main thread in cases where the signal module isn't available.
-            thread.interrupt_main()
+            interrupt_main()
 
     def terminate(self):
         '''Terminate the actor.'''
