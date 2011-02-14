@@ -90,6 +90,9 @@ class Actor(object):
             # to main thread in cases where the signal module isn't available.
             interrupt_main()
 
+    def is_alive(self):
+        return self.thread.is_alive()
+
     def terminate(self):
         '''Terminate the actor.'''
         self.stop = True

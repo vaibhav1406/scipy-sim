@@ -47,7 +47,7 @@ class Model(Actor):
             # Required for KeyboardInterrupt to be handled reliably
             # See: http://luke.maurits.id.au/blog/2008/03/threads-and-signals-in-python/
             while True:
-                if not any([component.isAlive() for component in self.components]):
+                if not any([component.is_alive() for component in self.components]):
                     # All threads have stopped
                     break
                 else:
