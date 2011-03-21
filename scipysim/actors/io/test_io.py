@@ -7,7 +7,6 @@ Created on Dec 11, 2009
 from scipysim.actors import Channel, Event, LastEvent
 from scipysim.actors.io import Reader, Writer, Bundle, Unbundle
 from scipysim.actors.io import TextReader, TextWriter
-import Queue as queue
 import numpy
 
 import unittest
@@ -63,7 +62,7 @@ class FileIOTests(unittest.TestCase):
         fileWriter.join()
 
         # Check that the channel is empty...
-        self.assertRaises(queue.Empty, self.chan.get_nowait)
+        self.assertRaises(Channel.Empty, lambda: self.chan.get(block=False))
 
         # TODO check the data (load with numpy)
 
