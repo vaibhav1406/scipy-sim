@@ -6,39 +6,70 @@ Channel class and helper functions for creating multiple channels.
 
 '''
 
-from Queue import Queue, Empty
-from time import time
+from Queue import Queue
+from Queue import Empty as QEmpty
 
-#class Empty(Empty):
-#    pass
 
-class Channel(Queue, object):
+class Channel(object):
     '''
-    A Channel is based on the Python Queue, used for communicating between
-    Actor threads.
-    
+    A Channel is used for communicating between Actors. Channels are
+    FIFO streams of Events.
+
     A Channel must be created for a specific domain, e.g.:
         * CT - Continuous Time
         * DT - Discrete Time
         * DE - Discrete Event
-        
+
     @param domain: The two letter domain code as a string
 
     '''
 
+    class Empty(Exception):
+        "Exception raised by Channel.get()."
+        pass
+
     def __init__(self, domain='CT', name=''):
         '''Construct a queue with domain type information.
-        
+
         @param domain: The specific domain of events that this channel will carry.
                         - defaults to 'CT' domain.
         '''
         super(Channel, self).__init__()
+        self.queue = Queue()
         self.domain = domain
         self.name = name
+        self._head = None
 
-    def put(self, item, *args, **kwargs):
-        '''Put an event into the channel.'''
-        super(Channel, self).put(item, args, kwargs)
+
+    def put(self, item, block=True, timeout=None):
+        '''Put an event into the channel.       '''
+        self.queue.put(item, block=block, timeout=timeout)
+
+    def get(self, block=True, timeout=None):
+        '''Get an event from the channel.
+
+        Blocks indefinitely when the channel is empty if 'block' is True
+        and 'timeout' is None.
+
+        Blocks for 'timeout' seconds when the channel is empty if 'block'
+        is True and 'timeout' is a positive number. Raises an Empty exception
+        if no item is available on timeout. A negative timeout is equivalent
+        to setting 'block' equal to false.
+
+        Raises an Empty exception if the channel is empty and 'block' is false.
+
+        @param block: True if an empty channel should cause blocking.
+        @param timeout: number of seconds to wait if blocked.
+        '''
+        if self._head is not None:
+            item = self._head
+            self._head = None
+        else:
+            try:
+                item = self.queue.get(block=block, timeout=timeout)
+            except QEmpty:
+                raise self.Empty
+        return item
 
     def head(self, block=True, timeout=None):
         '''Return the event at the head of the channel, but don't remove it.
@@ -55,57 +86,34 @@ class Channel(Queue, object):
 
         @param block: True if an empty channel should cause blocking.
         @param timeout: number of seconds to wait if blocked.
-        
-        '''
-        self.not_empty.acquire()
-        try:
-            # Assume block == True is the common case
-            if block:
-                if timeout is None:
-                    while not self._qsize():
-                        self.not_empty.wait()
-                elif timeout < 0:
-                    if not self._qsize():
-                        raise Empty
-                else:
-                    start = time()
-                    while not self._qsize():
-                        elapsed = time() - start
-                        if elapsed >= timeout:
-                            raise Empty
-                        self.not_empty.wait(timeout - elapsed)
-            else:
-                if not self._qsize():
-                    raise Empty
 
-            return self._head()
-        finally:
-            self.not_empty.release()
+        '''
+        if self._head is None:
+            try:
+                self._head = self.queue.get(block=block, timeout=timeout)
+            except QEmpty:
+                raise self.Empty
+        return self._head
 
     def drop(self):
         '''Remove the event at the head of the channel.'''
-        self.not_empty.acquire()
-        try:
-            if self._qsize():
-                self._drop()
-        finally:
-            self.not_empty.release()
+        if self._head is None:
+            try:
+                self._head = self.queue.get(block=False)
+            except QEmpty:
+                pass
+        self._head = None
 
-    # Look at the head of the channel
-    def _head(self):
-        return self.queue[0]
-
-    # Remove the head of the channel
-    def _drop(self):
-        del self.queue[0]
+    def empty(self):
+        return self._head is None and self.queue.empty()
 
 
 def MakeChans(num, domain='CT'):
     '''Return a list of n channels.
-    
+
     @param num: number of channels to create.
     @param domain: The specific domain of events that these channels will carry.
-                        - defaults to 'CT' domain.    
+                        - defaults to 'CT' domain.
     '''
     return [Channel(domain) for _ in xrange(num)]
 
@@ -118,4 +126,5 @@ def MakeNamedChans(names, domain='CT'):
                         - defaults to 'CT' domain.
     '''
     return dict( zip( names, MakeChans( len( names ) ) ) )
+
 

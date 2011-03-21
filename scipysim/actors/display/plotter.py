@@ -21,7 +21,7 @@ from multiprocessing import Process
 from multiprocessing import Queue as MQueue
 from multiprocessing import Event as MEvent
 
-from scipysim import Actor, Channel, Event
+from scipysim import Actor, Channel, Event, LastEvent
 from scipysim.core.actor import DisplayActor
 
 import time
