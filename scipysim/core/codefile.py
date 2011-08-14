@@ -13,7 +13,7 @@ or
     import scipysim.actors.sin
 
 TODO CHECK: If the filename is an absolute path this might not import 
-properly because the Actor or Model may inherit from other files?
+properly because the Actor or CompositeActor may inherit from other files?
 '''
 
 from os import path
@@ -34,7 +34,7 @@ from actor import Actor, Source
 
 class CodeFile(object):
     """
-    Wrapper around code defining an *Actor* or *Model*.
+    Wrapper around code defining an *Actor* or *CompositeActor*.
     
     CodeFile instances exist for every source module containing Actors
     and keep track of the path to the source as well as the actual class.

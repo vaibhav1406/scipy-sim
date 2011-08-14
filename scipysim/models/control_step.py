@@ -7,7 +7,7 @@ brianthorne
 '''
 
 
-from scipysim.actors import Channel, Model, MakeChans
+from scipysim.actors import Channel, CompositeActor, MakeChans
 
 from scipysim.actors.math import Constant
 from scipysim.actors.signal import Step
@@ -16,7 +16,7 @@ from scipysim.actors.display import Plotter
 import scipy
 import scipy.signal
 
-class ControlStep(Model):
+class ControlStep(CompositeActor):
     '''This simulation is a P controller responding to a step input.'''
     def __init__(self):
         '''Create the components'''

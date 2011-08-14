@@ -1,7 +1,7 @@
 """
 A model based on the bouncing ball example in simulink.
 """
-from scipysim.actors import Model, MakeChans
+from scipysim.actors import CompositeActor, MakeChans
 from scipysim.actors.signal import Split
 from scipysim.actors.math import Constant
 from scipysim.actors.math import CTIntegratorForwardEuler as Integrator
@@ -11,7 +11,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logging.info("Logger enabled")
 
-class ThrownBall(Model):
+class ThrownBall(CompositeActor):
     '''
     A simple example simulation where ...
     '''

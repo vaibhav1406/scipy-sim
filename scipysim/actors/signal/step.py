@@ -8,7 +8,7 @@ Created on Feb 7, 2010
 
 import logging
 from numpy import arange
-from scipysim.actors import Source, Channel, Model, Event, LastEvent
+from scipysim.actors import Source, Channel, CompositeActor, Event, LastEvent
 
 
 class Step(Source):
@@ -43,7 +43,7 @@ class Step(Source):
 
 from scipysim.actors.display import Stemmer
 from scipysim.actors.signal import Decimator
-class StepPlot(Model):
+class StepPlot(CompositeActor):
     def __init__(self):
         output = Channel()
         reduced_output = Channel()

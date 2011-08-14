@@ -5,7 +5,7 @@ feedback loop and discrete-event integrator.
 
 @author: Allan McInnes
 """
-from scipysim.actors import Model, MakeChans, Event
+from scipysim.actors import CompositeActor, MakeChans, Event
 from scipysim.actors.signal import Split
 from scipysim.actors.signal import Delay
 from scipysim.actors.signal import Step
@@ -14,7 +14,7 @@ from scipysim.actors.math import CTIntegratorQS1
 from scipysim.actors.math import CTIntegratorForwardEuler as CTIntegrator
 from scipysim.actors.display import StemPlotter
 
-class FeedbackIntegral(Model):
+class FeedbackIntegral(CompositeActor):
     '''
     A model of a simple feedback system.
     '''

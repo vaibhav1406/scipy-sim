@@ -3,7 +3,7 @@ Created on 23/11/2009
 
 @author: brian
 '''
-from scipysim.actors import MakeChans, Model
+from scipysim.actors import MakeChans, CompositeActor
 from scipysim.actors.signal import  Ramp, Delay, RandomSource
 from scipysim.actors.math import Summer
 from scipysim.actors.display import Plotter
@@ -12,7 +12,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logging.info("Logger enabled")
 
-class DelayedRampSum(Model):
+class DelayedRampSum(CompositeActor):
     '''Delaying an input (by an integer timestep ) to the multi input summer.'''
 
     def __init__(self, res=10, simulation_length=40):

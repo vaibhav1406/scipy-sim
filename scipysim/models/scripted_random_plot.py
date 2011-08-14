@@ -3,11 +3,11 @@ Created on 23/11/2009
 
 @author: brian
 '''
-from scipysim.actors import Channel, Model
+from scipysim.actors import Channel, CompositeActor
 from scipysim.actors.display import Plotter
 from scipysim.actors.signal import RandomSource
 
-class RandomPlot( Model ):
+class RandomPlot( CompositeActor ):
     '''
     Run a simple example connecting a random source with a plotter
     '''

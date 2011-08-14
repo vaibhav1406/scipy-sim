@@ -5,9 +5,9 @@ Created on 23/11/2009
 '''
 from scipysim.actors.signal import Ramp
 from scipysim.actors.display import Plotter
-from scipysim.actors import Channel, Model
+from scipysim.actors import Channel, CompositeActor
 
-class RampPlot(Model):
+class RampPlot(CompositeActor):
     '''This example simulation connects a ramp source to a plotter.'''
     def __init__(self):
         '''Create the components'''

@@ -12,7 +12,7 @@ The results match pretty well with a similar system simulated in Simulink.
 Created on 2010-03-22
 @author: Allan McInnes
 '''
-from scipysim.actors import Model, MakeChans
+from scipysim.actors import CompositeActor, MakeChans
 from scipysim.actors.display import Plotter
 from scipysim.actors.signal import Split
 from scipysim.actors.math import CTIntegratorQS1
@@ -24,7 +24,7 @@ import logging
 logging.basicConfig( level=logging.INFO )
 logging.info( "Logger enabled" )
 
-class SinDoubleIntegral( Model ):
+class SinDoubleIntegral( CompositeActor ):
     """
     Double-integration of a sinusoid 
     """

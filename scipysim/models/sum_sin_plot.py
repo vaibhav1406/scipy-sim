@@ -3,7 +3,7 @@ Created on 03/12/2009
 
 @author: allan
 '''
-from scipysim.actors import Channel, Model
+from scipysim.actors import Channel, CompositeActor
 from scipysim.actors.display import Plotter
 from scipysim.actors.math import Summer
 from scipysim.actors.math.trig import CTSinGenerator
@@ -14,7 +14,7 @@ import logging
 logging.basicConfig( level=logging.INFO )
 logging.info( "Logger enabled" )
 
-class SumSinPlot( Model ):
+class SumSinPlot( CompositeActor ):
     """
     Summing two continous sinusoidal sources with different timesteps,
     and plotting.

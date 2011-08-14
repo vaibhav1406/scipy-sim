@@ -104,7 +104,7 @@ class App:
 
         logging.debug( "Adding the screens to the notebook" )
         self.notebook.add_screen( component_src_frame, "Component Source" )
-        #self.notebook.add_screen( model_src_frame, "Model Source" )
+        #self.notebook.add_screen( model_src_frame, "CompositeActor Source" )
         self.notebook.add_screen( blank_src_frame, "Hide Source Viewer" )
 
         self.console = Text( main_frame, height=10, width=80 )

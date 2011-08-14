@@ -1,6 +1,6 @@
 import logging
 from scipysim.actors import MakeChans
-from scipysim.actors import Model
+from scipysim.actors import CompositeActor
 from scipysim.actors.display import BundleHistPlotter
 from scipysim.actors.io import Bundle
 from scipysim.actors.math import Summer
@@ -9,7 +9,7 @@ from scipysim.actors.signal import RandomSource
 logging.basicConfig(level=logging.INFO)
 logging.info("Starting dual ramp + noise sum.")
 
-class MultiSumPlot(Model):
+class MultiSumPlot(CompositeActor):
     '''
     This example connects N random sources to a summer block
     The final output is plotted AFTER all the processing is complete.
