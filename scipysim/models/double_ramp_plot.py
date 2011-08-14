@@ -1,4 +1,4 @@
-from scipysim.actors import Model, MakeChans
+from scipysim.actors import CompositeActor, MakeChans
 from scipysim.actors.signal import Ramp
 from scipysim.actors.math import Summer
 from scipysim.actors.display import Plotter
@@ -7,7 +7,7 @@ import logging
 logging.basicConfig( level=logging.INFO )
 logging.info( "Logger enabled" )
 
-class Double_Ramp_Plot( Model ):
+class Double_Ramp_Plot( CompositeActor ):
     '''
     A simple example simulation where two ramp sources 
     are connected to a summer block and then plotted.

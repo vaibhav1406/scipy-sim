@@ -4,7 +4,7 @@ Created on 23/11/2009
 @author: brian
 '''
 from scipysim.actors.display import Plotter
-from scipysim.actors import Channel, Model
+from scipysim.actors import Channel, CompositeActor
 from scipysim.actors.math import Proportional
 from scipysim.actors.signal import Ramp
 
@@ -12,7 +12,7 @@ import logging
 logging.basicConfig( level=logging.DEBUG )
 logging.info( "Logger enabled" )
 
-class RampGainPlot( Model ):
+class RampGainPlot( CompositeActor ):
     '''
     This example connects a ramp to a gain to a plotter.
     It could easily have used a different ramp to achieve the same effect.

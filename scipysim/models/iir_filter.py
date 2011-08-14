@@ -5,14 +5,14 @@ IIR filter.
 
 @author: Allan McInnes
 """
-from scipysim.actors import Model, MakeChans, Event
+from scipysim.actors import CompositeActor, MakeChans, Event
 from scipysim.actors.signal import Split, Delay
 from scipysim.actors.math.trig import DTSinGenerator
 from scipysim.actors.math import Summer
 from scipysim.actors.math import Proportional as Gain
 from scipysim.actors.display import StemPlotter
 
-class IIR(Model):
+class IIR(CompositeActor):
     '''
     A model of an IIR filter.
     '''

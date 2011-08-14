@@ -29,7 +29,7 @@ import logging
 
 class Node(object):
     '''
-    Abstraction of an *Actor* or *Model* that can be used in a program *Graph*.
+    Abstraction of an *Actor* or *CompositeActor* that can be used in a program *Graph*.
     Wraps a *CodeFile* with capabilities to handle parameters and keeps track of
     *Channel*s. Can be thought of as a not-yet-created but individual instance of
     an *Actor* with individual parameters and connections.
@@ -269,12 +269,12 @@ class Graph(object):
         
         code = """#!/bin/env python
 import scipysim
-from scipysim.actors import Model, MakeChans, Event
+from scipysim.actors import CompositeActor, MakeChans, Event
 %(imports)s
 
 print '%(header)s'
 
-class %(class_name)s(Model):
+class %(class_name)s(CompositeActor):
     '''
     A model of ...
     '''

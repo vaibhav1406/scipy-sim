@@ -1,4 +1,4 @@
-from scipysim.actors import Model, MakeChans
+from scipysim.actors import CompositeActor, MakeChans
 from scipysim.actors.signal import Ramp
 from scipysim.actors.math.trig import CTSinGenerator
 from scipysim.actors.math import Summer
@@ -8,7 +8,7 @@ import logging
 logging.basicConfig( level=logging.INFO )
 logging.info( "Logger enabled" )
 
-class SinRampSum( Model ):
+class SinRampSum( CompositeActor ):
     '''
     Demonstrate sources, summation, and plotting.
     '''
@@ -20,7 +20,7 @@ class SinRampSum( Model ):
         src2 = CTSinGenerator( chan2, amplitude=1.0, freq=1.0 )
 
         summer = Summer( [chan1, chan2], chan3 )
-        dst = Plotter( chan3, title="Sin/Ramp Sum" )
+        dst = Plotter( chan3, title="Sin+Ramp" )
 
         self.components = [src1, src2, summer, dst]
 

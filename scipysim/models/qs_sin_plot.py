@@ -3,7 +3,7 @@ Created on 2010-04-06
 
 @author: Allan McInnes
 '''
-from scipysim.actors import Channel, Model
+from scipysim.actors import Channel, CompositeActor
 from scipysim.actors.display import Plotter, StemPlotter
 from scipysim.actors.math.trig import CTSinGenerator
 from scipysim.actors.signal import EventFilter
@@ -14,7 +14,7 @@ import logging
 logging.basicConfig( level=logging.INFO )
 logging.info( "Logger enabled" )
 
-class QSSinPlot( Model ):
+class QSSinPlot( CompositeActor ):
     """
     Plot of a CT sinusoidal converted to a quantized-state representation.   
     """

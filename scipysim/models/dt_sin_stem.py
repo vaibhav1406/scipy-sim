@@ -1,8 +1,8 @@
-from scipysim.actors import Channel, Model
+from scipysim.actors import Channel, CompositeActor
 from scipysim.actors.display import StemPlotter
 from scipysim.actors.math.trig import DTSinGenerator
 
-class DT_Sin_Plot( Model ):
+class DT_Sin_Plot( CompositeActor ):
     '''
     This simulation is made up of a composite model containing a sin generator
     and a standard plotting actor.

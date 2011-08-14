@@ -15,9 +15,9 @@ a model looks like::
 
     from scipysim.actors.signal import Ramp
     from scipysim.actors.display import Plotter
-    from scipysim.actors import Channel, Model
+    from scipysim.actors import Channel, CompositeActor
 
-    class RampPlot( Model ):
+    class RampPlot( CompositeActor ):
         def __init__( self ):
 	        super( RampPlot, self ).__init__()
 	        connection = Channel()

@@ -5,14 +5,14 @@ elements in a single simulation.
 
 @author: Allan McInnes
 """
-from scipysim.actors import Model, MakeChans, Event
+from scipysim.actors import CompositeActor, MakeChans, Event
 from scipysim.actors.signal import Split, Delay, Ct2Dt
 from scipysim.actors.math.trig import CTSinGenerator
 from scipysim.actors.math import Summer
 from scipysim.actors.math import Proportional as Gain
 from scipysim.actors.display import Plotter, StemPlotter
 
-class DSP(Model):
+class DSP(CompositeActor):
     '''
     A model of an IIR filter.
     '''

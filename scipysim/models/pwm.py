@@ -3,7 +3,7 @@ Created on 13/12/2009
 
 @author: brian
 '''
-from scipysim.actors import MakeNamedChans, Model
+from scipysim.actors import MakeNamedChans, CompositeActor
 from scipysim.actors.display import Plotter
 from scipysim.actors.signal import Ramp, Split
 from scipysim.actors.logic import GreaterThan, PassThrough
@@ -15,7 +15,7 @@ import logging
 logging.basicConfig( level=logging.INFO )
 logging.info( "Logger enabled" )
 
-class Pulse_Width_Modulator( Model ):
+class Pulse_Width_Modulator( CompositeActor ):
     """A PWM generation simulation.
     
     This example connects 3 sources ( 2 ramps and a random) to a summer block

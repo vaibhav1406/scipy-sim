@@ -4,7 +4,7 @@ Created on 23/11/2009
 @author: brian
 '''
 
-from scipysim.actors import Channel, Model
+from scipysim.actors import Channel, CompositeActor
 from scipysim.actors.display.bundlePlotter import BundlePlotter
 from scipysim.actors.io import Bundle
 from scipysim.actors.signal import Ramp, RandomSource
@@ -14,7 +14,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logging.info("Logger enabled")
 
-class NoiseyRamp(Model):
+class NoiseyRamp(CompositeActor):
     """
     This model simulates a ramp source and a random source being added together
     The signals are in sync - there are NO missing tags.
