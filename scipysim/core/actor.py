@@ -1,7 +1,8 @@
 '''
 Created on 19/11/2009
 
-@author: brian
+@author: Allan McInnes
+@author: Brian Thorne
 '''
 
 import threading
