@@ -14,7 +14,7 @@ from scipysim.actors.display import Plotter, StemPlotter
 
 class DSP(CompositeActor):
     '''
-    A model of an IIR filter.
+    A model of an IIR filter processing a continuous-time signal.
     '''
 
     def __init__(self):
@@ -27,8 +27,8 @@ class DSP(CompositeActor):
 
         self.components = [
             # Continuous-Time signal source
-            CTSinGenerator(ct_wires[0]),
-            CTSinGenerator(ct_wires[1], amplitude = 0.3, freq = 10),
+            CTSinGenerator(ct_wires[0], simulation_time=3, timestep=0.003),
+            CTSinGenerator(ct_wires[1], amplitude = 0.3, freq = 10, simulation_time=3),
             Summer(inputs = [ct_wires[0], ct_wires[1]], output_channel = ct_wires[2]),
 
             Split(ct_wires[2], [ct_wires[3], ct_wires[4]]),
