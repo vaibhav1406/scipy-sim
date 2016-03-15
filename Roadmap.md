@@ -1,0 +1,7 @@
+ScipySim is very much a work in progress. Here are a few ideas for features that could or should be implemented.
+
+  * _Improved execution model_ : The generalized Kahn approach to execution proposed by Benveniste et al. sounds like a good idea in theory, but in practice runs into some problems with liveness and efficiency that complicate matters. Implementing an alternative execution model based on lessons from the distributed discrete-event simulation community would gretaly improve the operation of ScipySim. Allowing pluggable execution (e.g. conservative vs. optimistic) might be a worthwhile goal for the longer term.
+
+  * _Usable GUI_ : The current GUI is not functional, let alone feature-complete. It currently supports placing blocks, but doesn't allow connecting them. It would be great to get it to a stage where we can at least use it to create models graphically.
+
+  * _Domain type-checking_ : Type-checking on actor inputs and outputs is currently quite loose. There is provision in the ScipySim design for defining the domains that actors or channels will work with, but the mechanism is not yet widely used. All actors should throw exceptions when wired up to inappropriate channels.
